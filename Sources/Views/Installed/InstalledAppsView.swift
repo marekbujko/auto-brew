@@ -3,6 +3,7 @@ import SwiftUI
 struct InstalledAppsView: View {
     @State private var store = InstalledAppsStore.shared
     @State private var snapshotTarget: InstalledApp?
+    @State private var operationError: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,8 +27,28 @@ struct InstalledAppsView: View {
                 List(store.filtered) { app in
                     InstalledAppRowView(
                         app: app,
-                        onUpgrade: { Task { try? await BrewInstaller().upgrade(token: app.caskToken ?? "") } },
-                        onUninstall: { Task { try? await BrewInstaller().uninstall(token: app.caskToken ?? "") } },
+                        onUpgrade: {
+                            guard let token = app.caskToken else { return }
+                            Task {
+                                do {
+                                    try await BrewInstaller().upgrade(token: token)
+                                    await store.refresh()
+                                } catch {
+                                    operationError = error.localizedDescription
+                                }
+                            }
+                        },
+                        onUninstall: {
+                            guard let token = app.caskToken else { return }
+                            Task {
+                                do {
+                                    try await BrewInstaller().uninstall(token: token)
+                                    await store.refresh()
+                                } catch {
+                                    operationError = error.localizedDescription
+                                }
+                            }
+                        },
                         onSnapshot: { snapshotTarget = app }
                     )
                 }
@@ -43,5 +64,11 @@ struct InstalledAppsView: View {
             .padding(30)
             .frame(width: 360)
         }
+        .alert(String(localized: "Operation failed"),
+               isPresented: Binding(get: { operationError != nil },
+                                    set: { if !$0 { operationError = nil } }),
+               presenting: operationError) { _ in
+            Button("OK") { operationError = nil }
+        } message: { msg in Text(msg) }
     }
 }
