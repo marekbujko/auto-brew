@@ -141,6 +141,43 @@ final class SnapshotService {
         logger.info("Restored snapshot \(snapshot.bundleID, privacy: .public)")
     }
 
+    // MARK: - Export / Import
+
+    func exportSnapshot(_ snapshot: AppSnapshot, to destination: URL) async throws {
+        if fm.fileExists(atPath: destination.path) {
+            try fm.removeItem(at: destination)
+        }
+        try await SnapshotArchiver.zip(directory: snapshot.bundleURL, to: destination)
+    }
+
+    func importSnapshot(from archiveURL: URL) async throws -> AppSnapshot {
+        let extractRoot = storageRoot.appendingPathComponent("_import_\(UUID().uuidString)", isDirectory: true)
+        try fm.createDirectory(at: extractRoot, withIntermediateDirectories: true)
+        try await SnapshotArchiver.unzip(archiveURL, to: extractRoot)
+
+        let manifestURL = extractRoot.appendingPathComponent("manifest.json")
+        guard fm.fileExists(atPath: manifestURL.path) else {
+            try? fm.removeItem(at: extractRoot)
+            throw NSError(domain: "Snapshot", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid snapshot bundle"])
+        }
+        let manifestData = try Data(contentsOf: manifestURL)
+        let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: manifestData)
+
+        let timestamp = ISO8601DateFormatter().string(from: manifest.createdAt).replacingOccurrences(of: ":", with: "-")
+        let target = storageRoot.appendingPathComponent("\(manifest.bundleID)/\(timestamp)_\(manifest.id.uuidString.prefix(8))", isDirectory: true)
+        try fm.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+        if fm.fileExists(atPath: target.path) { try fm.removeItem(at: target) }
+        try fm.moveItem(at: extractRoot, to: target)
+
+        let total = manifest.components.reduce(Int64(0)) { $0 + $1.byteSize }
+        return AppSnapshot(
+            id: manifest.id, bundleID: manifest.bundleID, displayName: manifest.displayName,
+            createdAt: manifest.createdAt, caskToken: manifest.caskToken,
+            sourceAppVersion: manifest.sourceAppVersion, totalBytes: total, bundleURL: target
+        )
+    }
+
     // MARK: - Nonisolated file operations
 
     private nonisolated static func encodeOriginalPath(_ src: URL, home: URL) -> String {

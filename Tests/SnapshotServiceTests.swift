@@ -111,4 +111,26 @@ final class SnapshotServiceTests: XCTestCase {
         let stillThere = try String(contentsOf: prefs.appendingPathComponent("\(bundleID).plist"))
         XCTAssertEqual(stillThere, "live")
     }
+
+    @MainActor
+    func testExportImportRoundTrip() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let bundleID = "com.example.export"
+        let prefs = home.appendingPathComponent("Library/Preferences")
+        try FileManager.default.createDirectory(at: prefs, withIntermediateDirectories: true)
+        try "value".write(to: prefs.appendingPathComponent("\(bundleID).plist"), atomically: true, encoding: .utf8)
+
+        let svcA = SnapshotService(storageRoot: tmp.appendingPathComponent("snap-a"), home: home)
+        let snap = try await svcA.createSnapshot(bundleID: bundleID, displayName: "Exp", caskToken: nil, sourceAppVersion: nil)
+
+        let exportURL = tmp.appendingPathComponent("export.autobrewsnapshot")
+        try await svcA.exportSnapshot(snap, to: exportURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: exportURL.path))
+
+        let svcB = SnapshotService(storageRoot: tmp.appendingPathComponent("snap-b"), home: home)
+        let imported = try await svcB.importSnapshot(from: exportURL)
+        XCTAssertEqual(imported.bundleID, bundleID)
+        XCTAssertEqual(imported.displayName, "Exp")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: imported.manifestURL.path))
+    }
 }
