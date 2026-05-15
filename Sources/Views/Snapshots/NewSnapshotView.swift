@@ -4,7 +4,7 @@ import AppKit
 struct NewSnapshotView: View {
     let app: InstalledApp
     let onDone: () -> Void
-    @State private var isWorking = false
+    @State private var store = SnapshotsStore.shared
     @State private var error: String?
 
     var body: some View {
@@ -29,18 +29,16 @@ struct NewSnapshotView: View {
                 Spacer()
                 Button {
                     Task {
-                        isWorking = true
-                        await SnapshotsStore.shared.createSnapshot(for: app)
-                        if let err = SnapshotsStore.shared.lastError { error = err }
-                        isWorking = false
-                        if error == nil { onDone() }
+                        await store.createSnapshot(for: app)
+                        if let err = store.lastError { error = err }
+                        else { onDone() }
                     }
                 } label: {
-                    if isWorking { ProgressView().controlSize(.small) }
+                    if store.isWorking { ProgressView().controlSize(.small) }
                     else { Label(String(localized: "Create Snapshot"), systemImage: "camera.fill") }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(isWorking)
+                .disabled(store.isWorking)
             }
         }
         .padding(24)
