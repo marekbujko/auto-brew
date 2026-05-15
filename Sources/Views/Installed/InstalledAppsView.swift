@@ -56,13 +56,7 @@ struct InstalledAppsView: View {
         }
         .task { await store.refresh() }
         .sheet(item: $snapshotTarget) { app in
-            // Wird in Phase 4.7 ersetzt durch NewSnapshotView:
-            VStack(spacing: 16) {
-                Text(String(localized: "Snapshot for \(app.displayName)")).font(.title2)
-                Button(String(localized: "Close")) { snapshotTarget = nil }
-            }
-            .padding(30)
-            .frame(width: 360)
+            NewSnapshotView(app: app, onDone: { snapshotTarget = nil })
         }
         .alert(String(localized: "Operation failed"),
                isPresented: Binding(get: { operationError != nil },
