@@ -47,16 +47,21 @@ final class BrewCatalogService {
             let (caskBytes, _) = try await casksData
             let (analyticsBytes, _) = try await analyticsData
 
-            let decoded = try JSONDecoder().decode([CaskCatalogEntry].self, from: caskBytes)
-            let analyticsDecoded = try JSONDecoder().decode(CaskAnalytics.self, from: analyticsBytes)
+            let (decoded, analyticsDecoded) = try await Task.detached {
+                (try JSONDecoder().decode([CaskCatalogEntry].self, from: caskBytes),
+                 try JSONDecoder().decode(CaskAnalytics.self, from: analyticsBytes))
+            }.value
+
+            // Write cache first — if either write fails, in-memory state stays untouched
+            // so a subsequent loadCache() does not surface a mismatched cask/analytics pair.
+            try caskBytes.write(to: cacheDir.appendingPathComponent("cask.json"))
+            try analyticsBytes.write(to: cacheDir.appendingPathComponent("analytics.json"))
 
             casks = decoded
             analytics = analyticsDecoded
             lastRefresh = Date()
             lastError = nil
 
-            try caskBytes.write(to: cacheDir.appendingPathComponent("cask.json"))
-            try analyticsBytes.write(to: cacheDir.appendingPathComponent("analytics.json"))
             logger.info("Catalog refreshed: \(decoded.count) casks")
         } catch {
             lastError = error.localizedDescription
@@ -70,19 +75,23 @@ final class BrewCatalogService {
         guard FileManager.default.fileExists(atPath: caskFile.path) else {
             throw NSError(domain: "BrewCatalog", code: 1, userInfo: [NSLocalizedDescriptionKey: "No cache"])
         }
-        let data = try Data(contentsOf: caskFile)
-        casks = try JSONDecoder().decode([CaskCatalogEntry].self, from: data)
-
         let analyticsFile = cacheDir.appendingPathComponent("analytics.json")
-        if FileManager.default.fileExists(atPath: analyticsFile.path) {
-            let aData = try Data(contentsOf: analyticsFile)
-            analytics = try? JSONDecoder().decode(CaskAnalytics.self, from: aData)
-        }
+        let modDate = (try? FileManager.default.attributesOfItem(atPath: caskFile.path))?[.modificationDate] as? Date
 
-        if let attrs = try? FileManager.default.attributesOfItem(atPath: caskFile.path),
-           let date = attrs[.modificationDate] as? Date {
-            lastRefresh = date
-        }
+        let (loadedCasks, loadedAnalytics) = try await Task.detached {
+            let casksData = try Data(contentsOf: caskFile)
+            let casks = try JSONDecoder().decode([CaskCatalogEntry].self, from: casksData)
+            var analytics: CaskAnalytics?
+            if FileManager.default.fileExists(atPath: analyticsFile.path) {
+                let aData = try Data(contentsOf: analyticsFile)
+                analytics = try? JSONDecoder().decode(CaskAnalytics.self, from: aData)
+            }
+            return (casks, analytics)
+        }.value
+
+        casks = loadedCasks
+        analytics = loadedAnalytics
+        lastRefresh = modDate
         logger.info("Loaded \(self.casks.count) casks from cache")
     }
 }
