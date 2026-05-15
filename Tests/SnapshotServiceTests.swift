@@ -66,4 +66,22 @@ final class SnapshotServiceTests: XCTestCase {
         try svc.deleteSnapshot(snap)
         XCTAssertFalse(FileManager.default.fileExists(atPath: snap.bundleURL.path))
     }
+
+    @MainActor
+    func testRestoreCopiesBackToOriginalPaths() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let bundleID = "com.example.restore"
+        let prefs = home.appendingPathComponent("Library/Preferences")
+        try FileManager.default.createDirectory(at: prefs, withIntermediateDirectories: true)
+        try "original".write(to: prefs.appendingPathComponent("\(bundleID).plist"), atomically: true, encoding: .utf8)
+
+        let svc = SnapshotService(storageRoot: tmp.appendingPathComponent("snapshots"), home: home)
+        let snap = try await svc.createSnapshot(bundleID: bundleID, displayName: "X", caskToken: nil, sourceAppVersion: nil)
+
+        try "MODIFIED".write(to: prefs.appendingPathComponent("\(bundleID).plist"), atomically: true, encoding: .utf8)
+        try await svc.restoreSnapshot(snap)
+
+        let restored = try String(contentsOf: prefs.appendingPathComponent("\(bundleID).plist"))
+        XCTAssertEqual(restored, "original")
+    }
 }

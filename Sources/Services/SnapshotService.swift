@@ -143,6 +143,26 @@ final class SnapshotService {
         }
     }
 
+    func restoreSnapshot(_ snapshot: AppSnapshot, terminateApp: Bool = false) async throws {
+        if terminateApp {
+            try await AppQuitter.quit(bundleID: snapshot.bundleID)
+        }
+        let manifestData = try Data(contentsOf: snapshot.manifestURL)
+        let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: manifestData)
+        for component in manifest.components {
+            let src = snapshot.dataDir.appendingPathComponent(component.relativeArchivePath)
+            let destPath = component.originalPath.replacingOccurrences(of: "~", with: home.path)
+            let dest = URL(fileURLWithPath: destPath)
+
+            try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if fm.fileExists(atPath: dest.path) {
+                try fm.removeItem(at: dest)
+            }
+            try fm.copyItem(at: src, to: dest)
+        }
+        logger.info("Restored snapshot \(snapshot.bundleID, privacy: .public)")
+    }
+
     private func directorySize(at url: URL) throws -> Int64 {
         var total: Int64 = 0
         guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }
