@@ -39,6 +39,3 @@ struct BrewStationWindow: View {
         .frame(minWidth: 900, minHeight: 600)
     }
 }
-
-// Platzhalter — wird in 4.8 ersetzt:
-struct SnapshotsRootView: View { var body: some View { Text("Snapshots") } }
