@@ -7,13 +7,13 @@ struct BrewInstaller {
 
     enum InstallError: LocalizedError {
         case brewMissing
-        case installFailed(token: String, stderr: String)
+        case commandFailed(token: String, stderr: String)
         case noMatchFound(query: String)
 
         var errorDescription: String? {
             switch self {
             case .brewMissing: String(localized: "Homebrew not found")
-            case .installFailed(let token, let stderr): String(localized: "Install of \(token) failed: \(stderr)")
+            case .commandFailed(let token, let stderr): String(localized: "\(token): \(stderr)")
             case .noMatchFound(let q): String(localized: "No cask matches \"\(q)\"")
             }
         }
@@ -32,7 +32,7 @@ struct BrewInstaller {
         logger.warning("First attempt failed for \(token, privacy: .public), retrying with --force")
         let retry = try await BrewProcess.run(executable: brew, arguments: ["install", "--cask", "--force", token], brewPath: path)
         if !retry.succeeded {
-            throw InstallError.installFailed(token: token, stderr: retry.stderr)
+            throw InstallError.commandFailed(token: token, stderr: retry.stderr)
         }
     }
 
@@ -55,13 +55,13 @@ struct BrewInstaller {
         if zap { args.append("--zap") }
         args.append(token)
         let result = try await BrewProcess.run(executable: brew, arguments: args, brewPath: path)
-        if !result.succeeded { throw InstallError.installFailed(token: token, stderr: result.stderr) }
+        if !result.succeeded { throw InstallError.commandFailed(token: token, stderr: result.stderr) }
     }
 
     func upgrade(token: String) async throws {
         let manager = BrewManager.shared
         guard let brew = manager.brewExecutable, let path = manager.brewPath else { throw InstallError.brewMissing }
         let result = try await BrewProcess.run(executable: brew, arguments: ["upgrade", "--cask", token], brewPath: path)
-        if !result.succeeded { throw InstallError.installFailed(token: token, stderr: result.stderr) }
+        if !result.succeeded { throw InstallError.commandFailed(token: token, stderr: result.stderr) }
     }
 }
