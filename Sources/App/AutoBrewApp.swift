@@ -12,5 +12,13 @@ struct AutoBrewApp: App {
             MenuBarIcon(state: scheduler.state)
         }
         .menuBarExtraStyle(.window)
+
+        Window("BrewStation", id: "brewstation") {
+            BrewStationWindow()
+        }
+        .defaultSize(width: 1000, height: 680)
+        .commands {
+            CommandGroup(replacing: .newItem) { }
+        }
     }
 }
