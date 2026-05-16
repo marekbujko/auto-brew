@@ -38,6 +38,13 @@ struct RestoreWizardView: View {
                     .foregroundStyle(.secondary)
                 Button(String(localized: "Choose…")) { Task { await pick() } }
                     .buttonStyle(.borderedProminent)
+                if let err = store.loadError {
+                    Text(err)
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
+                }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         case .review:
             VStack(alignment: .leading) {
@@ -111,9 +118,10 @@ struct RestoreWizardView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        let resp = await withCheckedContinuation { cont in
-            panel.begin { r in cont.resume(returning: r) }
-        }
+        let snapshotType = UTType(filenameExtension: "autobrewsnapshot") ?? .data
+        panel.allowedContentTypes = [snapshotType]
+        panel.allowsOtherFileTypes = false
+        let resp = await panel.runModalAsync()
         if resp == .OK, let url = panel.url {
             await store.loadBundle(at: url)
         }

@@ -14,11 +14,13 @@ final class RestoreWizardStore {
     var installMissingCasks: Bool = true
     var quitAppsBeforeRestore: Bool = true
     var progress: [String: String] = [:]
+    var loadError: String?
     private(set) var failedBundles: [String] = []
 
     private let logger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", category: "RestoreWizard")
 
     func loadBundle(at url: URL) async {
+        loadError = nil
         sourceURL = url
         do {
             let result: (list: RestoreList, imported: [AppSnapshot])
@@ -38,6 +40,7 @@ final class RestoreWizardStore {
             selected = Set(result.imported.map(\.bundleID))
             step = .review
         } catch {
+            loadError = error.localizedDescription
             logger.error("Load failed: \(error.localizedDescription)")
         }
     }
