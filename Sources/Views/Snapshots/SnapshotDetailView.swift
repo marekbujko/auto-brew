@@ -1,4 +1,6 @@
 import SwiftUI
+import AppKit
+import UniformTypeIdentifiers
 
 struct SnapshotDetailView: View {
     let snapshot: AppSnapshot
@@ -29,6 +31,9 @@ struct SnapshotDetailView: View {
                         showRestoreConfirm = true
                     } label: { Label(String(localized: "Restore"), systemImage: "arrow.uturn.backward.circle.fill") }
                         .buttonStyle(.borderedProminent)
+                    Button {
+                        Task { await exportToFile() }
+                    } label: { Label(String(localized: "Export…"), systemImage: "square.and.arrow.up") }
                     Button(role: .destructive) {
                         showDeleteConfirm = true
                     } label: { Label(String(localized: "Delete"), systemImage: "trash") }
@@ -52,6 +57,37 @@ struct SnapshotDetailView: View {
         ) {
             Button(String(localized: "Delete"), role: .destructive) {
                 SnapshotsStore.shared.delete(snapshot)
+            }
+        }
+    }
+
+    @MainActor
+    private func exportToFile() async {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.zip]
+        panel.nameFieldStringValue = "\(snapshot.bundleID).autobrewsnapshot"
+        panel.canCreateDirectories = true
+        panel.title = String(localized: "Export Snapshot")
+        let response = await panel.runModalAsync()
+        guard response == .OK, let url = panel.url else { return }
+        do {
+            try await SnapshotService.shared.exportSnapshot(snapshot, to: url)
+        } catch {
+            // Error surfaces via SnapshotsStore.lastError — no additional UI needed here.
+        }
+    }
+}
+
+private extension NSSavePanel {
+    @MainActor
+    func runModalAsync() async -> NSApplication.ModalResponse {
+        if let window = NSApp.keyWindow {
+            return await withCheckedContinuation { cont in
+                self.beginSheetModal(for: window) { cont.resume(returning: $0) }
+            }
+        } else {
+            return await withCheckedContinuation { cont in
+                self.begin { cont.resume(returning: $0) }
             }
         }
     }
