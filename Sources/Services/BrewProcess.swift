@@ -9,14 +9,24 @@ private final class ProcessHolder: @unchecked Sendable {
     private var process: Process?
     private var terminated = false
 
+    /// Attach a freshly-created Process. If the holder is already terminated
+    /// (e.g. timeout/cancel fired before attach), immediately terminate the
+    /// newly attached process so it never starts producing output.
     func attach(_ p: Process) {
-        lock.withLock { self.process = p }
+        lock.withLock {
+            self.process = p
+            if terminated, p.isRunning {
+                p.terminate()
+            }
+        }
     }
 
     func terminateIfRunning() {
         lock.withLock {
-            guard !terminated, let p = process, p.isRunning else { terminated = true; return }
-            p.terminate()
+            guard !terminated else { return }
+            if let p = process, p.isRunning {
+                p.terminate()
+            }
             terminated = true
         }
     }
@@ -29,28 +39,33 @@ enum BrewProcess: Sendable {
     static func run(executable: String, arguments: [String], brewPath: String) async throws -> ProcessResult {
         let holder = ProcessHolder()
 
-        return try await withThrowingTaskGroup(of: ProcessResult?.self) { group in
-            group.addTask {
-                try await execute(holder: holder, executable: executable, arguments: arguments, brewPath: brewPath)
-            }
-            group.addTask {
-                do {
-                    try await Task.sleep(for: .seconds(timeout))
-                } catch is CancellationError {
-                    return nil // Normal: process finished before timeout
+        return try await withTaskCancellationHandler {
+            try await withThrowingTaskGroup(of: ProcessResult?.self) { group in
+                group.addTask {
+                    try await execute(holder: holder, executable: executable, arguments: arguments, brewPath: brewPath)
                 }
-                holder.terminateIfRunning()
+                group.addTask {
+                    do {
+                        try await Task.sleep(for: .seconds(timeout))
+                    } catch is CancellationError {
+                        return nil // Normal: process finished before timeout
+                    }
+                    holder.terminateIfRunning()
+                    throw BrewProcessError.timeout
+                }
+
+                while let next = try await group.next() {
+                    if let result = next {
+                        group.cancelAll()
+                        holder.terminateIfRunning()
+                        return result
+                    }
+                }
                 throw BrewProcessError.timeout
             }
-
-            while let next = try await group.next() {
-                if let result = next {
-                    group.cancelAll()
-                    holder.terminateIfRunning()
-                    return result
-                }
-            }
-            throw BrewProcessError.timeout
+        } onCancel: {
+            // Parent task cancelled — kill the child process so it doesn't leak.
+            holder.terminateIfRunning()
         }
     }
 
