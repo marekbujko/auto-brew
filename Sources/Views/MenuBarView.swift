@@ -169,11 +169,26 @@ struct MenuBarView: View {
                 .transition(.push(from: .bottom).combined(with: .opacity))
             }
 
-            Button {
-                openWindow(id: "brewstation")
-                NSApp.activate(ignoringOtherApps: true)
+            Menu {
+                Button(String(localized: "Open BrewStation Window…")) {
+                    openWindow(id: "brewstation")
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+                Divider()
+                Button(String(localized: "Browse Casks…")) {
+                    openWindow(id: "brewstation")
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+                Button(String(localized: "Installed Apps…")) {
+                    openWindow(id: "brewstation")
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+                Button(String(localized: "Snapshots…")) {
+                    openWindow(id: "brewstation")
+                    NSApp.activate(ignoringOtherApps: true)
+                }
             } label: {
-                Label("Open BrewStation Window", systemImage: "rectangle.on.rectangle")
+                Label("BrewStation", systemImage: "rectangle.on.rectangle")
             }
 
             Button {
