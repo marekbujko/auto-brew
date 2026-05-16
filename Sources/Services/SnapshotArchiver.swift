@@ -18,14 +18,14 @@ enum SnapshotArchiver {
     static func zip(directory: URL, to destination: URL) async throws {
         try await run(executable: "/usr/bin/ditto",
                       arguments: ["-c", "-k", "--sequesterRsrc", "--keepParent", directory.path, destination.path],
-                      errorMap: ArchiveError.zipFailed)
+                      errorMap: { ArchiveError.zipFailed($0) })
     }
 
     static func unzip(_ archive: URL, to destination: URL) async throws {
         try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
         try await run(executable: "/usr/bin/ditto",
                       arguments: ["-x", "-k", archive.path, destination.path],
-                      errorMap: ArchiveError.unzipFailed)
+                      errorMap: { ArchiveError.unzipFailed($0) })
 
         // Defence-in-depth: reject symlinks and any path that resolves outside the destination
         // before any callers can act on the extracted contents.
