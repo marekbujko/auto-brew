@@ -29,7 +29,7 @@ List of all third-party apps in the `/Applications` folder with cask-token mappi
 Capture complete app state: `Library/Preferences`, `Library/Application Support`, `Library/Containers`, `Library/Saved Application State`, `Library/Group Containers`, `Library/Caches`. Stored under `~/Library/Application Support/AutoBrew/Snapshots/`. Restore with optional app quit.
 
 ### Cross-Mac Migration
-- **Export a single snapshot** as an `.autobrewsnapshot` file (ZIP bundle with signed manifest).
+- **Export a single snapshot** as an `.autobrewsnapshot` file (ZIP bundle with JSON manifest containing SHA-256 component hashes).
 - **Bulk export** all snapshots as an `.autobrewbundle` directory with `restore_list.json`.
 - **Restore wizard**: open a file or bundle, pick the apps to restore, automatically install missing casks via Homebrew (with search fallback for renamed casks), and replay the data.
 
