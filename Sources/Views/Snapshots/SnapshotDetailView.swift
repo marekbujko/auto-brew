@@ -74,7 +74,7 @@ struct SnapshotDetailView: View {
     @MainActor
     private func exportToFile() async {
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [.zip]
+        panel.allowedContentTypes = [autobrewSnapshotType]
         panel.nameFieldStringValue = "\(snapshot.bundleID).autobrewsnapshot"
         panel.canCreateDirectories = true
         panel.title = String(localized: "Export Snapshot")
@@ -90,3 +90,7 @@ struct SnapshotDetailView: View {
     }
 }
 
+/// Custom UTType for `.autobrewsnapshot` archives. Conforms to `.zip` because
+/// the payload is a ditto zip — declaring the conformance lets `NSSavePanel`
+/// accept the custom extension without rewriting it to `.zip` or warning.
+private let autobrewSnapshotType: UTType = UTType(filenameExtension: "autobrewsnapshot", conformingTo: .zip) ?? .zip
