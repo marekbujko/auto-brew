@@ -138,6 +138,14 @@ final class SnapshotService {
         }
     }
 
+    func cleanup(olderThanDays days: Int) throws {
+        let snapshots = try listSnapshots()
+        let cutoff = Date().addingTimeInterval(-Double(days) * 86_400)
+        for snap in snapshots where snap.createdAt < cutoff {
+            try deleteSnapshot(snap)
+        }
+    }
+
     func restoreSnapshot(_ snapshot: AppSnapshot, terminateApp: Bool = false) async throws {
         if terminateApp {
             try await AppQuitter.quit(bundleID: snapshot.bundleID)

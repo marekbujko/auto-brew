@@ -190,4 +190,30 @@ final class SnapshotServiceTests: XCTestCase {
         XCTAssertEqual(manifest.entries.count, 2)
         XCTAssertTrue(FileManager.default.fileExists(atPath: exportDir.appendingPathComponent(manifest.entries[0].archiveFilename).path))
     }
+
+    @MainActor
+    func testAutoCleanupRemovesOldSnapshots() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let prefs = home.appendingPathComponent("Library/Preferences")
+        try FileManager.default.createDirectory(at: prefs, withIntermediateDirectories: true)
+        try Data().write(to: prefs.appendingPathComponent("com.test.old.plist"))
+
+        let svc = SnapshotService(storageRoot: tmp.appendingPathComponent("snap"), home: home)
+        let snap = try await svc.createSnapshot(bundleID: "com.test.old", displayName: "Old", caskToken: nil, sourceAppVersion: nil)
+
+        // Manifest auf 100 Tage zurückdatieren
+        let oldDate = Date().addingTimeInterval(-100 * 86_400)
+        let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: Data(contentsOf: snap.manifestURL))
+        let updated = SnapshotManifest(
+            id: manifest.id, bundleID: manifest.bundleID, displayName: manifest.displayName,
+            caskToken: manifest.caskToken, sourceAppVersion: manifest.sourceAppVersion,
+            createdAt: oldDate, originHost: manifest.originHost, originUser: manifest.originUser,
+            schemaVersion: manifest.schemaVersion, components: manifest.components
+        )
+        try JSONEncoder.snapshotEncoder().encode(updated).write(to: snap.manifestURL)
+
+        try svc.cleanup(olderThanDays: 90)
+        let remaining = try svc.listSnapshots()
+        XCTAssertEqual(remaining.count, 0)
+    }
 }
