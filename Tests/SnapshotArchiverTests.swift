@@ -24,4 +24,25 @@ final class SnapshotArchiverTests: XCTestCase {
 
         try? FileManager.default.removeItem(at: tmp)
     }
+
+    func testRejectsSymlinkInArchive() async throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let src = tmp.appendingPathComponent("source")
+        try FileManager.default.createDirectory(at: src, withIntermediateDirectories: true)
+        try "data".write(to: src.appendingPathComponent("real.txt"), atomically: true, encoding: .utf8)
+        let symlink = src.appendingPathComponent("link")
+        try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: URL(fileURLWithPath: "/etc/passwd"))
+
+        let zipURL = tmp.appendingPathComponent("evil.autobrewsnapshot")
+        try await SnapshotArchiver.zip(directory: src, to: zipURL)
+
+        let dest = tmp.appendingPathComponent("dest")
+        do {
+            try await SnapshotArchiver.unzip(zipURL, to: dest)
+            XCTFail("Should have rejected symlink in archive")
+        } catch {
+            XCTAssertTrue(String(describing: error).contains("Unsafe") || String(describing: error).contains("symlink"))
+        }
+        try? FileManager.default.removeItem(at: tmp)
+    }
 }
