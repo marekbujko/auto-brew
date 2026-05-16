@@ -53,6 +53,9 @@ final class SnapshotService {
     }
 
     func createSnapshot(bundleID: String, displayName: String, caskToken: String?, sourceAppVersion: String?) async throws -> AppSnapshot {
+        guard Self.isValidBundleID(bundleID) else {
+            throw SnapshotError.invalidManifest("Invalid bundleID: \(bundleID)")
+        }
         let id = UUID()
         let timestamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
         let bundleDir = storageRoot.appendingPathComponent("\(bundleID)/\(timestamp)_\(id.uuidString.prefix(8))", isDirectory: true)
@@ -195,6 +198,10 @@ final class SnapshotService {
             throw SnapshotError.unsupportedSchemaVersion(manifest.schemaVersion)
         }
 
+        guard Self.isValidBundleID(manifest.bundleID) else {
+            throw SnapshotError.invalidManifest("Invalid bundleID in manifest: \(manifest.bundleID)")
+        }
+
         let timestamp = ISO8601DateFormatter().string(from: manifest.createdAt).replacingOccurrences(of: ":", with: "-")
         let target = storageRoot.appendingPathComponent("\(manifest.bundleID)/\(timestamp)_\(manifest.id.uuidString.prefix(8))", isDirectory: true)
         try fm.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -261,6 +268,11 @@ final class SnapshotService {
     }
 
     // MARK: - Nonisolated file operations
+
+    private nonisolated static func isValidBundleID(_ id: String) -> Bool {
+        !id.isEmpty &&
+        id.range(of: #"^[a-zA-Z0-9][a-zA-Z0-9._-]*$"#, options: .regularExpression) != nil
+    }
 
     private nonisolated static func encodeOriginalPath(_ src: URL, home: URL) -> String {
         let homePath = home.path.hasSuffix("/") ? home.path : home.path + "/"

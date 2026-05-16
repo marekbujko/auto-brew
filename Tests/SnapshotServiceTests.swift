@@ -216,4 +216,46 @@ final class SnapshotServiceTests: XCTestCase {
         let remaining = try svc.listSnapshots()
         XCTAssertEqual(remaining.count, 0)
     }
+
+    @MainActor
+    func testImportRejectsBundleIDPathTraversal() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let prefs = home.appendingPathComponent("Library/Preferences")
+        try FileManager.default.createDirectory(at: prefs, withIntermediateDirectories: true)
+        try Data().write(to: prefs.appendingPathComponent("com.test.bid.plist"))
+
+        let svcA = SnapshotService(storageRoot: tmp.appendingPathComponent("snap-a"), home: home)
+        let snap = try await svcA.createSnapshot(bundleID: "com.test.bid", displayName: "X", caskToken: nil, sourceAppVersion: nil)
+
+        // Export valid snapshot to archive
+        let exportURL = tmp.appendingPathComponent("bad.autobrewsnapshot")
+        try await svcA.exportSnapshot(snap, to: exportURL)
+
+        // Tamper: extract, rewrite manifest bundleID to a traversal payload, re-zip
+        let extractDir = tmp.appendingPathComponent("extract")
+        try FileManager.default.createDirectory(at: extractDir, withIntermediateDirectories: true)
+        try await SnapshotArchiver.unzip(exportURL, to: extractDir)
+
+        let manifestURL = extractDir.appendingPathComponent("manifest.json")
+        let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: Data(contentsOf: manifestURL))
+        let tampered = SnapshotManifest(
+            id: manifest.id, bundleID: "../../../tmp/evil", displayName: manifest.displayName,
+            caskToken: manifest.caskToken, sourceAppVersion: manifest.sourceAppVersion,
+            createdAt: manifest.createdAt, originHost: manifest.originHost, originUser: manifest.originUser,
+            schemaVersion: manifest.schemaVersion, components: manifest.components
+        )
+        try JSONEncoder.snapshotEncoder().encode(tampered).write(to: manifestURL)
+
+        let tamperedZip = tmp.appendingPathComponent("tampered.autobrewsnapshot")
+        try await SnapshotArchiver.zip(directory: extractDir, to: tamperedZip)
+
+        let svcB = SnapshotService(storageRoot: tmp.appendingPathComponent("snap-b"), home: home)
+        do {
+            _ = try await svcB.importSnapshot(from: tamperedZip)
+            XCTFail("Import should have rejected the tampered bundleID")
+        } catch {
+            let msg = String(describing: error)
+            XCTAssertTrue(msg.contains("Invalid bundleID") || msg.contains("invalid"))
+        }
+    }
 }
