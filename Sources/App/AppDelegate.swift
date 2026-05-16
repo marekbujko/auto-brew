@@ -38,13 +38,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case "open":
             requestOpenWindow()
         case "install":
-            if let token = url.pathComponents.dropFirst().first, !token.isEmpty {
-                Task { try? await BrewInstaller().install(token: token) }
+            if let token = url.pathComponents.dropFirst().first,
+               !token.isEmpty,
+               isValidCaskToken(token) {
+                Task {
+                    do {
+                        try await BrewInstaller().install(token: token)
+                    } catch {
+                        self.logger.error("URL-scheme install failed for '\(token, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+                    }
+                }
                 requestOpenWindow()
+            } else {
+                logger.warning("Rejected install URL with invalid token")
             }
         default:
             requestOpenWindow()
         }
+    }
+
+    private func isValidCaskToken(_ token: String) -> Bool {
+        token.range(of: #"^[a-zA-Z0-9][a-zA-Z0-9._-]*$"#, options: .regularExpression) != nil
     }
 
     private func requestOpenWindow() {
