@@ -5,6 +5,7 @@ struct SnapshotsRootView: View {
     @State private var store = SnapshotsStore.shared
     @State private var selected: AppSnapshot?
     @State private var showWizard = false
+    @State private var exportError: String?
 
     var body: some View {
         NavigationSplitView {
@@ -45,6 +46,13 @@ struct SnapshotsRootView: View {
                 store.refresh()
             })
         }
+        .alert(String(localized: "Export failed"),
+               isPresented: Binding(get: { exportError != nil }, set: { if !$0 { exportError = nil } }),
+               presenting: exportError) { _ in
+            Button("OK") { exportError = nil }
+        } message: { msg in
+            Text(msg)
+        }
     }
 
     @MainActor
@@ -58,6 +66,10 @@ struct SnapshotsRootView: View {
         guard resp == .OK, let dir = panel.url else { return }
         let stamp = Date().formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false).timeSeparator(.omitted))
         let target = dir.appendingPathComponent("AutoBrew-export-\(stamp).autobrewbundle", isDirectory: true)
-        try? await SnapshotService.shared.exportRestoreList(snapshots: store.snapshots, to: target)
+        do {
+            try await SnapshotService.shared.exportRestoreList(snapshots: store.snapshots, to: target)
+        } catch {
+            exportError = error.localizedDescription
+        }
     }
 }
