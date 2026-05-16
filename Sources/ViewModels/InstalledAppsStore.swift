@@ -25,6 +25,11 @@ final class InstalledAppsStore {
         if BrewCatalogService.shared.casks.isEmpty {
             try? await BrewCatalogService.shared.loadCache()
         }
+        // First-launch fallback: if cache was empty too, try a network fetch
+        // so Homebrew-managed apps get their cask token immediately.
+        if BrewCatalogService.shared.casks.isEmpty {
+            try? await BrewCatalogService.shared.refresh()
+        }
         let resolver = CaskNameResolver(catalog: BrewCatalogService.shared.casks)
         apps = await AppDiscoveryService().scan(resolver: resolver)
     }

@@ -20,6 +20,12 @@ private final class ProcessHolder: @unchecked Sendable {
         }
     }
 
+    /// True if the holder has been marked terminated (caller should not start
+    /// or should immediately terminate the process).
+    var isTerminated: Bool {
+        lock.withLock { terminated }
+    }
+
     func terminateIfRunning() {
         lock.withLock {
             guard !terminated else { return }
@@ -127,6 +133,11 @@ enum BrewProcess: Sendable {
 
             do {
                 try process.run()
+                // Cancellation/timeout could have fired between attach and run —
+                // terminate immediately if so.
+                if holder.isTerminated, process.isRunning {
+                    process.terminate()
+                }
             } catch {
                 continuation.resume(throwing: error)
             }
