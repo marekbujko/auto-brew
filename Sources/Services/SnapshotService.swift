@@ -447,13 +447,29 @@ final class SnapshotService {
             throw error
         }
 
-        // Phase 2b: copy every component. On failure, remove what we already copied
-        // and restore every backup before reporting the error.
+        // Phase 2b: copy every component, then re-verify its hash at the
+        // destination to close the TOCTOU gap between Phase 1's pre-check and
+        // the actual write. The pre-check still fast-fails before any
+        // destructive work; the post-check guarantees the bytes that landed on
+        // disk are the bytes we hashed. On failure, remove what we already
+        // copied and restore every backup before reporting the error.
         var copiedDests: [URL] = []
         do {
             for plan in plans {
                 try fm.copyItem(at: plan.src, to: plan.dest)
                 copiedDests.append(plan.dest)
+                if plan.component.kind == .file, let expectedHash = plan.component.sha256 {
+                    let actualHash = try Sha256Hasher.hash(file: plan.dest)
+                    guard actualHash == expectedHash else {
+                        throw SnapshotError.invalidManifest("Post-copy hash mismatch for \(plan.component.relativeArchivePath)")
+                    }
+                }
+                if plan.component.kind == .directory, let expectedHash = plan.component.sha256 {
+                    let actualHash = try Self.directoryTreeHash(at: plan.dest)
+                    guard actualHash == expectedHash else {
+                        throw SnapshotError.invalidManifest("Post-copy tree hash mismatch for \(plan.component.relativeArchivePath)")
+                    }
+                }
             }
         } catch {
             for dest in copiedDests.reversed() {
