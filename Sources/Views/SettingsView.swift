@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -78,6 +79,32 @@ struct SettingsView: View {
                         get: { settings.showNotifications },
                         set: { settings.showNotifications = $0 }
                     ))
+                }
+
+                Section(String(localized: "Snapshots")) {
+                    Toggle(String(localized: "Auto-clean up old snapshots"),
+                           isOn: Binding(
+                               get: { settings.autoCleanupSnapshots },
+                               set: { settings.autoCleanupSnapshots = $0 }
+                           ))
+                    if settings.autoCleanupSnapshots {
+                        Stepper(String(localized: "Keep snapshots for \(settings.snapshotRetentionDays) days"),
+                                value: Binding(
+                                    get: { settings.snapshotRetentionDays },
+                                    set: { settings.snapshotRetentionDays = $0 }
+                                ),
+                                in: 7...365, step: 7)
+                    }
+                    HStack {
+                        Text(String(localized: "Snapshot storage"))
+                        Spacer()
+                        Button(String(localized: "Open in Finder")) {
+                            let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+                                .appendingPathComponent("AutoBrew/Snapshots")
+                            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
                 }
 
                 Section("Homebrew") {
