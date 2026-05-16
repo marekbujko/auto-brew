@@ -125,7 +125,7 @@ final class SnapshotService {
                 guard fm.fileExists(atPath: manifestURL.path) else { continue }
                 guard let data = try? Data(contentsOf: manifestURL),
                       let manifest = try? JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: data) else { continue }
-                let total = manifest.components.reduce(Int64(0)) { $0 + $1.byteSize }
+                let total = Self.safeTotalBytes(manifest.components)
                 result.append(AppSnapshot(
                     id: manifest.id,
                     bundleID: manifest.bundleID,
@@ -214,6 +214,10 @@ final class SnapshotService {
             throw SnapshotError.invalidManifest("Imported snapshot has no components")
         }
 
+        guard manifest.components.allSatisfy({ $0.byteSize >= 0 }) else {
+            throw SnapshotError.invalidManifest("Negative byteSize in manifest")
+        }
+
         let timestamp = ISO8601DateFormatter().string(from: manifest.createdAt).replacingOccurrences(of: ":", with: "-")
         let target = storageRoot.appendingPathComponent("\(manifest.bundleID)/\(timestamp)_\(manifest.id.uuidString.prefix(8))", isDirectory: true)
         try fm.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -236,7 +240,7 @@ final class SnapshotService {
             throw error
         }
 
-        let total = manifest.components.reduce(Int64(0)) { $0 + $1.byteSize }
+        let total = Self.safeTotalBytes(manifest.components)
         return AppSnapshot(
             id: manifest.id, bundleID: manifest.bundleID, displayName: manifest.displayName,
             createdAt: manifest.createdAt, caskToken: manifest.caskToken,
@@ -295,6 +299,20 @@ final class SnapshotService {
     }
 
     // MARK: - Nonisolated file operations
+
+    /// Sum `byteSize` values without trapping on overflow. A malicious manifest
+    /// that declares `Int64.max` for every component would otherwise crash the
+    /// reduce. Negative entries are clamped to zero and overflow saturates to
+    /// `Int64.max` so the UI still gets a meaningful "huge" number.
+    private nonisolated static func safeTotalBytes(_ components: [SnapshotComponent]) -> Int64 {
+        var total: Int64 = 0
+        for c in components {
+            let (sum, overflow) = total.addingReportingOverflow(max(0, c.byteSize))
+            if overflow { return Int64.max }
+            total = sum
+        }
+        return total
+    }
 
     private nonisolated static func isValidBundleID(_ id: String) -> Bool {
         !id.isEmpty &&
