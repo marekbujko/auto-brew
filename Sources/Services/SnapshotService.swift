@@ -1,5 +1,6 @@
 import Foundation
 import os
+import CryptoKit
 
 extension JSONDecoder {
     static func snapshotDecoder() -> JSONDecoder {
@@ -349,12 +350,13 @@ final class SnapshotService {
             if isDir.boolValue {
                 try fm.copyItem(at: src, to: dest)
                 let size = try directorySize(at: dest)
+                let treeHash = try directoryTreeHash(at: dest)
                 totalBytes += size
                 components.append(SnapshotComponent(
                     originalPath: encodeOriginalPath(src, home: home),
                     relativeArchivePath: rel,
                     kind: .directory,
-                    sha256: nil,
+                    sha256: treeHash,
                     byteSize: size
                 ))
             } else {
@@ -409,6 +411,12 @@ final class SnapshotService {
                 let actualHash = try Sha256Hasher.hash(file: src)
                 guard actualHash == expectedHash else {
                     throw SnapshotError.invalidManifest("Hash mismatch for \(component.relativeArchivePath)")
+                }
+            }
+            if component.kind == .directory, let expectedHash = component.sha256 {
+                let actualHash = try Self.directoryTreeHash(at: src)
+                guard actualHash == expectedHash else {
+                    throw SnapshotError.invalidManifest("Tree hash mismatch for \(component.relativeArchivePath)")
                 }
             }
             let dest = try decodeOriginalPath(component.originalPath, home: home)
@@ -468,5 +476,35 @@ final class SnapshotService {
             total += Int64(attrs.fileSize ?? 0)
         }
         return total
+    }
+
+    /// Deterministic hash over every regular file inside `url`. Used so tampering
+    /// inside a snapshot's directory components is detectable on restore. Entries
+    /// are sorted by relative path before hashing so the result is stable across
+    /// filesystems with different enumeration order.
+    private nonisolated static func directoryTreeHash(at url: URL) throws -> String {
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey]) else {
+            return ""
+        }
+        var entries: [(String, String)] = []
+        let rootPath = (url.path as NSString).standardizingPath
+        let rootWithSlash = rootPath.hasSuffix("/") ? rootPath : rootPath + "/"
+
+        for case let item as URL in enumerator {
+            let attrs = try item.resourceValues(forKeys: [.isRegularFileKey])
+            guard attrs.isRegularFile == true else { continue }
+            let stdPath = (item.path as NSString).standardizingPath
+            let relPath = stdPath.hasPrefix(rootWithSlash) ? String(stdPath.dropFirst(rootWithSlash.count)) : item.lastPathComponent
+            let fileHash = try Sha256Hasher.hash(file: item)
+            entries.append((relPath, fileHash))
+        }
+        entries.sort { $0.0 < $1.0 }
+
+        var hasher = SHA256()
+        for (rel, hash) in entries {
+            hasher.update(data: Data("\(rel):\(hash)\n".utf8))
+        }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 }

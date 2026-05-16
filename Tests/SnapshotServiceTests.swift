@@ -256,6 +256,33 @@ final class SnapshotServiceTests: XCTestCase {
     }
 
     @MainActor
+    func testRestoreDetectsTamperedDirectoryContents() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let bundleID = "com.test.dirtamper"
+        let appSupport = home.appendingPathComponent("Library/Application Support/\(bundleID)")
+        try FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+        try "original".write(to: appSupport.appendingPathComponent("file1.txt"), atomically: true, encoding: .utf8)
+        try "original2".write(to: appSupport.appendingPathComponent("file2.txt"), atomically: true, encoding: .utf8)
+
+        let svc = SnapshotService(storageRoot: tmp.appendingPathComponent("snap"), home: home)
+        let snap = try await svc.createSnapshot(bundleID: bundleID, displayName: "DirTamper", caskToken: nil, sourceAppVersion: nil)
+
+        // Tamper a file inside the snapshot directory
+        let archivedFile = snap.dataDir.appendingPathComponent("Library/Application Support/\(bundleID)/file1.txt")
+        try "TAMPERED".write(to: archivedFile, atomically: true, encoding: .utf8)
+
+        do {
+            try await svc.restoreSnapshot(snap)
+            XCTFail("Restore should have detected tampered directory contents")
+        } catch {
+            XCTAssertTrue(String(describing: error).contains("Tree hash") || String(describing: error).contains("mismatch"))
+        }
+        // Original must be untouched
+        let stillThere = try String(contentsOf: appSupport.appendingPathComponent("file1.txt"))
+        XCTAssertEqual(stillThere, "original")
+    }
+
+    @MainActor
     func testImportRejectsBundleIDPathTraversal() async throws {
         let home = tmp.appendingPathComponent("home")
         let prefs = home.appendingPathComponent("Library/Preferences")
