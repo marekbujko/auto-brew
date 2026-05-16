@@ -5016,6 +5016,98 @@
         }
       }
     },
+    "Install %@ via Homebrew?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ via Homebrew installieren?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installer %@ via Homebrew ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installare %@ tramite Homebrew?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ via Homebrew installeren?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zainstalować %@ przez Homebrew?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalar %@ via Homebrew?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Instalar %@ vía Homebrew?"
+          }
+        }
+      }
+    },
+    "An external request asked to install the cask \"%@\". Approve only if you trust the source." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine externe Anfrage will den Cask „%@\" installieren. Nur zustimmen, wenn die Quelle vertrauenswürdig ist."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une requête externe demande d'installer le cask « %@ ». N'acceptez que si vous faites confiance à la source."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una richiesta esterna chiede di installare il cask \"%@\". Approvare solo se la fonte è attendibile."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een externe aanvraag wil de cask \"%@\" installeren. Alleen toestaan als je de bron vertrouwt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zewnętrzne żądanie chce zainstalować cask „%@\". Zatwierdź tylko jeśli ufasz źródłu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma requisição externa pediu para instalar o cask \"%@\". Aprove apenas se confiar na fonte."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una solicitud externa pidió instalar el cask \"%@\". Aprueba solo si confías en la fuente."
+          }
+        }
+      }
+    },
     "Operation failed" : {
       "localizations" : {
         "de" : {

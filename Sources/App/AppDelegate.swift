@@ -42,11 +42,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                !token.isEmpty,
                isValidCaskToken(token) {
                 Task {
-                    do {
-                        try await BrewInstaller().install(token: token)
-                    } catch {
-                        self.logger.error("URL-scheme install failed for '\(token, privacy: .public)': \(error.localizedDescription, privacy: .public)")
-                    }
+                    await self.confirmAndInstall(token: token)
                 }
                 requestOpenWindow()
             } else {
@@ -59,6 +55,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func isValidCaskToken(_ token: String) -> Bool {
         token.range(of: #"^[a-zA-Z0-9][a-zA-Z0-9._-]*$"#, options: .regularExpression) != nil
+    }
+
+    /// Prompt the user before running brew install in response to an external
+    /// `autobrew://install/<token>` request. Without this guard a webpage could
+    /// silently trigger installs simply by linking to the URL scheme.
+    @MainActor
+    private func confirmAndInstall(token: String) async {
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Install \(token) via Homebrew?")
+        alert.informativeText = String(localized: "An external request asked to install the cask \"\(token)\". Approve only if you trust the source.")
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: String(localized: "Install"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+        guard response == .alertFirstButtonReturn else {
+            logger.info("User declined URL-scheme install of \(token, privacy: .public)")
+            return
+        }
+        do {
+            try await BrewInstaller().install(token: token)
+        } catch {
+            logger.error("URL-scheme install failed for '\(token, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func requestOpenWindow() {
