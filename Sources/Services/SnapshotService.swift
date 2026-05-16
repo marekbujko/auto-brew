@@ -362,34 +362,70 @@ final class SnapshotService {
         let dataDirStandardized = (dataDir.path as NSString).standardizingPath
         let dataDirWithSlash = dataDirStandardized.hasSuffix("/") ? dataDirStandardized : dataDirStandardized + "/"
 
+        struct Plan {
+            let component: SnapshotComponent
+            let src: URL
+            let dest: URL
+            let backup: URL
+        }
+
+        // Phase 1: validate every source up-front so a missing or traversal-laden
+        // component aborts the whole operation before we touch any live data.
+        var plans: [Plan] = []
         for component in components {
             let src = dataDir.appendingPathComponent(component.relativeArchivePath)
             let srcStandardized = (src.path as NSString).standardizingPath
             guard srcStandardized.hasPrefix(dataDirWithSlash) else {
                 throw SnapshotError.pathTraversal(component.relativeArchivePath)
             }
+            guard fm.fileExists(atPath: src.path) else {
+                throw SnapshotError.invalidManifest("Missing component: \(component.relativeArchivePath)")
+            }
             let dest = try decodeOriginalPath(component.originalPath, home: home)
-
-            try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
-
             let backup = dest.deletingLastPathComponent()
                 .appendingPathComponent(".\(dest.lastPathComponent).autobrewbackup-\(UUID().uuidString.prefix(8))")
-            let hadExisting = fm.fileExists(atPath: dest.path)
-            if hadExisting {
-                try fm.moveItem(at: dest, to: backup)
-            }
-            do {
-                try fm.copyItem(at: src, to: dest)
-                if hadExisting {
-                    try? fm.removeItem(at: backup)
+            plans.append(Plan(component: component, src: src, dest: dest, backup: backup))
+        }
+
+        // Phase 2a: move every existing destination to its backup path so a failure
+        // anywhere in the apply step can rewind every component, not just the last one.
+        var madeBackups: [(backup: URL, dest: URL)] = []
+        do {
+            for plan in plans {
+                try fm.createDirectory(at: plan.dest.deletingLastPathComponent(), withIntermediateDirectories: true)
+                if fm.fileExists(atPath: plan.dest.path) {
+                    try fm.moveItem(at: plan.dest, to: plan.backup)
+                    madeBackups.append((plan.backup, plan.dest))
                 }
-            } catch {
-                if hadExisting {
-                    try? fm.removeItem(at: dest)
-                    try? fm.moveItem(at: backup, to: dest)
-                }
-                throw error
             }
+        } catch {
+            for entry in madeBackups.reversed() {
+                try? fm.moveItem(at: entry.backup, to: entry.dest)
+            }
+            throw error
+        }
+
+        // Phase 2b: copy every component. On failure, remove what we already copied
+        // and restore every backup before reporting the error.
+        var copiedDests: [URL] = []
+        do {
+            for plan in plans {
+                try fm.copyItem(at: plan.src, to: plan.dest)
+                copiedDests.append(plan.dest)
+            }
+        } catch {
+            for dest in copiedDests.reversed() {
+                try? fm.removeItem(at: dest)
+            }
+            for entry in madeBackups.reversed() {
+                try? fm.moveItem(at: entry.backup, to: entry.dest)
+            }
+            throw error
+        }
+
+        // Success: discard backups.
+        for entry in madeBackups {
+            try? fm.removeItem(at: entry.backup)
         }
     }
 
