@@ -503,33 +503,82 @@ final class SnapshotService {
         }
     }
 
-    /// Deterministic hash over every regular file inside `url`. Used so tampering
-    /// inside a snapshot's directory components is detectable on restore. Entries
-    /// are sorted by relative path before hashing so the result is stable across
+    /// Deterministic hash over every entry inside `url`. Used so tampering inside
+    /// a snapshot's directory components is detectable on restore. Entries are
+    /// sorted by relative path before hashing so the result is stable across
     /// filesystems with different enumeration order.
+    ///
+    /// Encoding is length-prefixed binary framing so filenames that contain the
+    /// previous separator characters (":" or "\n", both legal in HFS+/APFS) can
+    /// no longer collide with a different tree. macOS only forbids "/" and NUL in
+    /// filenames, so we cannot rely on textual separators for injectivity.
     private nonisolated static func directoryTreeHash(at url: URL) throws -> String {
         let fm = FileManager.default
-        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey]) else {
-            return ""
+        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey, .isSymbolicLinkKey]) else {
+            return emptyTreeHash()
         }
-        var entries: [(String, String)] = []
+
+        enum EntryKind: UInt8 {
+            case file = 0x01
+            case directory = 0x02
+        }
+
+        struct Entry {
+            let relPath: String
+            let kind: EntryKind
+            let fileHash: String?  // hex, only for file
+        }
+
         let rootPath = (url.path as NSString).standardizingPath
         let rootWithSlash = rootPath.hasSuffix("/") ? rootPath : rootPath + "/"
 
+        var entries: [Entry] = []
         for case let item as URL in enumerator {
-            let attrs = try item.resourceValues(forKeys: [.isRegularFileKey])
-            guard attrs.isRegularFile == true else { continue }
+            let attrs = try item.resourceValues(forKeys: [.isRegularFileKey, .isDirectoryKey, .isSymbolicLinkKey])
+            // Reject symlinks — a malicious snapshot could otherwise smuggle
+            // pointers to live filesystem locations into the verified set.
+            if attrs.isSymbolicLink == true {
+                throw SnapshotError.invalidManifest("Symlink not allowed in snapshot directory: \(item.lastPathComponent)")
+            }
             let stdPath = (item.path as NSString).standardizingPath
             let relPath = stdPath.hasPrefix(rootWithSlash) ? String(stdPath.dropFirst(rootWithSlash.count)) : item.lastPathComponent
-            let fileHash = try Sha256Hasher.hash(file: item)
-            entries.append((relPath, fileHash))
+            if attrs.isRegularFile == true {
+                let hash = try Sha256Hasher.hash(file: item)
+                entries.append(Entry(relPath: relPath, kind: .file, fileHash: hash))
+            } else if attrs.isDirectory == true {
+                entries.append(Entry(relPath: relPath, kind: .directory, fileHash: nil))
+            } else {
+                // Reject FIFOs, sockets, character/block devices — they have no
+                // place inside an Application Support payload and could mask
+                // tampering by being non-hashable.
+                throw SnapshotError.invalidManifest("Unsupported file type in snapshot directory: \(item.lastPathComponent)")
+            }
         }
-        entries.sort { $0.0 < $1.0 }
+        entries.sort { $0.relPath < $1.relPath }
 
         var hasher = SHA256()
-        for (rel, hash) in entries {
-            hasher.update(data: Data("\(rel):\(hash)\n".utf8))
+        for entry in entries {
+            let pathBytes = Array(entry.relPath.utf8)
+            var lenBE = UInt64(pathBytes.count).bigEndian
+            withUnsafeBytes(of: &lenBE) { hasher.update(data: Data($0)) }
+            hasher.update(data: Data(pathBytes))
+            hasher.update(data: Data([entry.kind.rawValue]))
+            if entry.kind == .file, let hexHash = entry.fileHash {
+                // Convert hex hash to raw bytes so the framing covers exactly
+                // 32 bytes of content digest, not its 64-char textual form.
+                var raw = [UInt8]()
+                raw.reserveCapacity(32)
+                var iterator = hexHash.makeIterator()
+                while let hi = iterator.next(), let lo = iterator.next() {
+                    if let byte = UInt8(String([hi, lo]), radix: 16) { raw.append(byte) }
+                }
+                hasher.update(data: Data(raw))
+            }
         }
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
+    private nonisolated static func emptyTreeHash() -> String {
+        SHA256.hash(data: Data()).map { String(format: "%02x", $0) }.joined()
     }
 }

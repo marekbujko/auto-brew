@@ -283,6 +283,31 @@ final class SnapshotServiceTests: XCTestCase {
     }
 
     @MainActor
+    func testTreeHashRejectsFilenameWithControlCharacters() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let bundleID = "com.test.injectivity"
+        let appSupport = home.appendingPathComponent("Library/Application Support/\(bundleID)")
+        try FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+        // A filename containing the old hash separator ":" and a newline — would have collided in v1 encoding
+        try "x".write(to: appSupport.appendingPathComponent("a:b\nc.txt"), atomically: true, encoding: .utf8)
+        try "y".write(to: appSupport.appendingPathComponent("a.txt"), atomically: true, encoding: .utf8)
+
+        let svc = SnapshotService(storageRoot: tmp.appendingPathComponent("snap"), home: home)
+        let snap = try await svc.createSnapshot(bundleID: bundleID, displayName: "Inj", caskToken: nil, sourceAppVersion: nil)
+
+        // Snapshot was created with new encoding — replace file contents to force a mismatch
+        let archivedFile = snap.dataDir.appendingPathComponent("Library/Application Support/\(bundleID)/a.txt")
+        try "DIFFERENT".write(to: archivedFile, atomically: true, encoding: .utf8)
+
+        do {
+            try await svc.restoreSnapshot(snap)
+            XCTFail("Tree hash should detect content change")
+        } catch {
+            XCTAssertTrue(String(describing: error).contains("Tree hash") || String(describing: error).contains("mismatch"))
+        }
+    }
+
+    @MainActor
     func testImportRejectsEmptyManifest() async throws {
         let home = tmp.appendingPathComponent("home")
         let prefs = home.appendingPathComponent("Library/Preferences")
