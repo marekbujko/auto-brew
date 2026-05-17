@@ -4786,58 +4786,58 @@
         }
       }
     },
-    "Open BrewStation Window" : {
+    "Open BrewStore Window" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BrewStation-Fenster öffnen"
+            "value" : "BrewStore-Fenster öffnen"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvrir la fenêtre BrewStation"
+            "value" : "Ouvrir la fenêtre BrewStore"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apri finestra BrewStation"
+            "value" : "Apri finestra BrewStore"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BrewStation-venster openen"
+            "value" : "BrewStore-venster openen"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Otwórz okno BrewStation"
+            "value" : "Otwórz okno BrewStore"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abrir janela BrewStation"
+            "value" : "Abrir janela BrewStore"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abrir ventana BrewStation"
+            "value" : "Abrir ventana BrewStore"
           }
         }
       }
     },
-    "Open BrewStation Window…" : {
+    "Open BrewStore Window…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BrewStation-Fenster öffnen…"
+            "value" : "BrewStore-Fenster öffnen…"
           }
         },
         "fr" : {

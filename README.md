@@ -15,7 +15,7 @@ A native macOS menu bar app that automatically keeps Homebrew and all installed 
 - **Auto-Updates** — Keeps itself up to date via Sparkle
 - **8 Languages** — English, German, French, Italian, Dutch, Polish, Portuguese (Brazil), Spanish
 
-## BrewStation Integration
+## BrewStore
 
 Starting with version 2.0.0, AutoBrew ships a full Homebrew GUI and an AppSnapshot engine.
 

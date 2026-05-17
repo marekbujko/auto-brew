@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum BrewStationTab: String, CaseIterable, Identifiable {
+enum BrewStoreTab: String, CaseIterable, Identifiable {
     case browse, installed, snapshots
     var id: String { rawValue }
     var label: String {
@@ -19,22 +19,22 @@ enum BrewStationTab: String, CaseIterable, Identifiable {
     }
 }
 
-struct BrewStationWindow: View {
-    @State private var selectedTab: BrewStationTab = .browse
+struct BrewStoreWindow: View {
+    @State private var selectedTab: BrewStoreTab = .browse
 
     var body: some View {
         TabView(selection: $selectedTab) {
             BrowseRootView()
-                .tabItem { Label(BrewStationTab.browse.label, systemImage: BrewStationTab.browse.systemImage) }
-                .tag(BrewStationTab.browse)
+                .tabItem { Label(BrewStoreTab.browse.label, systemImage: BrewStoreTab.browse.systemImage) }
+                .tag(BrewStoreTab.browse)
 
             InstalledAppsView()
-                .tabItem { Label(BrewStationTab.installed.label, systemImage: BrewStationTab.installed.systemImage) }
-                .tag(BrewStationTab.installed)
+                .tabItem { Label(BrewStoreTab.installed.label, systemImage: BrewStoreTab.installed.systemImage) }
+                .tag(BrewStoreTab.installed)
 
             SnapshotsRootView()
-                .tabItem { Label(BrewStationTab.snapshots.label, systemImage: BrewStationTab.snapshots.systemImage) }
-                .tag(BrewStationTab.snapshots)
+                .tabItem { Label(BrewStoreTab.snapshots.label, systemImage: BrewStoreTab.snapshots.systemImage) }
+                .tag(BrewStoreTab.snapshots)
         }
         .frame(minWidth: 900, minHeight: 600)
     }

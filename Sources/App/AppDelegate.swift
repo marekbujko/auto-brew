@@ -84,10 +84,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func requestOpenWindow() {
         NSApp.activate(ignoringOtherApps: true)
-        NotificationCenter.default.post(name: .openBrewStationWindow, object: nil)
+        NotificationCenter.default.post(name: .openBrewStoreWindow, object: nil)
     }
 }
 
 extension Notification.Name {
-    static let openBrewStationWindow = Notification.Name("openBrewStationWindow")
+    static let openBrewStoreWindow = Notification.Name("openBrewStoreWindow")
 }

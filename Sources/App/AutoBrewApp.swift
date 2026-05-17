@@ -10,13 +10,13 @@ struct AutoBrewApp: App {
             MenuBarView()
         } label: {
             MenuBarIcon(state: scheduler.state)
-                .modifier(OpenWindowOnNotification(windowID: "brewstation"))
+                .modifier(OpenWindowOnNotification(windowID: "brewstore"))
         }
         .menuBarExtraStyle(.window)
 
-        Window("BrewStation", id: "brewstation") {
-            BrewStationWindow()
-                .modifier(OpenWindowOnNotification(windowID: "brewstation"))
+        Window("BrewStore", id: "brewstore") {
+            BrewStoreWindow()
+                .modifier(OpenWindowOnNotification(windowID: "brewstore"))
         }
         .defaultSize(width: 1000, height: 680)
         .commands {
@@ -31,7 +31,7 @@ private struct OpenWindowOnNotification: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onReceive(NotificationCenter.default.publisher(for: .openBrewStationWindow)) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: .openBrewStoreWindow)) { _ in
                 openWindow(id: windowID)
             }
     }
