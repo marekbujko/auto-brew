@@ -23,7 +23,7 @@ struct BrowseListView: View {
             List(selection: $selection) {
                 ForEach(filteredForCategory) { entry in
                     HStack(spacing: 10) {
-                        CaskIconView(token: entry.token, size: 32)
+                        CaskIconView(token: entry.token, appNames: entry.appNames, size: 32)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(entry.displayName).font(.system(.body, weight: .medium))
                             if let desc = entry.description {
@@ -60,6 +60,22 @@ struct BrowseListView: View {
             }.prefix(Self.maxPopularCount))
         case .recent:
             return store.filtered
+        default:
+            // Content-based category — filter store.allCasks (respecting search) then check matches
+            let q = store.searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+            let searched = q.isEmpty
+                ? store.allCasks
+                : store.allCasks.filter { entry in
+                    entry.token.lowercased().contains(q) ||
+                    entry.displayName.lowercased().contains(q) ||
+                    (entry.description?.lowercased().contains(q) ?? false)
+                }
+            let inCategory = searched.filter { category.matches($0) }
+            // Sort by popularity within the category
+            return inCategory.sorted {
+                (store.analytics?.installCount(for: $0.token) ?? 0) >
+                (store.analytics?.installCount(for: $1.token) ?? 0)
+            }
         }
     }
 
