@@ -4,10 +4,12 @@ import SwiftUI
 struct RankedCaskRow: View {
     let rank: Int
     let entry: CaskCatalogEntry
+    let onOpenDetail: () -> Void
 
     @State private var installer = BrewInstaller()
     @State private var isInstalling = false
     @State private var installerError: String?
+    @State private var installedApps = InstalledAppsStore.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -24,19 +26,24 @@ struct RankedCaskRow: View {
                 .frame(width: 24, alignment: .center)
                 .monospacedDigit()
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.displayName)
-                    .font(.system(.body, weight: .semibold))
-                    .lineLimit(1)
-                if let desc = entry.description {
-                    Text(desc)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
+            Button {
+                onOpenDetail()
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.displayName)
+                        .font(.system(.body, weight: .semibold))
+                        .lineLimit(1)
+                    if let desc = entry.description {
+                        Text(desc)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-
-            Spacer()
+            .buttonStyle(.plain)
 
             installButton
         }
@@ -71,18 +78,25 @@ struct RankedCaskRow: View {
         .disabled(isInstalling)
     }
 
-    private var isInstalled: Bool {
-        entry.appNames.contains { name in
-            FileManager.default.fileExists(atPath: "/Applications/\(name)")
+    /// Resolves to the first appName from `entry.appNames` that exists on disk,
+    /// or nil if none are installed. Uses the in-memory `InstalledAppsStore`
+    /// to avoid per-row `FileManager.fileExists` syscalls during render.
+    private var installedAppPath: String? {
+        let installed = installedApps.apps
+        for name in entry.appNames {
+            if let app = installed.first(where: { $0.appPath.lastPathComponent == name }) {
+                return app.appPath.path
+            }
         }
+        return nil
     }
+
+    private var isInstalled: Bool { installedAppPath != nil }
 
     @MainActor
     private func install() async {
-        guard !isInstalled else {
-            if let appName = entry.appNames.first {
-                NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications/\(appName)"))
-            }
+        if let path = installedAppPath {
+            NSWorkspace.shared.open(URL(fileURLWithPath: path))
             return
         }
         isInstalling = true

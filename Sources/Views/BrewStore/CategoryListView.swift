@@ -5,21 +5,28 @@ struct CategoryListView: View {
     @Bindable var store: CatalogStore
     @Binding var searchText: String
 
+    @State private var selectedEntry: CaskCatalogEntry?
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(Array(filtered.enumerated()), id: \.element.id) { index, entry in
-                    NavigationLink(value: entry) {
-                        RankedCaskRow(rank: index + 1, entry: entry)
-                    }
-                    .buttonStyle(.plain)
+                    RankedCaskRow(rank: index + 1, entry: entry, onOpenDetail: { selectedEntry = entry })
                 }
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
         }
-        .navigationDestination(for: CaskCatalogEntry.self) { entry in
-            BrowseDetailView(entry: entry)
+        .sheet(item: $selectedEntry) { entry in
+            NavigationStack {
+                BrowseDetailView(entry: entry)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(String(localized: "Close")) { selectedEntry = nil }
+                        }
+                    }
+                    .frame(minWidth: 520, minHeight: 420)
+            }
         }
     }
 

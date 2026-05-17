@@ -14,12 +14,7 @@ struct DiscoverSection: View {
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 16),
                                 GridItem(.flexible(), spacing: 16)], spacing: 0) {
                 ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-                    Button {
-                        onSelect(entry)
-                    } label: {
-                        RankedCaskRow(rank: index + 1, entry: entry)
-                    }
-                    .buttonStyle(.plain)
+                    RankedCaskRow(rank: index + 1, entry: entry, onOpenDetail: { onSelect(entry) })
                 }
             }
             Divider()

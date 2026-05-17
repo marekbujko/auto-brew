@@ -59,7 +59,8 @@ struct CaskIconView: View {
             if remoteImage != nil { return }
             if remoteLoader.cached(token: token) != nil { return }
             if remoteLoader.isCachedMiss(token: token) { return }
-            remoteLoader.fetch(token: token, displayName: displayName, homepage: homepage) { img in
+            if let img = await remoteLoader.fetch(token: token, displayName: displayName, homepage: homepage) {
+                if Task.isCancelled { return }
                 remoteImage = img
             }
         }

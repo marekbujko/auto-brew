@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var brewManager = BrewManager.shared
     @State private var iconCacheSize: Int64 = 0
     @State private var cacheLastUpdated: String = "—"
+    @State private var cacheError: String?
     var onBack: () -> Void
 
     var body: some View {
@@ -125,11 +126,22 @@ struct SettingsView: View {
                             .font(.caption)
                     }
                     Button(String(localized: "Clear Icon Cache"), role: .destructive) {
-                        try? RemoteIconLoader.shared.clearCache()
+                        do {
+                            try RemoteIconLoader.shared.clearCache()
+                        } catch {
+                            cacheError = error.localizedDescription
+                        }
                         refreshCacheStats()
                     }
                 }
                 .task { refreshCacheStats() }
+                .alert(String(localized: "Couldn't clear cache"),
+                       isPresented: Binding(get: { cacheError != nil }, set: { if !$0 { cacheError = nil } }),
+                       presenting: cacheError) { _ in
+                    Button("OK") { cacheError = nil }
+                } message: { msg in
+                    Text(msg)
+                }
 
                 Section("Homebrew") {
                     HStack {

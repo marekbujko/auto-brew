@@ -2,10 +2,14 @@ import SwiftUI
 
 struct UpdatesView: View {
     @State private var brewManager = BrewManager.shared
+    @State private var hasLoaded = false
 
     var body: some View {
         Group {
-            if brewManager.outdatedPackages.isEmpty {
+            if !hasLoaded {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if brewManager.outdatedPackages.isEmpty {
                 ContentUnavailableView(
                     String(localized: "All up to date"),
                     systemImage: "checkmark.seal.fill",
@@ -29,6 +33,9 @@ struct UpdatesView: View {
                 }
             }
         }
-        .task { await brewManager.fetchOutdated() }
+        .task {
+            await brewManager.fetchOutdated()
+            hasLoaded = true
+        }
     }
 }

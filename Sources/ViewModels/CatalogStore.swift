@@ -10,6 +10,21 @@ final class CatalogStore {
     private(set) var allCasks: [CaskCatalogEntry] = []
     private(set) var analytics: CaskAnalytics?
 
+    /// Precomputed top-6 most-installed casks overall.
+    /// Recomputed only when `replaceAll(...)` runs — avoids re-sorting ~7000 casks
+    /// on every SwiftUI render of DiscoverView.
+    private(set) var topInstalledOverall: [CaskCatalogEntry] = []
+
+    /// Precomputed top-6 most-installed casks per browse category.
+    /// Same rationale as `topInstalledOverall`.
+    private(set) var topByCategory: [BrowseCategory: [CaskCatalogEntry]] = [:]
+
+    /// Categories for which top-N rankings are precomputed in `recomputeRankings()`.
+    private static let rankedCategories: [BrowseCategory] = [
+        .browsers, .developerTools, .communication, .productivity,
+        .media, .graphics, .utilities, .security, .games, .storage
+    ]
+
     enum SortMode: String, CaseIterable, Sendable {
         case popularity, name, recent
     }
@@ -43,5 +58,19 @@ final class CatalogStore {
     func replaceAll(_ casks: [CaskCatalogEntry], analytics: CaskAnalytics?) {
         allCasks = casks
         self.analytics = analytics
+        recomputeRankings()
+    }
+
+    private func recomputeRankings() {
+        let sorted = allCasks.sorted {
+            (analytics?.installCount(for: $0.token) ?? 0) >
+            (analytics?.installCount(for: $1.token) ?? 0)
+        }
+        topInstalledOverall = Array(sorted.prefix(6))
+        var byCat: [BrowseCategory: [CaskCatalogEntry]] = [:]
+        for cat in Self.rankedCategories {
+            byCat[cat] = Array(sorted.filter { cat.matches($0) }.prefix(6))
+        }
+        topByCategory = byCat
     }
 }
