@@ -160,7 +160,7 @@ classDiagram
     AutoBrewApp --> MenuBarView
     AppDelegate --> SchedulerService
     AppDelegate --> NotificationManager
-    AppDelegate --> BrewInstaller : autobrew://install
+    AppDelegate --> BrewInstaller : autobrew install URL
     SchedulerService --> BrewManager
     SchedulerService --> SettingsStore
     SchedulerService --> SleepWakeObserver

@@ -39,17 +39,15 @@ nb-configuration.xml
 # Local environment
 .env
 
-# Claude Code
+# Claude Code / AI assistant
 .claude/
 claude.md
 CLAUDE.md
+.mcp.json
+docs/superpowers/
 
 # Plugin directory
 /.quarkus/cli/plugins/
 
 # Build
 build/
-
-# AI assistant config
-CLAUDE.md
-.mcp.json
