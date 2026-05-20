@@ -72,6 +72,11 @@ struct SettingsView: View {
                     }
                 }
 
+                UpdatePolicySection(defaults: Binding(
+                    get: { settings.policyDefaults },
+                    set: { settings.policyDefaults = $0 }
+                ))
+
                 Section("General") {
                     Toggle("Launch at Login", isOn: Binding(
                         get: { LoginItemManager.isEnabled },

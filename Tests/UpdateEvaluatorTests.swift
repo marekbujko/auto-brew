@@ -20,7 +20,7 @@ final class UpdateEvaluatorTests: XCTestCase {
         var defaults = UpdatePolicyDefaults.safeDefaults
         defaults.caskPatch = .auto
         let evaluator = UpdateEvaluator(defaults: defaults)
-        let result = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: UpdateLedger(), now: referenceDate)
+        let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertEqual(result.autoInstall.map(\.name), ["firefox"])
         XCTAssertTrue(result.waitingForCooldown.isEmpty)
     }
@@ -31,7 +31,7 @@ final class UpdateEvaluatorTests: XCTestCase {
         var defaults = UpdatePolicyDefaults.safeDefaults
         defaults.caskPatch = .delayedDays(7)
         let evaluator = UpdateEvaluator(defaults: defaults)
-        let result = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: UpdateLedger(), now: referenceDate)
+        let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertTrue(result.autoInstall.isEmpty)
         XCTAssertEqual(result.waitingForCooldown.count, 1)
         XCTAssertEqual(result.waitingForCooldown.first?.daysRemaining, 7)
@@ -43,10 +43,10 @@ final class UpdateEvaluatorTests: XCTestCase {
 
         var ledger = UpdateLedger()
         let seenEightDaysAgo = referenceDate.addingTimeInterval(-8 * 86_400)
-        _ = ledger.touch(token: "firefox", version: "120.1", now: seenEightDaysAgo)
+        _ = ledger.touch(token: "firefox", version: "120.0.1", now: seenEightDaysAgo)
 
         let evaluator = UpdateEvaluator(defaults: defaults)
-        let result = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: ledger, now: referenceDate)
+        let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: ledger, now: referenceDate)
         XCTAssertEqual(result.autoInstall.map(\.name), ["firefox"])
     }
 
@@ -132,7 +132,7 @@ final class UpdateEvaluatorTests: XCTestCase {
         var defaults = UpdatePolicyDefaults.safeDefaults
         defaults.caskPatch = .skip
         let evaluator = UpdateEvaluator(defaults: defaults)
-        let result = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: UpdateLedger(), now: referenceDate)
+        let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertEqual(result.skipped.count, 1)
         XCTAssertEqual(result.skipped.first?.reason, .policySkip)
     }
@@ -145,7 +145,7 @@ final class UpdateEvaluatorTests: XCTestCase {
 
         let override = PackagePolicyOverride(token: "firefox", patch: .skip, minor: nil, major: nil)
         let evaluator = UpdateEvaluator(defaults: defaults, overrides: [override])
-        let result = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: UpdateLedger(), now: referenceDate)
+        let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertEqual(result.skipped.count, 1)
     }
 
@@ -158,11 +158,11 @@ final class UpdateEvaluatorTests: XCTestCase {
         let evaluator = UpdateEvaluator(defaults: defaults, overrides: [override])
 
         // patch falls back to default (.auto)
-        let patchResult = evaluator.evaluate([cask("firefox", "120.0", "120.1")], ledger: UpdateLedger(), now: referenceDate)
+        let patchResult = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertEqual(patchResult.autoInstall.count, 1)
 
         // major hits the override (.auto, not default .manualApproval)
-        let majorResult = evaluator.evaluate([cask("firefox", "120.0", "121.0")], ledger: UpdateLedger(), now: referenceDate)
+        let majorResult = evaluator.evaluate([cask("firefox", "120.0.0", "121.0.0")], ledger: UpdateLedger(), now: referenceDate)
         XCTAssertEqual(majorResult.autoInstall.count, 1)
     }
 
@@ -186,7 +186,7 @@ final class UpdateEvaluatorTests: XCTestCase {
 
         let evaluator = UpdateEvaluator(defaults: defaults)
         let result = evaluator.evaluate([
-            cask("firefox", "120.0", "120.1"),
+            cask("firefox", "120.0.0", "120.0.1"),
             formula("openssl", "3.0.0", "3.0.1")
         ], ledger: UpdateLedger(), now: referenceDate)
 

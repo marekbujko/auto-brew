@@ -23,6 +23,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         SupportPromptStore.shared.ensureInstallDate()
 
+        // The notification-action handler can fire before the scheduler is
+        // ready, so wire it up synchronously before any async work starts.
+        NotificationManager.shared.onReviewApprovalsRequested = { [weak self] in
+            self?.openPendingApprovals()
+        }
+
         Task { @MainActor in
             await NotificationManager.shared.requestAuthorization()
             if BrewManager.shared.isHomebrewInstalled {
@@ -30,6 +36,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             logger.info("AutoBrew started (homebrew installed: \(BrewManager.shared.isHomebrewInstalled))")
         }
+    }
+
+    private func openPendingApprovals() {
+        NSApp.activate(ignoringOtherApps: true)
+        BrewStoreNavigation.shared.requestedSection = .pendingApprovals
+        NotificationCenter.default.post(name: .openBrewStoreWindow, object: nil)
     }
 
     @objc func handleURLEvent(_ event: NSAppleEventDescriptor, replyEvent: NSAppleEventDescriptor) {

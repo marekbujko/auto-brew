@@ -6,6 +6,7 @@ enum BrewStoreSection: Hashable {
     case installed
     case snapshots
     case updates
+    case pendingApprovals
 }
 
 /// The standalone "BrewStore" window — a proper full-size browser for casks,
@@ -18,6 +19,7 @@ struct BrewStoreWindow: View {
     @State private var service = BrewCatalogService.shared
     @State private var searchText: String = ""
     @State private var detailEntry: CaskCatalogEntry?
+    @State private var navigation = BrewStoreNavigation.shared
 
     var body: some View {
         NavigationSplitView {
@@ -32,6 +34,12 @@ struct BrewStoreWindow: View {
         .task {
             await loadCatalog()
             await InstalledAppsStore.shared.refresh()
+        }
+        .onAppear {
+            consumeRequestedSection()
+        }
+        .onChange(of: navigation.requestedSection) { _, _ in
+            consumeRequestedSection()
         }
         .sheet(item: $detailEntry) { entry in
             NavigationStack {
@@ -59,6 +67,8 @@ struct BrewStoreWindow: View {
             SnapshotsRootView()
         case .updates:
             UpdatesView()
+        case .pendingApprovals:
+            PendingApprovalsView()
         }
     }
 
@@ -69,6 +79,16 @@ struct BrewStoreWindow: View {
         case .installed: String(localized: "Installed")
         case .snapshots: String(localized: "Snapshots")
         case .updates: String(localized: "Updates")
+        case .pendingApprovals: String(localized: "Pending Approvals")
+        }
+    }
+
+    /// Honours the most recent deep-link request once and clears it so a
+    /// later manual selection from the sidebar isn't overridden.
+    private func consumeRequestedSection() {
+        if let requested = navigation.requestedSection {
+            selection = requested
+            navigation.requestedSection = nil
         }
     }
 

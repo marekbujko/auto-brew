@@ -5,6 +5,7 @@ import SwiftUI
 /// about: running, just-finished, and failed.
 struct MenuBarIcon: View {
     let state: SchedulerState
+    @State private var pendingStore = PendingUpdatesStore.shared
 
     var body: some View {
         HStack(spacing: 2) {
@@ -13,6 +14,12 @@ struct MenuBarIcon: View {
             if let badge = badgeIcon {
                 Image(systemName: badge)
                     .font(.system(size: 7, weight: .bold))
+            } else if pendingStore.pendingCount > 0 {
+                // Subtle dot — the same hint the App Store uses when updates
+                // need a tap. Numeric count is too big for the menu bar.
+                Circle()
+                    .fill(.orange)
+                    .frame(width: 6, height: 6)
             }
         }
         .accessibilityLabel("AutoBrew")

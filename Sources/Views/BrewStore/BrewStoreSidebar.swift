@@ -7,6 +7,8 @@ struct BrewStoreSidebar: View {
     @Binding var selection: BrewStoreSection
     @Binding var searchText: String
 
+    @State private var pendingStore = PendingUpdatesStore.shared
+
     /// Order matches the precomputed rankings in `CatalogStore.rankedCategories`
     /// so the sidebar and Discover sections stay in sync.
     private let contentCategories: [BrowseCategory] = [
@@ -36,6 +38,12 @@ struct BrewStoreSidebar: View {
                     sidebarRow(BrewStoreSection.installed, label: String(localized: "Installed"), systemImage: "shippingbox.fill")
                     sidebarRow(BrewStoreSection.snapshots, label: String(localized: "Snapshots"), systemImage: "camera.on.rectangle.fill")
                     sidebarRow(BrewStoreSection.updates, label: String(localized: "Updates"), systemImage: "arrow.triangle.2.circlepath")
+                    // Approvals row only shows when something is actually
+                    // pending — keeps the sidebar uncluttered for users who
+                    // don't have major updates pending.
+                    if pendingStore.pendingCount > 0 {
+                        approvalsRow
+                    }
                 }
                 Section(String(localized: "Categories")) {
                     ForEach(contentCategories) { cat in
@@ -52,5 +60,21 @@ struct BrewStoreSidebar: View {
         Label(label, systemImage: systemImage)
             .padding(.vertical, 4)
             .tag(section)
+    }
+
+    private var approvalsRow: some View {
+        HStack {
+            Label(String(localized: "Pending Approvals"), systemImage: "exclamationmark.circle.fill")
+                .foregroundStyle(.orange)
+            Spacer()
+            Text("\(pendingStore.pendingCount)")
+                .font(.caption2.bold())
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.orange, in: Capsule())
+                .foregroundStyle(.white)
+        }
+        .padding(.vertical, 4)
+        .tag(BrewStoreSection.pendingApprovals)
     }
 }
