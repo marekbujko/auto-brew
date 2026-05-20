@@ -7,15 +7,15 @@
         <language>en</language>
         <item>
             <title>Version 2.1.0</title>
-            <pubDate>Wed, 20 May 2026 10:59:53 +0000</pubDate>
+            <pubDate>Wed, 20 May 2026 11:18:38 +0000</pubDate>
             <sparkle:version>9</sparkle:version>
             <sparkle:shortVersionString>2.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <enclosure
                 url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.1.0/AutoBrew.zip"
-                length="4078824"
+                length="4064005"
                 type="application/octet-stream"
-                sparkle:edSignature="PAVq7nwvM+IsVmb/q5SzDjq4wqrGtskWdhM/yU+5x5KfbKtrpmpV9YNJENB7cCqZx1/ewSwXzaCC26HWJKXIBQ=="
+                sparkle:edSignature="Lhqj348XpmpldqxOqhP49vkczda0XZxMsr/q27dzsWhpR6dEXMpvC7jn4Uh6t5TXxHCJ6guMaU3+CU5yRW3yAw=="
             />
         </item>
     </channel>
