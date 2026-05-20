@@ -184,14 +184,29 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     HStack {
-                        Text("Developer")
+                        Text("Brand")
                         Spacer()
-                        Text("Marcel R. G. Berger")
+                        Text("DigitalFreedom")
                             .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("Operated by")
+                        Spacer()
+                        Text("Berger & Rosenstock GbR")
+                            .foregroundStyle(.secondary)
+                    }
+                    Link(destination: URL(string: "https://support.digitalfreedom.co.za/help/767340152")!) {
+                        HStack {
+                            Label("Help & Support", systemImage: "questionmark.circle")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     Link(destination: URL(string: "https://github.com/sponsors/marcelrgberger")!) {
                         HStack {
-                            Label("Support this Project", systemImage: "heart")
+                            Label("Sponsor this Project", systemImage: "heart")
                             Spacer()
                             Image(systemName: "arrow.up.right")
                                 .font(.caption)
@@ -208,10 +223,40 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+                Section("Legal") {
+                    ForEach(LegalDocument.allCases) { doc in
+                        Button {
+                            LegalNavigation.shared.requestedDocument = doc
+                            NotificationCenter.default.post(name: .openLegalWindow, object: nil)
+                            NSApp.activate(ignoringOtherApps: true)
+                        } label: {
+                            HStack {
+                                Label(LocalizedStringKey(doc.titleKey), systemImage: icon(for: doc))
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
             .formStyle(.grouped)
         }
         .frame(maxWidth: 320, maxHeight: 460)
+    }
+
+    private func icon(for document: LegalDocument) -> String {
+        switch document {
+        case .privacy: return "hand.raised"
+        case .terms: return "doc.text"
+        case .eula: return "doc.badge.gearshape"
+        case .impressum: return "building.columns"
+        case .trademark: return "r.square"
+        case .openSource: return "shippingbox"
+        }
     }
 
     @MainActor

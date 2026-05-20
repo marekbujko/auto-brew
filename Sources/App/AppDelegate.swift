@@ -92,4 +92,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension Notification.Name {
     static let openBrewStoreWindow = Notification.Name("openBrewStoreWindow")
+    static let openLegalWindow = Notification.Name("openLegalWindow")
 }
