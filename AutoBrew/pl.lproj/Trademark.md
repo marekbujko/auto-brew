@@ -1,109 +1,98 @@
 # OŚWIADCZENIE O ZNAKACH TOWAROWYCH
 
-## Dla aplikacji odwołujących się do znaków towarowych lub programów stron trzecich
+## AutoBrew
 
-**Data wejścia w życie:** maj 2026
+**Ostatnia aktualizacja:** maj 2026
 
 **Wydawca:**
-DigitalFreedom
-Marka Berger & Rosenstock GbR
-Dieselstr. 22e
-61231 Bad Nauheim
-Niemcy
-Kontakt: hello@digitalfreedom.co.za
+Berger & Rosenstock GbR (działająca jako DigitalFreedom)
+Dieselstr. 22e, 61231 Bad Nauheim, Niemcy
+E-mail: hello@digitalfreedom.co.za
 Strona internetowa: https://digitalfreedom.co.za
 
 ---
 
-## 1. CEL I ZAKRES
+## 1. Cel
 
-Niniejszy dokument wyjaśnia relację między aplikacjami publikowanymi przez Wydawcę a wszelkimi znakami towarowymi, nazwami marek, programami lub metodologiami stron trzecich, do których odwołują się te aplikacje, materiały marketingowe lub dokumentacja pomocnicza.
+Niniejszy dokument wyjaśnia relację pomiędzy **AutoBrew** a znakami towarowymi, nazwami marek oraz oprogramowaniem stron trzecich wymienianymi w aplikacji, jej kodzie źródłowym i dokumentacji.
 
-Aplikacje Wydawcy (w tym AutoBrew) są dystrybuowane bezpośrednio jako natywne aplikacje macOS i są udostępniane użytkownikom na całym świecie. Niniejsze Oświadczenie ma zastosowanie globalnie. Wydawca stosuje unijne prawo o znakach towarowych (rozporządzenie (UE) 2017/1001 w sprawie znaku towarowego Unii Europejskiej oraz dyrektywę (UE) 2015/2436) wraz z doktryną nominatywnego fair use jako standard bazowy i dodatkowo przestrzega zasad dotyczących znaków towarowych i fair use każdej jurysdykcji, w której aplikacje są udostępniane.
+AutoBrew jest dystrybuowany wyłącznie poprzez tap Homebrew [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) oraz poprzez stronę GitHub Releases pod adresem [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases). Nie jest powiązany z Apple App Store, Google Play Store ani żadnym zewnętrznym portalem pobierania.
 
----
-
-## 2. NOMINATYWNE FAIR USE
-
-Odwołania do znaków towarowych, nazw marek, programów lub metodologii stron trzecich w aplikacjach i materiałach Wydawcy są dokonywane na podstawie doktryny **nominatywnego fair use** (lub porównywalnych doktryn na mocy obowiązującego prawa o znakach towarowych).
-
-Takie odwołania mają na celu:
-
-- Dokładną identyfikację programu, metodologii lub produktu strony trzeciej
-- Zapewnienie kontekstu użytkownikowi dotyczącego kompatybilności, wsparcia lub zastosowania
-- Umożliwienie rzeczowych opisów cech i funkcji
-
-Odwołania **nie** oznaczają:
-
-- Poparcia aplikacji Wydawcy przez właściciela znaku towarowego
-- Powiązania między Wydawcą a właścicielem znaku towarowego
-- Sponsorowania aplikacji Wydawcy przez właściciela znaku towarowego
-- Autoryzacji, certyfikacji ani zatwierdzenia przez właściciela znaku towarowego
+Wydawca stosuje unijne prawo znaków towarowych (rozporządzenie (UE) 2017/1001 oraz dyrektywę (UE) 2015/2436) oraz doktrynę dozwolonego użytku nominatywnego jako standard podstawowy, a dodatkowo przestrzega zasad znaków towarowych i dozwolonego użytku każdej jurysdykcji, w której AutoBrew jest pobierany.
 
 ---
 
-## 3. WŁASNOŚĆ ZNAKÓW TOWAROWYCH
+## 2. Dozwolony użytek nominatywny
 
-Wszystkie znaki towarowe, zarejestrowane znaki towarowe, znaki usługowe, nazwy marek i nazwy handlowe, do których odwołują się aplikacje lub materiały Wydawcy, są własnością ich odpowiednich właścicieli.
-
-Wydawca nie rości sobie własności do takiej własności intelektualnej stron trzecich i wykorzystuje je wyłącznie w celach opisanych w sekcji 2.
-
-Konkretne przypisania znaków towarowych dla poszczególnych aplikacji są podane w dokumentacji odpowiedniej aplikacji, w ujawnieniach wewnątrz aplikacji lub w materiałach marketingowych.
-
-W szczególności w odniesieniu do AutoBrew:
-
-- **Homebrew** jest znakiem towarowym projektu Homebrew. AutoBrew automatyzuje operacje Homebrew, ale nie jest oficjalnym projektem Homebrew, nie jest powiązany ani popierany przez Homebrew.
-- **macOS**, **Apple** oraz powiązane nazwy są znakami towarowymi Apple Inc.
-- **GitHub** jest znakiem towarowym GitHub, Inc.
-- **Sparkle** jest znakiem towarowym projektu Sparkle.
+Odniesienia do znaków towarowych, nazw marek i oprogramowania stron trzecich w AutoBrew i jego materiałach są dokonywane w ramach doktryny **dozwolonego użytku nominatywnego** (lub porównywalnych doktryn na mocy obowiązującego prawa znaków towarowych). Takie odniesienia identyfikują i opisują produkty stron trzecich, z którymi AutoBrew współdziała, i nie sugerują żadnego poparcia, sponsorowania, powiązania ani partnerstwa.
 
 ---
 
-## 4. NIEZALEŻNY ROZWÓJ
+## 3. Atrybucje znaków towarowych specyficzne dla AutoBrew
 
-Aplikacje publikowane przez Wydawcę są rozwijane niezależnie.
+### 3.1 Homebrew
 
-- Aplikacje Wydawcy nie są powiązane, popierane, sponsorowane ani zatwierdzane przez żadnego właściciela znaku towarowego strony trzeciej, chyba że wyraźnie stwierdzono inaczej na piśmie
-- Funkcjonalne podobieństwo między aplikacją a programem strony trzeciej nie oznacza licencji ani partnerstwa
-- Kompatybilność z metodologią strony trzeciej nie oznacza certyfikacji ani akredytacji
+Nazwy **Homebrew** i **brew** oraz powiązane logo są znakami towarowymi lub zastrzeżonymi znakami towarowymi swoich odpowiednich właścicieli, głównie projektu Homebrew ([brew.sh](https://brew.sh)). AutoBrew automatyzuje i wizualizuje operacje Homebrew oraz używa tych nazw wyłącznie w celu identyfikacji narzędzia bazowego. AutoBrew nie jest powiązany z projektem Homebrew, nie jest przez niego popierany ani sponsorowany.
+
+### 3.2 Apple, macOS, App Store
+
+**Apple**, **macOS**, **App Store**, **iTunes**, **TestFlight**, narzędzia do podpisywania kodu **Sparkle** oraz inne znaki Apple są znakami towarowymi Apple Inc. AutoBrew działa na macOS i podpisuje swoje pliki binarne w ramach programu Apple Developer ID, jak jest to wymagane do dystrybucji bezpośredniej. AutoBrew nie jest powiązany z Apple Inc.
+
+### 3.3 GitHub
+
+**GitHub**, **GitHub Releases** oraz **GitHub Sponsors** są znakami towarowymi GitHub, Inc. AutoBrew jest hostowany na GitHub i używa GitHub Sponsors jako jedynego opcjonalnego kanału darowizn. AutoBrew nie jest powiązany z GitHub, Inc.
+
+### 3.4 Sparkle
+
+**Sparkle** jest open-source frameworkiem aktualizacji używanym wewnątrz AutoBrew. Nazwa i logo Sparkle należą do projektu Sparkle ([sparkle-project.org](https://sparkle-project.org/)). AutoBrew łączy Sparkle jako zależność SwiftPM na licencji MIT (patrz [Licencje Open Source](OpenSourceLicenses.md) sekcja 2.1).
+
+### 3.5 Wydawcy cask
+
+BrewStore wewnątrz AutoBrew wyświetla cask z publicznego katalogu Homebrew. Każda indywidualna nazwa cask (np. „Firefox", „Visual Studio Code", „Docker", „Slack"), każda ikona aplikacji i każdy zrzut ekranu należą do swojego odpowiedniego wydawcy. AutoBrew odwołuje się do tych nazw i ikon wyłącznie w celu pomocy Państwu w identyfikacji oprogramowania, które mogą Państwo zdecydować się zainstalować za pośrednictwem Homebrew; nie hostuje, nie dystrybuuje ani nie modyfikuje tych plików binarnych.
 
 ---
 
-## 5. ZASTRZEŻENIE PRAW
+## 4. Znaki AutoBrew i DigitalFreedom
 
-Właściciele znaków towarowych zachowują wszelkie prawa do swoich znaków towarowych. Nominatywne fair use przez Wydawcę nie przenosi, nie licencjonuje ani nie przyznaje żadnych praw do znaków towarowych stron trzecich.
+**AutoBrew** i **DigitalFreedom** są niezarejestrowanymi znakami Berger & Rosenstock GbR.
+
+### 4.1 Forki open-source są mile widziane
+
+Kod źródłowy AutoBrew jest licencjonowany na licencji MIT, a forki na GitHub są wyraźnie dozwolone. Mogą Państwo odwoływać się do AutoBrew opisowo w pliku README forka, informacjach o wydaniu lub nazwie repozytorium (np. „fork AutoBrew", „oparty na AutoBrew") w ramach doktryny dozwolonego użytku nominatywnego.
+
+### 4.2 Ograniczenia dotyczące marki AutoBrew / DigitalFreedom
+
+Użycie znaków **AutoBrew** i **DigitalFreedom** **nie jest** dozwolone:
+
+- Jako **nazwa produktu** forka lub utworu pochodnego (np. nie mogą Państwo nazwać swojego forka „AutoBrew Pro", „AutoBrew+", „DigitalFreedom Brew" itp.)
+- Jako nazwa lub etykieta jakiegokolwiek **konkurencyjnego płatnego produktu lub usługi**, niezależnie od tego, czy pochodzą one z kodu AutoBrew
+- W sposób sugerujący poparcie, sponsorowanie, certyfikację lub powiązanie z Wydawcą
+
+Logo, grafiki ikon oraz tożsamość wizualna AutoBrew i DigitalFreedom nie mogą być ponownie wykorzystywane na produktach pochodnych bez naszej uprzedniej pisemnej zgody.
+
+### 4.3 Zastrzeżenie dotyczące funkcji płatnych
+
+Wydawca może w przyszłości publikować własnościowe funkcje płatne na podstawie odrębnej licencji (patrz [EULA](EULA.md) sekcja 1.3). Licencja MIT nie obejmuje tych własnościowych funkcji. Prawo do niezależnego opracowania porównywalnej funkcjonalności od podstaw pozostaje nienaruszone — ograniczenie dotyczy konkretnej implementacji wydawcy oraz użycia marki AutoBrew / DigitalFreedom w przypadku konkurencyjnych ofert płatnych.
 
 ---
 
-## 6. SKARGI DOTYCZĄCE ZNAKÓW TOWAROWYCH
+## 5. Zastrzeżenie
 
-Jeśli są Państwo właścicielem znaku towarowego i uważają, że aplikacja Wydawcy lub materiał używa Państwa znaku towarowego w sposób wykraczający poza nominatywne fair use lub w inny sposób narusza Państwa prawa, prosimy o kontakt:
+Wszystkie nazwy produktów i firm wymienione w AutoBrew, jego kodzie źródłowym i dokumentacji są własnością ich odpowiednich właścicieli znaków towarowych. Ich użycie nie sugeruje poparcia AutoBrew przez tych właścicieli ani odwrotnie.
 
-DigitalFreedom
-Marka Berger & Rosenstock GbR
+Jeśli są Państwo właścicielem znaku towarowego i uważają, że AutoBrew odwołuje się do Państwa znaku w sposób niezgodny z dozwolonym użytkiem nominatywnym, prosimy o kontakt pod powyższym adresem, a niezwłocznie zajmiemy się sprawą.
+
+---
+
+## 6. Kontakt
+
+Berger & Rosenstock GbR (działająca jako DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Niemcy
 E-mail: hello@digitalfreedom.co.za
 Strona internetowa: https://digitalfreedom.co.za
 
-Prosimy o podanie:
-
-- Identyfikacji danego znaku towarowego (numer rejestracji, jurysdykcja)
-- Identyfikacji domniemanego naruszającego użycia (konkretna aplikacja, strona lub materiał)
-- Opisu żądanego środka zaradczego
-- Państwa danych kontaktowych
-
-Wydawca rozpatrzy takie skargi w dobrej wierze i podejmie odpowiednie działania tam, gdzie jest to uzasadnione.
-
 ---
 
-## 7. AKTUALIZACJE
-
-Wydawca może od czasu do czasu aktualizować niniejsze Oświadczenie o znakach towarowych. Najbardziej aktualna wersja jest dostępna pod adresem:
-
-https://digitalfreedom.co.za/legal/trademark-disclaimer
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Wszelkie prawa zastrzeżone.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

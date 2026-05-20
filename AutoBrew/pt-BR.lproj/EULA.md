@@ -1,257 +1,173 @@
 # CONTRATO DE LICENÇA DE USUÁRIO FINAL (EULA)
 
-## Contrato de Licença Multiplataforma Global
+## AutoBrew
 
-**Data de Vigência:** Março de 2026
+**Data de Vigência:** Maio de 2026
+**Última Atualização:** Maio de 2026
 
-**Editor:**
-DigitalFreedom
-Uma marca da Berger & Rosenstock GbR
+Este Contrato de Licença de Usuário Final ("EULA", "Contrato") é um contrato jurídico entre você ("Usuário", "você") e o editor do AutoBrew, **Berger & Rosenstock GbR** atuando como **DigitalFreedom** ("Editor", "nós", "nosso").
+
+Ao instalar, copiar ou de qualquer forma usar o AutoBrew (o "Software"), você concorda em vincular-se aos termos deste EULA.
+
+---
+
+## 1. O SOFTWARE
+
+O AutoBrew é um utilitário de barra de menus para macOS que automatiza atualizações do Homebrew, permite navegar no catálogo de casks do Homebrew e gerencia snapshots de aplicativos. Ele é publicado sob a marca DigitalFreedom e licenciado a você nos termos abaixo.
+
+### 1.1 Modelo de licenciamento
+
+O AutoBrew é disponibilizado como **software livre e de código aberto** sob a Licença MIT. O texto integral da Licença MIT está reproduzido na Seção 6 e no documento [Licenças de Código Aberto](OpenSourceLicenses.md). A Licença MIT rege o código-fonte; este EULA rege a distribuição do binário e as suas obrigações como usuário do binário.
+
+### 1.2 Reserva quanto a funcionalidades pagas futuras
+
+O Editor reserva-se o direito de introduzir, a qualquer momento, **funcionalidades pagas**, **edições pagas** ou **serviços complementares pagos** opcionais. Quaisquer alterações futuras desse tipo:
+
+- Serão anunciadas com antecedência por meio da interface do aplicativo e das notas de versão oficiais
+- Aplicar-se-ão apenas para o futuro (isto é, a funcionalidade gratuita existente em uma versão já instalada permanece de uso gratuito)
+- Deixarão intacto o núcleo de código aberto sob a Licença MIT — o código-fonte em [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew) permanece disponível sob a mesma licença, independentemente de quaisquer adições pagas
+
+A ausência atual de qualquer funcionalidade paga não constitui garantia de que o AutoBrew permanecerá livre de funcionalidades pagas para sempre.
+
+### 1.3 Escopo do código aberto vs. funcionalidades pagas
+
+A Licença MIT aplica-se ao código-fonte do AutoBrew tal como publicado no repositório oficial em [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew). **Forks e derivados dessa base de código são expressamente permitidos** nos termos da Licença MIT — incentivamos a comunidade a construir sobre o AutoBrew.
+
+Quaisquer **funcionalidades pagas futuras**, **edições pagas** ou **serviços complementares pagos** (consulte a Seção 1.2) serão disponibilizados sob uma **licença proprietária separada** e **não** farão parte da base de código sob a Licença MIT. Em particular:
+
+- O código-fonte das funcionalidades pagas não será publicado no repositório MIT
+- Copiar, descompilar, fazer engenharia reversa ou de qualquer outra forma reproduzir a implementação de qualquer funcionalidade paga proprietária distribuída pelo AutoBrew não é permitido, salvo quando expressamente autorizado por lei imperativa aplicável (por exemplo, § 69e UrhG / Art. 6 da Diretiva 2009/24/CE da UE para fins de interoperabilidade)
+- Essa restrição aplica-se especificamente à implementação da funcionalidade paga — ela não restringe o direito de qualquer terceiro desenvolver, de forma independente e do zero, funcionalidade comparável
+
+As marcas **"AutoBrew"** e **"DigitalFreedom"** não podem ser utilizadas por forks ou derivados que ofereçam funcionalidades pagas concorrentes — consulte a Seção 3 deste EULA e o aviso [Marca](Trademark.md).
+
+### 1.4 Canais de distribuição
+
+O binário oficial do AutoBrew é distribuído exclusivamente por meio de:
+
+- **GitHub Releases** em [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases) — arquivos DMG notarizados e assinados com o certificado Apple Developer ID
+- O **tap do Homebrew** em [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) — `brew install --cask autobrew`
+
+O AutoBrew **não** é distribuído pela Apple App Store, pela Google Play Store ou por qualquer portal de download de terceiros. Se você obteve o AutoBrew por qualquer outro meio, o binário não é verificado e não está coberto por este EULA.
+
+---
+
+## 2. CONCESSÃO DA LICENÇA
+
+Sujeito ao cumprimento deste EULA e da Licença MIT, o Editor concede a você uma licença mundial, isenta de royalties e não exclusiva para:
+
+- Instalar e executar o AutoBrew em quantos Macs você possua ou controle
+- Modificar o código-fonte e criar trabalhos derivados
+- Redistribuir o Software em código-fonte ou em forma binária
+
+---
+
+## 3. RESTRIÇÕES
+
+Você não pode:
+
+- Remover, alterar ou ocultar os avisos de copyright, o texto da Licença MIT ou os avisos de licença incorporados de Sparkle / bsdiff / sais-lite / pdqsort ao redistribuir
+- Utilizar as marcas **"AutoBrew"** e **"DigitalFreedom"** no nome de um fork ou derivado sem nosso consentimento prévio por escrito (consulte o documento [Marca](Trademark.md))
+- Apresentar de forma indevida o seu fork como sendo a distribuição oficial do AutoBrew
+
+---
+
+## 4. COMPONENTES DE TERCEIROS
+
+O AutoBrew incorpora os seguintes componentes de código aberto, cada um regido pela sua respectiva licença (consulte o documento [Licenças de Código Aberto](OpenSourceLicenses.md) para a lista completa e os textos integrais das licenças):
+
+- **Sparkle** (MIT) — atualizações automáticas no aplicativo
+- **bsdiff / bspatch** (BSD-2-Clause) — incorporado dentro do Sparkle para deltas binários
+- **sais-lite** (MIT) — incorporado dentro do Sparkle
+- **pdqsort** (zlib) — incorporado dentro do Sparkle
+
+O AutoBrew também depende em tempo de execução do **Homebrew** (BSD-2-Clause) — invocado via spawn de processo, não incorporado. O Homebrew precisa ser instalado separadamente; o AutoBrew o guiará na sua instalação no primeiro lançamento.
+
+As licenças MIT, BSD-2-Clause e zlib aplicáveis a esses componentes permanecem em vigor independentemente deste EULA. Em caso de conflito entre este EULA e uma licença de código aberto, prevalece a licença de código aberto para o componente afetado.
+
+---
+
+## 5. SEM PAGAMENTO, SEM CONTA (ESTADO ATUAL)
+
+O AutoBrew é atualmente gratuito. O Software não exige cadastro, registro ou qualquer pagamento e, na data deste EULA, não há compras dentro do aplicativo, assinaturas, funcionalidades pagas nem mecânicas de avaliação.
+
+O link **Sponsor** dentro do AutoBrew direciona ao GitHub Sponsors e é **totalmente voluntário**. Qualquer contribuição é tratada como doação e não confere direitos adicionais.
+
+**Reserva:** consulte a Seção 1.2 — o Editor reserva-se o direito de introduzir, no futuro, funcionalidades pagas, edições pagas ou serviços complementares pagos opcionais. Quaisquer ofertas pagas futuras desse tipo aplicar-se-ão somente aos usuários que explicitamente optarem por elas; a funcionalidade gratuita atual que você instalou não será restringida retroativamente.
+
+---
+
+## 6. LICENÇA MIT (verbatim)
+
+```
+Copyright (c) 2026 Marcel R. G. Berger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+---
+
+## 7. ISENÇÃO DE GARANTIA
+
+O Software é fornecido **"COMO ESTÁ"**, sem garantia de qualquer tipo, expressa ou implícita. O Editor não garante que o Software será ininterrupto ou livre de erros, que a interação do AutoBrew com o Homebrew ou com casks individuais sempre terá êxito, ou que os snapshots capturarão perfeitamente todos os aspectos do estado de um aplicativo.
+
+Direitos legais de garantia que não possam ser excluídos por contrato segundo a legislação local de proteção do consumidor (por exemplo, a Mängelhaftung alemã nos §§ 434 e seguintes do BGB, quando aplicável, ou os direitos do consumidor previstos no Código de Defesa do Consumidor brasileiro) permanecem inalterados.
+
+---
+
+## 8. LIMITAÇÃO DE RESPONSABILIDADE
+
+Na máxima extensão permitida pela lei aplicável, o Editor não é responsável por danos indiretos, incidentais, consequenciais, exemplares ou punitivos — incluindo perda de dados, lucros cessantes ou danos decorrentes de software de terceiros (Homebrew, casks individuais) invocado pelo AutoBrew.
+
+Para usuários habitualmente residentes na Alemanha ou na UE, nossa responsabilidade por danos causados por **culpa grave ou dolo**, por **lesão à vida, ao corpo ou à saúde** e nos termos da **Lei Alemã de Responsabilidade pelo Produto (ProdHaftG)** permanece inalterada.
+
+---
+
+## 9. CONTROLE DE EXPORTAÇÃO
+
+O Software não contém criptografia além do que o macOS da Apple e o framework Sparkle fornecem por padrão. A exportação do próprio macOS é regida pelos termos da Apple; você continua responsável pelo cumprimento das leis de controle de exportação aplicáveis à sua jurisdição.
+
+---
+
+## 10. RESCISÃO
+
+Este EULA permanece em vigor até ser rescindido. Ele se rescinde automaticamente, sem aviso prévio, se você descumprir qualquer um dos seus termos. Você também pode rescindi-lo a qualquer momento desinstalando o AutoBrew. Após a rescisão, você deve cessar todo uso do Software e remover todas as cópias sob seu controle.
+
+---
+
+## 11. LEI APLICÁVEL E FORO
+
+Este EULA é regido pelas leis da República Federal da Alemanha, com exclusão da Convenção das Nações Unidas sobre Contratos de Compra e Venda Internacional de Mercadorias (CISG). A lei imperativa de proteção do consumidor do país de residência do usuário aplica-se adicionalmente.
+
+O foro não exclusivo é Bad Nauheim, Alemanha. Consumidores podem demandar no seu domicílio quando a lei local permitir.
+
+---
+
+## 12. CONTATO
+
+Berger & Rosenstock GbR (atuando como DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Alemanha
-Contato: hello@digitalfreedom.co.za
+E-mail: hello@digitalfreedom.co.za
 Site: https://digitalfreedom.co.za
 
 ---
 
-## 1. ACEITAÇÃO DOS TERMOS
-
-Ao instalar, acessar ou usar este aplicativo, software ou serviços relacionados ("o Aplicativo"), você concorda em ficar vinculado a este Contrato.
-
-Se você não concorda, não deve usar o Aplicativo.
-
----
-
-## 2. ESCOPO DE APLICAÇÃO
-
-Este Contrato aplica-se a todos os canais de distribuição, incluindo, mas não se limitando a:
-
-- Distribuição direta pela DigitalFreedom (download / Sparkle para atualizações automáticas)
-- GitHub ou outros repositórios de código-fonte
-- Homebrew ou outros gerenciadores de pacotes
-- Downloads diretos ou distribuição empresarial
-
-O Aplicativo pode ser fornecido como software gratuito, pago, de código aberto ou híbrido. **O AutoBrew é distribuído gratuitamente como software de código aberto sob a licença MIT.**
-
-### 2.1 Escopo global
-
-O Aplicativo é distribuído diretamente pela DigitalFreedom para macOS e está disponível para usuários em todo o mundo. Este Contrato aplica-se globalmente a todos os usuários, independentemente do país em que o Aplicativo é baixado, instalado ou utilizado. O Editor adota o Regulamento Geral de Proteção de Dados da União Europeia (GDPR) e a legislação europeia conexa como padrão de referência e o aplica como piso global; os direitos obrigatórios de proteção ao consumidor e outros direitos estatutários conferidos pelo país de residência do usuário permanecem inalterados e prevalecem sempre que forem mais protetivos.
-
----
-
-## 3. CONCESSÃO DE LICENÇA
-
-Sujeito a este Contrato, o Editor concede a você uma licença limitada, não exclusiva, intransferível e revogável para:
-
-- Usar o Aplicativo em dispositivos macOS de sua propriedade ou controle
-- Acessar e usar funcionalidades de acordo com a finalidade pretendida
-
-Para componentes de código aberto, prevalecem as respectivas licenças de código aberto. **Para o AutoBrew, o próprio código-fonte do aplicativo é disponibilizado sob a licença MIT, que concede direitos amplos para uso, modificação e redistribuição. Este Contrato não restringe os direitos que a licença MIT confere a você sobre o código.**
-
----
-
-## 4. COMPONENTES DE CÓDIGO ABERTO
-
-O Aplicativo pode incluir software de código aberto. **O próprio AutoBrew é software de código aberto sob a licença MIT.**
-
-- Tais componentes são regidos pelas suas respectivas licenças
-- Este Contrato não substitui nem restringe os direitos concedidos pelas licenças de código aberto
-- Uma lista de componentes de código aberto é fornecida no documento [Open Source Notices](OpenSourceLicenses.md)
-
-Você é responsável pelo cumprimento das licenças de código aberto aplicáveis.
-
----
-
-## 5. RESTRIÇÕES
-
-Você não pode:
-
-- Fazer engenharia reversa ou descompilar partes do Aplicativo cuja licença não permita, exceto quando permitido por lei
-- Contornar mecanismos de segurança ou de controle de acesso
-- Usar o Aplicativo de forma ilegal ou em violação de direitos de terceiros
-- Redistribuir componentes proprietários fora do escopo permitido
-
-A licença MIT do AutoBrew expressamente autoriza o uso, a modificação e a redistribuição do código-fonte conforme seus próprios termos; nada nesta Seção restringe esses direitos para os componentes cobertos pela licença MIT.
-
----
-
-## 6. TERMOS COMERCIAIS
-
-O Aplicativo pode ser oferecido:
-
-- Gratuitamente
-- Como compra única
-- Como assinatura
-
-**O AutoBrew é oferecido gratuitamente.** Não há compras dentro do aplicativo, não há níveis pagos e não há assinaturas. A DigitalFreedom mantém uma página de GitHub Sponsors para apoio voluntário ao desenvolvimento; patrocinar é totalmente opcional e não desbloqueia recursos.
-
-Quaisquer pagamentos em outros aplicativos do Editor podem ser processados por plataformas terceiras (por exemplo, Apple, Google) ou diretamente. Reembolsos e faturamento estão sujeitos aos termos da respectiva plataforma ou à lei aplicável.
-
----
-
-## 7. RESPONSABILIDADE DO USUÁRIO
-
-Você é o único responsável por:
-
-- Todas as atividades realizadas usando o Aplicativo
-- Todos os dados processados, armazenados ou transmitidos
-- O cumprimento das leis e regulamentações aplicáveis
-- A configuração do Homebrew e dos pacotes instalados em seu Mac
-
-O uso do Aplicativo pode resultar em ações não intencionais, incluindo modificação ou exclusão de pacotes do Homebrew. Recomenda-se fortemente manter backups independentes de configurações críticas.
-
----
-
-## 8. DADOS E PRIVACIDADE
-
-O AutoBrew opera inteiramente no seu Mac. **Nenhum dado pessoal é enviado aos servidores do Editor.**
-
-Salvo declaração expressa em contrário:
-
-- Os dados são armazenados localmente no seu Mac
-- O Editor não garante a segurança ou a integridade dos dados em seu dispositivo
-- Você é responsável por backups
-
-Uma [Política de Privacidade](PrivacyPolicy.md) separada rege o tratamento de dados.
-
----
-
-## 9. SERVIÇOS DE TERCEIROS
-
-O Aplicativo pode interagir com serviços de terceiros (por exemplo, Homebrew, GitHub Sponsors).
-
-O Editor:
-
-- Não controla serviços de terceiros
-- Não é responsável pela sua disponibilidade ou comportamento
-- Não é responsável por danos causados por tais serviços
-
-O uso de serviços de terceiros está sujeito aos termos desses serviços.
-
----
-
-## 10. ISENÇÃO DE GARANTIAS
-
-NA MÁXIMA EXTENSÃO PERMITIDA POR LEI, O APLICATIVO É FORNECIDO "NO ESTADO EM QUE SE ENCONTRA", SEM GARANTIAS DE QUALQUER TIPO.
-
-Isso inclui, mas não se limita a:
-
-- COMERCIABILIDADE
-- ADEQUAÇÃO A UM FIM ESPECÍFICO
-- PRECISÃO OU CONFIABILIDADE
-- SEGURANÇA OU DISPONIBILIDADE
-
----
-
-## 11. LIMITAÇÃO DE RESPONSABILIDADE
-
-NA MÁXIMA EXTENSÃO PERMITIDA POR LEI, O EDITOR NÃO SERÁ RESPONSÁVEL POR:
-
-- DANOS INDIRETOS OU CONSEQUENTES
-- PERDA DE DADOS, LUCROS OU NEGÓCIOS
-- FALHAS DE SISTEMA OU INCIDENTES DE SEGURANÇA
-
-A RESPONSABILIDADE TOTAL NÃO EXCEDERÁ O VALOR PAGO PELO APLICATIVO (SE HOUVER). COMO O AUTOBREW É GRATUITO, O VALOR PAGO É TIPICAMENTE ZERO.
-
----
-
-## 12. USO DE ALTO RISCO
-
-O Aplicativo não é destinado para uso em:
-
-- Sistemas críticos para segurança
-- Aplicações médicas
-- Sistemas de negociação financeira
-- Infraestrutura crítica
-
-O uso em tais contextos é por sua conta e risco.
-
----
-
-## 13. INDENIZAÇÃO
-
-Você concorda em indenizar o Editor contra reclamações decorrentes de:
-
-- Seu uso do Aplicativo
-- Violação deste Contrato
-- Violação da lei aplicável
-
----
-
-## 14. RESCISÃO
-
-O Editor pode rescindir este Contrato a qualquer momento.
-
-Após a rescisão, você deve cessar o uso e excluir todas as cópias do Aplicativo. A licença MIT aplicada ao código-fonte do AutoBrew permanece em vigor conforme seus próprios termos.
-
----
-
-## 15. EXPORTAÇÃO E SANÇÕES
-
-Você concorda em cumprir todas as leis aplicáveis de controle de exportação e sanções.
-
----
-
-## 16. LEI APLICÁVEL
-
-Este Contrato é regido pela lei alemã.
-
-As leis obrigatórias de proteção ao consumidor de seu país de residência permanecem inalteradas.
-
----
-
-## 17. DISPOSIÇÕES REGIONAIS
-
-### 17.1 União Europeia
-
-- Os direitos obrigatórios do consumidor (incluindo direitos de garantia) não são excluídos
-- As exclusões de responsabilidade aplicam-se apenas na medida permitida pela legislação da UE
-
-### 17.2 Estados Unidos
-
-- Alguns estados não permitem a limitação de certas garantias ou responsabilidades
-- Nesses casos, as limitações aplicam-se na máxima extensão permitida
-
-### 17.3 Reino Unido
-
-- Nada exclui a responsabilidade por morte ou lesão pessoal causada por negligência
-- As proteções do Consumer Rights Act permanecem inalteradas
-
-### 17.4 Canadá
-
-- As leis de proteção ao consumidor variam por província e podem prevalecer sobre partes deste Contrato
-
-### 17.5 Austrália
-
-- As garantias estatutárias da Australian Consumer Law aplicam-se e não podem ser excluídas
-
-### 17.6 Brasil
-
-- Aplica-se o Código de Defesa do Consumidor (CDC, Lei nº 8.078/1990)
-- Aplica-se a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018)
-- Os direitos do consumidor não podem ser renunciados
-
-### 17.7 Outras Jurisdições
-
-- Quando a lei local restringir disposições deste Contrato, essas disposições aplicam-se apenas na medida permitida
-
----
-
-## 18. SEPARABILIDADE
-
-Se qualquer disposição for inválida, o restante permanece em vigor.
-
----
-
-## 19. ACORDO INTEGRAL
-
-Este Contrato, juntamente com a [Política de Privacidade](PrivacyPolicy.md), os [Termos de Uso](TermsOfUse.md), o [Disclaimer de Marcas Registradas](Trademark.md) e os [Avisos de Código Aberto](OpenSourceLicenses.md), constitui o acordo integral entre você e o Editor.
-
----
-
-**AO USAR O APLICATIVO, VOCÊ CONCORDA COM ESTE CONTRATO.**
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Todos os direitos reservados.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

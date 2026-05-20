@@ -1,106 +1,98 @@
-# DISCLAIMER DE MARCAS REGISTRADAS
+# AVISO DE MARCAS REGISTRADAS
 
-## Para Aplicativos que Referenciam Marcas Registradas ou Programas de Terceiros
+## AutoBrew
 
-**Data de Vigência:** Maio de 2026
+**Última Atualização:** Maio de 2026
 
 **Editor:**
-DigitalFreedom
-Uma marca da Berger & Rosenstock GbR
-Dieselstr. 22e
-61231 Bad Nauheim
-Alemanha
-Contato: hello@digitalfreedom.co.za
+Berger & Rosenstock GbR (atuando como DigitalFreedom)
+Dieselstr. 22e, 61231 Bad Nauheim, Alemanha
+E-mail: hello@digitalfreedom.co.za
 Site: https://digitalfreedom.co.za
 
 ---
 
-## 1. FINALIDADE E ESCOPO
+## 1. Finalidade
 
-Este documento esclarece a relação entre os aplicativos publicados pelo Editor e quaisquer marcas registradas, nomes de marca, programas ou metodologias de terceiros referenciados nesses aplicativos, materiais de marketing ou documentação de apoio. Aplica-se especificamente ao AutoBrew, que faz referência ao Homebrew e ao macOS de forma nominativa para descrever sua funcionalidade.
+Este documento esclarece a relação entre o **AutoBrew** e as marcas registradas, nomes comerciais e softwares de terceiros referenciados no aplicativo, em seu código-fonte e em sua documentação.
 
-Os aplicativos do Editor são distribuídos diretamente pela DigitalFreedom para macOS e estão disponíveis em todo o mundo. Este Disclaimer aplica-se globalmente. O Editor aplica a legislação de marcas registradas da UE (Regulamento (UE) 2017/1001 sobre a marca da UE e Directiva (UE) 2015/2436) e a doutrina do uso nominativo justo como padrão de referência e adicionalmente observa as regras de marcas registradas e de uso justo de cada jurisdição em que os aplicativos são disponibilizados.
+O AutoBrew é distribuído exclusivamente pelo tap do Homebrew em [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) e pela página de GitHub Releases em [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases). Ele não é afiliado à Apple App Store, à Google Play Store ou a qualquer portal de download de terceiros.
 
----
-
-## 2. USO NOMINATIVO JUSTO
-
-As referências a marcas registradas, nomes de marca, programas ou metodologias de terceiros nos aplicativos e materiais do Editor são feitas sob a doutrina do **uso nominativo justo** (ou doutrinas comparáveis sob a legislação aplicável de marcas registradas).
-
-Tais referências têm por objetivo:
-
-- Identificar com precisão o programa, metodologia ou produto de terceiros
-- Fornecer contexto ao usuário sobre compatibilidade, suporte ou aplicabilidade
-- Permitir descrições factuais de recursos e funções
-
-As referências **não** implicam:
-
-- Endosso do aplicativo do Editor pelo titular da marca
-- Afiliação entre o Editor e o titular da marca
-- Patrocínio do aplicativo do Editor pelo titular da marca
-- Autorização, certificação ou aprovação pelo titular da marca
-
-Especificamente para o AutoBrew: "Homebrew" é uma marca de seus respectivos detentores, e "macOS" é uma marca registrada da Apple Inc. O AutoBrew é uma ferramenta independente que automatiza operações do Homebrew. O AutoBrew **não** é afiliado, endossado, patrocinado ou aprovado pelos mantenedores do Homebrew ou pela Apple Inc.
+O Editor aplica o direito de marcas da UE (Regulamento (UE) 2017/1001 e Diretiva (UE) 2015/2436) e a doutrina do uso nominativo justo como padrão de referência e observa adicionalmente as regras de marcas e de uso justo de cada jurisdição em que o AutoBrew é baixado.
 
 ---
 
-## 3. PROPRIEDADE DAS MARCAS REGISTRADAS
+## 2. Uso Nominativo Justo
 
-Todas as marcas registradas, marcas registradas inscritas, marcas de serviço, nomes de marca e nomes comerciais referenciados nos aplicativos ou materiais do Editor são propriedade de seus respectivos titulares.
-
-O Editor não reivindica propriedade sobre tal propriedade intelectual de terceiros e os utiliza apenas para os fins descritos na Seção 2.
-
-Atribuições específicas de marcas registradas para aplicativos individuais são fornecidas na documentação do aplicativo, em divulgações dentro do aplicativo ou em materiais de marketing.
+As referências a marcas registradas, nomes comerciais e softwares de terceiros dentro do AutoBrew e dos seus materiais são feitas com base na doutrina do **uso nominativo justo** (ou doutrinas comparáveis previstas na legislação aplicável de marcas). Tais referências identificam e descrevem os produtos de terceiros com os quais o AutoBrew interopera e não implicam endosso, patrocínio, afiliação ou parceria.
 
 ---
 
-## 4. DESENVOLVIMENTO INDEPENDENTE
+## 3. Atribuições Específicas de Marcas no AutoBrew
 
-Os aplicativos publicados pelo Editor são desenvolvidos de forma independente.
+### 3.1 Homebrew
 
-- Os aplicativos do Editor não são afiliados, endossados, patrocinados ou aprovados por qualquer titular de marca registrada de terceiros, salvo quando expressamente declarado por escrito
-- A similaridade funcional entre um aplicativo e um programa de terceiros não implica licenciamento ou parceria
-- A compatibilidade com uma metodologia de terceiros não implica certificação ou credenciamento
+Os nomes **Homebrew** e **brew** e os logotipos relacionados são marcas comerciais ou marcas registradas dos respectivos titulares, principalmente o projeto Homebrew ([brew.sh](https://brew.sh)). O AutoBrew automatiza e visualiza operações do Homebrew e utiliza esses nomes apenas para identificar a ferramenta subjacente. O AutoBrew não é afiliado, endossado ou patrocinado pelo projeto Homebrew.
 
-O AutoBrew foi desenvolvido independentemente como uma ferramenta de menu bar para macOS para automatizar operações do Homebrew. Não é um produto oficial dos mantenedores do Homebrew, nem um produto oficial da Apple.
+### 3.2 Apple, macOS, App Store
+
+**Apple**, **macOS**, **App Store**, **iTunes**, **TestFlight**, as ferramentas de assinatura de código do **Sparkle** e demais marcas da Apple são marcas registradas da Apple Inc. O AutoBrew é executado no macOS e assina seus binários com o programa Apple Developer ID, conforme exigido para distribuição direta. O AutoBrew não é afiliado à Apple Inc.
+
+### 3.3 GitHub
+
+**GitHub**, **GitHub Releases** e **GitHub Sponsors** são marcas registradas da GitHub, Inc. O AutoBrew é hospedado no GitHub e utiliza o GitHub Sponsors como seu único canal opcional de doação. O AutoBrew não é afiliado à GitHub, Inc.
+
+### 3.4 Sparkle
+
+**Sparkle** é o framework de atualização de código aberto utilizado dentro do AutoBrew. O nome e o logotipo do Sparkle pertencem ao projeto Sparkle ([sparkle-project.org](https://sparkle-project.org/)). O AutoBrew vincula o Sparkle como dependência SwiftPM nos termos da sua licença MIT (consulte [Licenças de Código Aberto](OpenSourceLicenses.md), Seção 2.1).
+
+### 3.5 Publicadores de casks
+
+A BrewStore dentro do AutoBrew lista casks do catálogo público do Homebrew. Cada nome de cask individual (por exemplo, "Firefox", "Visual Studio Code", "Docker", "Slack"), cada ícone de aplicativo e cada captura de tela pertence ao seu respectivo publicador. O AutoBrew referencia esses nomes e ícones apenas para ajudá-lo a identificar o software que você pode optar por instalar via Homebrew; ele não hospeda, não distribui e não modifica esses binários.
 
 ---
 
-## 5. DIREITOS RESERVADOS
+## 4. Marcas AutoBrew e DigitalFreedom
 
-Os titulares de marcas registradas retêm todos os direitos sobre suas marcas. O uso nominativo justo pelo Editor não transfere, licencia ou concede quaisquer direitos sobre as marcas de terceiros.
+**AutoBrew** e **DigitalFreedom** são marcas não registradas da Berger & Rosenstock GbR.
+
+### 4.1 Forks de código aberto são bem-vindos
+
+O código-fonte do AutoBrew é licenciado sob a Licença MIT e os forks no GitHub são expressamente permitidos. Você pode referir-se ao AutoBrew de forma descritiva no README do seu fork, nas notas de versão ou no nome do repositório (por exemplo, "fork do AutoBrew", "baseado no AutoBrew") com base na doutrina do uso nominativo justo.
+
+### 4.2 Restrições às marcas AutoBrew / DigitalFreedom
+
+O uso das marcas **AutoBrew** e **DigitalFreedom** **não** é permitido:
+
+- Como **nome de produto** de um fork ou derivado (por exemplo, você não pode chamar o seu fork de "AutoBrew Pro", "AutoBrew+", "DigitalFreedom Brew" etc.)
+- Como nome ou rótulo de qualquer **produto ou serviço pago concorrente**, derivado ou não do código do AutoBrew
+- De forma que sugira endosso, patrocínio, certificação ou afiliação por parte do Editor
+
+Logotipos, ícones e a identidade visual do AutoBrew e do DigitalFreedom não podem ser reutilizados em produtos derivados sem nosso consentimento prévio por escrito.
+
+### 4.3 Reserva quanto a funcionalidades pagas
+
+O Editor poderá, no futuro, publicar funcionalidades pagas proprietárias sob uma licença separada (consulte o [EULA](EULA.md), Seção 1.3). A Licença MIT não se estende a essas funcionalidades proprietárias. O direito de desenvolver, de forma independente e do zero, funcionalidade comparável permanece inalterado — a restrição aplica-se à implementação específica do editor e ao uso da marca AutoBrew / DigitalFreedom para ofertas pagas concorrentes.
 
 ---
 
-## 6. RECLAMAÇÕES SOBRE MARCAS REGISTRADAS
+## 5. Disclaimer
 
-Se você é titular de uma marca registrada e acredita que um aplicativo ou material do Editor usa sua marca de forma que excede o uso nominativo justo ou de outra forma infringe seus direitos, entre em contato:
+Todos os nomes de produtos e de empresas mencionados no AutoBrew, em seu código-fonte e em sua documentação são propriedade dos respectivos titulares das marcas. Sua utilização não implica endosso do AutoBrew por esses titulares, nem vice-versa.
 
-DigitalFreedom
-Uma marca da Berger & Rosenstock GbR
+Se você é titular de uma marca e considera que o AutoBrew faz referência à sua marca de forma incompatível com o uso nominativo justo, entre em contato pelo endereço acima e trataremos do assunto prontamente.
+
+---
+
+## 6. Contato
+
+Berger & Rosenstock GbR (atuando como DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Alemanha
 E-mail: hello@digitalfreedom.co.za
 Site: https://digitalfreedom.co.za
 
-Por favor, inclua:
-
-- Identificação da marca registrada em questão (número de registro, jurisdição)
-- Identificação do uso supostamente infrator (aplicativo, página ou material específico)
-- Descrição da medida solicitada
-- Suas informações de contato
-
-O Editor analisará tais reclamações de boa-fé e tomará as medidas apropriadas quando justificado.
-
 ---
 
-## 7. ATUALIZAÇÕES
-
-O Editor pode atualizar este Disclaimer de Marcas Registradas periodicamente. A versão mais atual está disponível em:
-
-https://digitalfreedom.co.za/legal/trademark-disclaimer
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Todos os direitos reservados.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

@@ -1,110 +1,98 @@
 # DISCLAIMER HANDELSMERKEN
 
-## Voor applicaties die verwijzen naar handelsmerken of programma's van derden
+## AutoBrew
 
-**Ingangsdatum:** mei 2026
+**Laatst bijgewerkt:** mei 2026
 
 **Uitgever:**
-DigitalFreedom
-Een merk van Berger & Rosenstock GbR
-Dieselstr. 22e
-61231 Bad Nauheim
-Duitsland
-Contact: hello@digitalfreedom.co.za
+Berger & Rosenstock GbR (handelend onder de naam DigitalFreedom)
+Dieselstr. 22e, 61231 Bad Nauheim, Duitsland
+E-mail: hello@digitalfreedom.co.za
 Website: https://digitalfreedom.co.za
 
 ---
 
-## 1. DOEL EN TOEPASSINGSGEBIED
+## 1. Doel
 
-Dit document verduidelijkt de relatie tussen applicaties die door de Uitgever worden gepubliceerd en handelsmerken, merknamen, programma's of methodologieën van derden waarnaar binnen die applicaties, marketingmateriaal of bijbehorende documentatie wordt verwezen.
+Dit document verduidelijkt de verhouding tussen **AutoBrew** en de handelsmerken, merknamen en software van derden waarnaar wordt verwezen in de applicatie, de broncode en de documentatie.
 
-AutoBrew is een open-source macOS-applicatie die rechtstreeks wordt gedistribueerd vanaf onze website en GitHub. Deze Disclaimer geldt wereldwijd. De Uitgever past het EU-merkenrecht (Verordening (EU) 2017/1001 betreffende het Uniemerk en Richtlijn (EU) 2015/2436) en de leer van het nominatieve fair use toe als basisstandaard, en neemt aanvullend de merken- en fair-useregels in acht van elk rechtsgebied waarin de applicaties beschikbaar worden gesteld.
+AutoBrew wordt uitsluitend verspreid via de Homebrew-tap [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) en via de GitHub Releases-pagina op [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases). Er is geen sprake van een band met de Apple App Store, de Google Play Store of enig downloadportaal van derden.
 
----
-
-## 2. NOMINATIEF FAIR USE
-
-Verwijzingen naar handelsmerken, merknamen, programma's of methodologieën van derden binnen de applicaties en het materiaal van de Uitgever (waaronder verwijzingen naar "Homebrew" en "macOS") vallen onder de leer van het **nominatief fair use** (of vergelijkbare leerstukken op grond van het toepasselijke merkenrecht).
-
-Dergelijke verwijzingen zijn bedoeld om:
-
-- Het programma, de methodologie of het product van een derde nauwkeurig te identificeren
-- Context te bieden aan de gebruiker over compatibiliteit, ondersteuning of toepasselijkheid
-- Feitelijke beschrijvingen van functies en eigenschappen mogelijk te maken
-
-Verwijzingen impliceren **niet**:
-
-- Onderschrijving van de app van de Uitgever door de merkeigenaar
-- Verbondenheid tussen de Uitgever en de merkeigenaar
-- Sponsoring van de app van de Uitgever door de merkeigenaar
-- Autorisatie, certificering of goedkeuring door de merkeigenaar
+De Uitgever hanteert het EU-merkenrecht (Verordening (EU) 2017/1001 en Richtlijn (EU) 2015/2436) en de leer van het nominatieve fair use als basisnorm, en neemt daarnaast de regels inzake handelsmerken en fair use in acht in elk rechtsgebied waar AutoBrew wordt gedownload.
 
 ---
 
-## 3. EIGENDOM VAN HANDELSMERKEN
+## 2. Nominatief fair use
 
-Alle handelsmerken, geregistreerde handelsmerken, dienstmerken, merknamen en handelsnamen waarnaar in de applicaties of het materiaal van de Uitgever wordt verwezen, zijn eigendom van hun respectieve eigenaren.
-
-In het bijzonder:
-
-- "Homebrew" is een handelsmerk van het Homebrew-project en zijn medewerkers
-- "macOS", "Mac", "Apple" en gerelateerde tekens zijn handelsmerken van Apple Inc.
-- "GitHub" is een handelsmerk van GitHub, Inc.
-- "Sparkle" is een open-sourceproject van zijn respectieve auteurs
-
-De Uitgever maakt geen aanspraak op enig eigendom op dergelijke intellectuele eigendom van derden en gebruikt deze uitsluitend voor de in paragraaf 2 beschreven doeleinden.
-
-Specifieke handelsmerkvermeldingen voor afzonderlijke applicaties worden verstrekt in de documentatie, in-app openbaarmakingen of marketingmaterialen van de betreffende applicatie.
+Verwijzingen naar handelsmerken, merknamen en software van derden in AutoBrew en het bijbehorende materiaal worden gedaan onder de leer van **nominatief fair use** (of vergelijkbare leerstukken onder het toepasselijke merkenrecht). Dergelijke verwijzingen identificeren en beschrijven de producten van derden waarmee AutoBrew samenwerkt en impliceren geen goedkeuring, sponsoring, gelieerdheid of partnerschap.
 
 ---
 
-## 4. ONAFHANKELIJKE ONTWIKKELING
+## 3. Specifieke handelsmerkattributies voor AutoBrew
 
-Applicaties die door de Uitgever worden gepubliceerd, worden onafhankelijk ontwikkeld.
+### 3.1 Homebrew
 
-- De applicaties van de Uitgever zijn niet verbonden aan, onderschreven door, gesponsord door of goedgekeurd door enige merkeigenaar van een derde, tenzij dit uitdrukkelijk schriftelijk is vermeld
-- AutoBrew is geen officieel Homebrew-product en wordt niet onderschreven door het Homebrew-project
-- Functionele gelijkenis tussen een applicatie en een programma van een derde impliceert geen licentie of partnerschap
-- Compatibiliteit met een methodologie van een derde impliceert geen certificering of accreditatie
+De namen **Homebrew** en **brew** en de bijbehorende logo's zijn handelsmerken of geregistreerde handelsmerken van hun respectieve eigenaren, in het bijzonder het Homebrew-project ([brew.sh](https://brew.sh)). AutoBrew automatiseert en visualiseert Homebrew-bewerkingen en gebruikt deze namen uitsluitend om het onderliggende hulpmiddel te identificeren. AutoBrew is niet gelieerd aan, onderschreven door of gesponsord door het Homebrew-project.
+
+### 3.2 Apple, macOS, App Store
+
+**Apple**, **macOS**, **App Store**, **iTunes**, **TestFlight**, de code-signing-tooling van **Sparkle** en overige Apple-merken zijn handelsmerken van Apple Inc. AutoBrew draait op macOS en ondertekent zijn binairs met het Apple Developer ID-programma zoals vereist voor directe distributie. AutoBrew is niet gelieerd aan Apple Inc.
+
+### 3.3 GitHub
+
+**GitHub**, **GitHub Releases** en **GitHub Sponsors** zijn handelsmerken van GitHub, Inc. AutoBrew wordt op GitHub gehost en gebruikt GitHub Sponsors als enig optioneel donatiekanaal. AutoBrew is niet gelieerd aan GitHub, Inc.
+
+### 3.4 Sparkle
+
+**Sparkle** is het open-source-updateframework dat binnen AutoBrew wordt gebruikt. De naam en het logo Sparkle behoren toe aan het Sparkle-project ([sparkle-project.org](https://sparkle-project.org/)). AutoBrew koppelt Sparkle als SwiftPM-afhankelijkheid onder de MIT-licentie van Sparkle (zie [Open-source-licenties](OpenSourceLicenses.md) paragraaf 2.1).
+
+### 3.5 Cask-uitgevers
+
+De BrewStore in AutoBrew toont casks uit de openbare Homebrew-catalogus. Elke afzonderlijke cask-naam (bijvoorbeeld "Firefox", "Visual Studio Code", "Docker", "Slack"), elk app-icoon en elke schermafbeelding behoort toe aan de respectieve uitgever. AutoBrew verwijst uitsluitend naar deze namen en iconen om u te helpen de software te identificeren die u eventueel via Homebrew wenst te installeren; AutoBrew host, distribueert of wijzigt die binairs niet.
 
 ---
 
-## 5. VOORBEHOUDEN RECHTEN
+## 4. Merken AutoBrew en DigitalFreedom
 
-Merkeigenaren behouden alle rechten op hun handelsmerken. Het nominatieve fair use door de Uitgever draagt geen rechten over op de handelsmerken van derden, verleent geen licentie en verleent geen andere rechten daarop.
+**AutoBrew** en **DigitalFreedom** zijn niet-geregistreerde merken van Berger & Rosenstock GbR.
+
+### 4.1 Open-source-forks zijn welkom
+
+De broncode van AutoBrew is gelicentieerd onder de MIT-licentie en forks op GitHub zijn uitdrukkelijk toegestaan. U mag in de README van uw fork, in de releasenotes of in de naam van de repository descriptief naar AutoBrew verwijzen (bijvoorbeeld "fork of AutoBrew", "based on AutoBrew") onder de leer van het nominatieve fair use.
+
+### 4.2 Beperkingen op het merk AutoBrew / DigitalFreedom
+
+Het gebruik van de merken **AutoBrew** en **DigitalFreedom** is **niet** toegestaan:
+
+- Als **productnaam** van een fork of afgeleid werk (u mag uw fork bijvoorbeeld niet "AutoBrew Pro", "AutoBrew+", "DigitalFreedom Brew" enz. noemen)
+- Als naam of label voor een **concurrerend betaald product of dienst**, ongeacht of het afgeleid is van de AutoBrew-code
+- Op een wijze die goedkeuring, sponsoring, certificering of gelieerdheid door de Uitgever suggereert
+
+Logo's, icoonafbeeldingen en de visuele identiteit van AutoBrew en DigitalFreedom mogen niet zonder onze voorafgaande schriftelijke toestemming op afgeleide producten worden hergebruikt.
+
+### 4.3 Voorbehoud ten aanzien van betaalde functies
+
+De Uitgever kan in de toekomst proprietary betaalde functies onder een afzonderlijke licentie publiceren (zie [EULA](EULA.md) paragraaf 1.3). De MIT-licentie strekt zich niet uit tot die proprietary functies. Het recht om vergelijkbare functionaliteit zelfstandig en vanaf nul te ontwikkelen blijft onverlet — de beperking ziet op de specifieke implementatie van de uitgever en op het gebruik van het merk AutoBrew / DigitalFreedom voor concurrerende betaalde aanbiedingen.
 
 ---
 
-## 6. KLACHTEN OVER HANDELSMERKEN
+## 5. Disclaimer
 
-Indien u merkeigenaar bent en van mening bent dat een applicatie of materiaal van de Uitgever uw handelsmerk op een wijze gebruikt die het nominatieve fair use te buiten gaat of anderszins inbreuk maakt op uw rechten, neem dan contact op met:
+Alle product- en bedrijfsnamen die in AutoBrew, in de broncode en in de documentatie worden vermeld, zijn eigendom van hun respectieve merkhouders. Het gebruik ervan impliceert geen goedkeuring van AutoBrew door die houders of omgekeerd.
 
-DigitalFreedom
-Een merk van Berger & Rosenstock GbR
+Indien u merkhouder bent en van mening bent dat AutoBrew op een wijze naar uw merk verwijst die niet strookt met het nominatieve fair use, gelieve dan contact met ons op te nemen via het bovenstaande adres; wij zullen de zaak voortvarend behandelen.
+
+---
+
+## 6. Contact
+
+Berger & Rosenstock GbR (handelend onder de naam DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Duitsland
 E-mail: hello@digitalfreedom.co.za
 Website: https://digitalfreedom.co.za
 
-Vermeld daarbij:
-
-- Identificatie van het betreffende handelsmerk (registratienummer, rechtsgebied)
-- Identificatie van het vermeende inbreukmakende gebruik (specifieke applicatie, pagina of materiaal)
-- Beschrijving van de gevraagde remedie
-- Uw contactgegevens
-
-De Uitgever zal dergelijke klachten te goeder trouw beoordelen en passende maatregelen treffen waar gerechtvaardigd.
-
 ---
 
-## 7. UPDATES
-
-De Uitgever kan deze Disclaimer Handelsmerken van tijd tot tijd bijwerken. De meest actuele versie is beschikbaar op:
-
-https://digitalfreedom.co.za/legal/trademark-disclaimer
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Alle rechten voorbehouden.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

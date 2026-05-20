@@ -41,7 +41,7 @@ Any **future paid features**, **paid editions**, or **paid add-on services** (se
 
 The trademarks **"AutoBrew"** and **"DigitalFreedom"** may not be used by forks or derivatives that offer competing paid features — see Section 3 of this EULA and the [Trademark](Trademark.md) disclaimer.
 
-### 1.2 Distribution channels
+### 1.4 Distribution channels
 
 The official AutoBrew binary is distributed exclusively through:
 

@@ -1,246 +1,173 @@
 # EINDGEBRUIKERSLICENTIEOVEREENKOMST (EULA)
 
-## Wereldwijde licentieovereenkomst voor meerdere platforms
+## AutoBrew
 
-**Ingangsdatum:** maart 2026
+**Ingangsdatum:** mei 2026
+**Laatst bijgewerkt:** mei 2026
 
-**Uitgever:**
-DigitalFreedom
-Een merk van Berger & Rosenstock GbR
+Deze Eindgebruikerslicentieovereenkomst ("EULA", "Overeenkomst") is een juridisch contract tussen u ("Gebruiker", "u") en de uitgever van AutoBrew, **Berger & Rosenstock GbR**, handelend onder de naam **DigitalFreedom** ("Uitgever", "wij", "ons", "onze").
+
+Door AutoBrew (de "Software") te installeren, te kopiëren of anderszins te gebruiken, verbindt u zich aan de voorwaarden van deze EULA.
+
+---
+
+## 1. DE SOFTWARE
+
+AutoBrew is een macOS-menubalkhulpprogramma dat Homebrew-updates automatiseert, door de Homebrew-cask-catalogus bladert en app-snapshots beheert. De Software wordt uitgegeven onder het merk DigitalFreedom en aan u in licentie gegeven onder onderstaande voorwaarden.
+
+### 1.1 Licentiemodel
+
+AutoBrew wordt uitgebracht als **gratis open-source-software** onder de MIT-licentie. De volledige tekst van de MIT-licentie is overgenomen in paragraaf 6 en in het document [Open-source-licenties](OpenSourceLicenses.md). De MIT-licentie regelt de broncode; deze EULA regelt de binaire distributie en uw verplichtingen als gebruiker van het binair.
+
+### 1.2 Voorbehoud ten aanzien van toekomstige betaalde functies
+
+De Uitgever behoudt zich het recht voor om op elk moment optionele **betaalde functies**, **betaalde edities** of **betaalde aanvullende diensten** te introduceren. Dergelijke toekomstige wijzigingen zullen:
+
+- Vooraf worden aangekondigd via de applicatie-UI en de officiële releasenotes
+- Uitsluitend voorwaarts werken (d.w.z. bestaande gratis functionaliteit van een versie die u al heeft geïnstalleerd, blijft gratis te gebruiken)
+- De open-source-kern onder de MIT-licentie intact laten — de broncode op [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew) blijft beschikbaar onder dezelfde licentie, ongeacht eventuele betaalde toevoegingen
+
+Het huidige ontbreken van enige betaalde functie vormt geen garantie dat AutoBrew voor altijd vrij blijft van betaalde functies.
+
+### 1.3 Open-source-omvang versus betaalde functies
+
+De MIT-licentie is van toepassing op de AutoBrew-broncode zoals gepubliceerd in de officiële repository op [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew). **Forks en afgeleide werken van die codebasis zijn uitdrukkelijk toegestaan** onder de voorwaarden van de MIT-licentie — wij verwelkomen het dat de community op AutoBrew voortbouwt.
+
+Eventuele **toekomstige betaalde functies**, **betaalde edities** of **betaalde aanvullende diensten** (zie paragraaf 1.2) zullen worden uitgebracht onder een **afzonderlijke proprietary licentie** en zullen **geen** deel uitmaken van de codebasis onder de MIT-licentie. In het bijzonder:
+
+- De broncode van betaalde functies wordt niet in de MIT-repository gepubliceerd
+- Het kopiëren, decompileren, reverse-engineeren of anderszins reproduceren van de implementatie van enige door AutoBrew uitgebrachte proprietary betaalde functie is niet toegestaan, behoudens voor zover uitdrukkelijk toegestaan door dwingend toepasselijk recht (bijvoorbeeld § 69e UrhG / artikel 6 van EU-richtlijn 2009/24/EG voor interoperabiliteit)
+- Deze beperking ziet specifiek op de implementatie van de betaalde functie — zij beperkt niet het recht van derden om vergelijkbare functionaliteit zelfstandig en vanaf nul te ontwikkelen
+
+De handelsmerken **"AutoBrew"** en **"DigitalFreedom"** mogen niet worden gebruikt door forks of afgeleide werken die concurrerende betaalde functies aanbieden — zie paragraaf 3 van deze EULA en de [Handelsmerk](Trademark.md)-disclaimer.
+
+### 1.4 Distributiekanalen
+
+Het officiële AutoBrew-binair wordt uitsluitend verspreid via:
+
+- **GitHub Releases** op [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases) — genotariseerde DMG-bestanden ondertekend met het Apple Developer ID-certificaat
+- De **Homebrew-tap** op [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) — `brew install --cask autobrew`
+
+AutoBrew wordt **niet** verspreid via de Apple App Store, de Google Play Store of enig downloadportaal van derden. Indien u AutoBrew elders heeft verkregen, is het binair niet geverifieerd en valt het niet onder deze EULA.
+
+---
+
+## 2. VERLENING VAN LICENTIE
+
+Onder voorbehoud van uw naleving van deze EULA en de MIT-licentie verleent de Uitgever u een wereldwijde, royaltyvrije, niet-exclusieve licentie om:
+
+- AutoBrew te installeren en uit te voeren op een willekeurig aantal Macs waarvan u eigenaar of beheerder bent
+- De broncode te wijzigen en afgeleide werken te maken
+- De Software in broncode- of binaire vorm te herdistribueren
+
+---
+
+## 3. BEPERKINGEN
+
+U mag niet:
+
+- De auteursrechtmeldingen, de tekst van de MIT-licentie of de gebundelde Sparkle-/bsdiff-/sais-lite-/pdqsort-licentievermeldingen verwijderen, wijzigen of onleesbaar maken bij herdistributie
+- De handelsmerken **"AutoBrew"** en **"DigitalFreedom"** gebruiken in de naam van een fork of afgeleid werk zonder onze voorafgaande schriftelijke toestemming (zie het document [Handelsmerk](Trademark.md))
+- Uw fork verkeerd voorstellen als de officiële AutoBrew-distributie
+
+---
+
+## 4. COMPONENTEN VAN DERDEN
+
+AutoBrew bundelt de volgende open-source-componenten, elk geregeld door een eigen licentie (zie het document [Open-source-licenties](OpenSourceLicenses.md) voor de volledige lijst en de letterlijke licentieteksten):
+
+- **Sparkle** (MIT) — automatische in-app-updates
+- **bsdiff / bspatch** (BSD-2-Clause) — gebundeld in Sparkle voor binaire delta's
+- **sais-lite** (MIT) — gebundeld in Sparkle
+- **pdqsort** (zlib) — gebundeld in Sparkle
+
+AutoBrew vertrouwt tijdens runtime ook op **Homebrew** (BSD-2-Clause) — aangeroepen via process spawning, niet ingebed. Homebrew moet apart worden geïnstalleerd; AutoBrew begeleidt u bij de installatie ervan tijdens het eerste gebruik.
+
+De op deze componenten toepasselijke MIT-, BSD-2-Clause- en zlib-licenties blijven onafhankelijk van deze EULA van kracht. Bij strijdigheid tussen deze EULA en een open-source-licentie prevaleert de open-source-licentie voor het betreffende component.
+
+---
+
+## 5. GEEN BETALING, GEEN ACCOUNT (HUIDIGE TOESTAND)
+
+AutoBrew is momenteel gratis. De Software vereist geen registratie, geen aanmelding en geen enkele betaling, en op het moment van deze EULA zijn er geen in-app-aankopen, geen abonnementen, geen betaalde functies en geen proefmechanismen.
+
+De **Sponsor**-link in AutoBrew verwijst naar GitHub Sponsors en is **volledig vrijwillig**. Elke bijdrage wordt behandeld als een donatie en verleent geen extra rechten.
+
+**Voorbehoud:** zie paragraaf 1.2 — de Uitgever behoudt zich het recht voor om in de toekomst optionele betaalde functies, betaalde edities of betaalde aanvullende diensten te introduceren. Dergelijke toekomstige betaalde aanbiedingen zullen uitsluitend gelden voor gebruikers die uitdrukkelijk opt-in geven; de huidige gratis functionaliteit die u heeft geïnstalleerd, wordt niet met terugwerkende kracht achter een betaalmuur geplaatst.
+
+---
+
+## 6. MIT-LICENTIE (letterlijk)
+
+```
+Copyright (c) 2026 Marcel R. G. Berger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+---
+
+## 7. GARANTIEVRIJWARING
+
+De Software wordt geleverd **"AS IS"**, zonder garantie van welke aard dan ook, uitdrukkelijk of impliciet. De Uitgever garandeert niet dat de Software ononderbroken of foutloos zal werken, dat de interactie van AutoBrew met Homebrew of met individuele casks altijd zal slagen, of dat snapshots elk aspect van de toestand van een applicatie perfect zullen vastleggen.
+
+Wettelijke garantierechten die niet bij overeenkomst kunnen worden uitgesloten op grond van het op u toepasselijke consumentenrecht (bijvoorbeeld de Duitse Mängelhaftung op grond van §§ 434 e.v. BGB, voor zover van toepassing) blijven onverlet.
+
+---
+
+## 8. BEPERKING VAN AANSPRAKELIJKHEID
+
+Voor zover wettelijk toegestaan, is de Uitgever niet aansprakelijk voor indirecte, incidentele, gevolg-, exemplarische of punitieve schade — met inbegrip van gegevensverlies, gederfde winst of schade die voortvloeit uit software van derden (Homebrew, individuele casks) die via AutoBrew wordt aangeroepen.
+
+Voor gebruikers met gewone verblijfplaats in Duitsland of de EU blijft onze aansprakelijkheid voor schade door **grove nalatigheid of opzet**, voor **letsel aan leven, lichaam of gezondheid** en op grond van de **Duitse Productaansprakelijkheidswet (ProdHaftG)** onverlet.
+
+---
+
+## 9. EXPORTCONTROLE
+
+De Software bevat geen cryptografie buiten wat macOS van Apple en het Sparkle-framework standaard leveren. De export van macOS zelf is onderworpen aan de voorwaarden van Apple; u blijft zelf verantwoordelijk voor de naleving van de in uw rechtsgebied toepasselijke exportcontrolewetgeving.
+
+---
+
+## 10. BEËINDIGING
+
+Deze EULA is van kracht totdat zij wordt beëindigd. Zij eindigt automatisch en zonder kennisgeving indien u een van de bepalingen niet naleeft. U kunt deze ook op elk moment beëindigen door AutoBrew te de-installeren. Na beëindiging dient u elk gebruik van de Software te staken en alle kopieën in uw beheer te verwijderen.
+
+---
+
+## 11. TOEPASSELIJK RECHT EN BEVOEGDE RECHTER
+
+Op deze EULA is het recht van de Bondsrepubliek Duitsland van toepassing, met uitsluiting van het Weens Koopverdrag (CISG). Daarnaast is het dwingende consumentenrecht van het land van verblijf van de gebruiker van toepassing.
+
+Niet-uitsluitend bevoegd is Bad Nauheim, Duitsland. Consumenten kunnen een procedure aanhangig maken bij hun woonplaats wanneer het lokale recht dit toestaat.
+
+---
+
+## 12. CONTACT
+
+Berger & Rosenstock GbR (handelend onder de naam DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Duitsland
-Contact: hello@digitalfreedom.co.za
+E-mail: hello@digitalfreedom.co.za
 Website: https://digitalfreedom.co.za
 
 ---
 
-## 1. AANVAARDING VAN DE VOORWAARDEN
-
-Door deze applicatie, software of gerelateerde diensten ("de App") te installeren, te openen of te gebruiken, gaat u ermee akkoord aan deze Overeenkomst gebonden te zijn.
-
-Indien u hier niet mee instemt, mag u de App niet gebruiken.
-
----
-
-## 2. TOEPASSINGSGEBIED
-
-Deze Overeenkomst is van toepassing op alle distributiekanalen, waaronder maar niet beperkt tot:
-
-- Directe downloads vanaf onze website (https://digitalfreedom.co.za)
-- GitHub-broncoderepository's
-- Homebrew of andere pakketbeheerders waarin de App beschikbaar is
-
-AutoBrew wordt aangeboden als gratis open-source software onder de MIT-licentie.
-
-### 2.1 Wereldwijd toepassingsgebied
-
-AutoBrew is een open-source macOS-applicatie die rechtstreeks wordt gedistribueerd vanaf onze website en GitHub. Deze Overeenkomst geldt wereldwijd voor alle gebruikers, ongeacht het land waarin de App wordt gedownload, geïnstalleerd of gebruikt. De Uitgever hanteert de Algemene Verordening Gegevensbescherming (AVG) van de Europese Unie en de gerelateerde EU-wetgeving als basisstandaard en past deze toe als wereldwijde ondergrens; dwingende consumentenbeschermingsrechten en andere wettelijke rechten die zijn toegekend door het land van verblijf van de gebruiker, blijven onverlet en prevaleren wanneer ze meer bescherming bieden.
-
----
-
-## 3. LICENTIEVERLENING
-
-Onder de voorwaarden van deze Overeenkomst en de MIT-licentie verleent de Uitgever u een beperkte, niet-exclusieve, herroepbare licentie om:
-
-- De App te gebruiken op apparaten die u bezit of beheert
-- De functionaliteit volgens het beoogde doel te openen en te gebruiken
-
-Aangezien AutoBrew open source is onder de MIT-licentie, gelden de aanvullende rechten op die licentie naast deze Overeenkomst. In geval van strijdigheid prevaleert de MIT-licentie voor de open-sourcerechten.
-
----
-
-## 4. OPEN-SOURCECOMPONENTEN
-
-AutoBrew is zelf open source onder de MIT-licentie en kan aanvullende open-sourcesoftware bevatten.
-
-- Dergelijke componenten worden beheerst door hun respectieve licenties
-- Deze Overeenkomst doet geen afbreuk aan, of beperkt geen, rechten die op grond van open-sourcelicenties worden verleend
-- Een lijst van open-sourcecomponenten is beschikbaar in het document Open Source Notices
-
-U bent verantwoordelijk voor de naleving van de toepasselijke open-sourcelicenties.
-
----
-
-## 5. BEPERKINGEN
-
-U mag niet:
-
-- De App reverse-engineeren of decompileren, behalve voor zover wettelijk toegestaan (de broncode is openbaar beschikbaar onder de MIT-licentie)
-- Beveiligings- of toegangscontrolemechanismen omzeilen
-- De App onrechtmatig gebruiken of in strijd met rechten van derden
-- Eigendomsvermeldingen of copyrightaanduidingen verwijderen, behalve voor zover de MIT-licentie dit uitdrukkelijk toestaat
-
----
-
-## 6. COMMERCIËLE VOORWAARDEN
-
-AutoBrew wordt aangeboden:
-
-- **Volledig gratis** onder de MIT-licentie
-- Geen in-app aankopen, geen betaalde niveaus, geen abonnementen
-
-Gebruikers kunnen het project optioneel ondersteunen via GitHub Sponsors. Dergelijke bijdragen zijn volledig vrijwillig en geven geen aanvullende rechten op de App.
-
----
-
-## 7. VERANTWOORDELIJKHEID VAN DE GEBRUIKER
-
-U bent als enige verantwoordelijk voor:
-
-- Alle activiteiten die met de App worden uitgevoerd
-- Alle gegevens die worden verwerkt, opgeslagen of verzonden
-- Naleving van de toepasselijke wet- en regelgeving
-
-Gebruik van de App kan leiden tot onbedoelde acties op uw systeem, waaronder de installatie, update of verwijdering van Homebrew-pakketten en geïnstalleerde applicaties. U wordt aangeraden onafhankelijke back-ups bij te houden.
-
----
-
-## 8. GEGEVENS EN PRIVACY
-
-AutoBrew werkt volledig op uw Mac. Er worden geen gegevens naar onze servers verzonden — alles wordt lokaal verwerkt.
-
-Tenzij uitdrukkelijk anders vermeld:
-
-- Gegevens worden lokaal opgeslagen op uw apparaat
-- De Uitgever garandeert geen gegevensbeveiliging of -integriteit
-- U bent verantwoordelijk voor back-ups
-
-Een afzonderlijk Privacybeleid regelt de werking van de App in detail.
-
----
-
-## 9. DIENSTEN VAN DERDEN
-
-AutoBrew werkt met Homebrew en haalt updates op via een Sparkle-feed.
-
-De Uitgever:
-
-- Heeft geen controle over Homebrew of pakketformules van derden
-- Is niet verantwoordelijk voor hun beschikbaarheid of gedrag
-- Is niet aansprakelijk voor schade veroorzaakt door dergelijke diensten
-
-Het gebruik van diensten van derden is onderworpen aan hun voorwaarden.
-
----
-
-## 10. AFWIJZING VAN GARANTIES
-
-VOOR ZOVER WETTELIJK MAXIMAAL TOEGESTAAN WORDT DE APP GELEVERD "AS IS" ZONDER ENIGE GARANTIES.
-
-Dit omvat, maar is niet beperkt tot:
-
-- VERKOOPBAARHEID
-- GESCHIKTHEID VOOR EEN BEPAALD DOEL
-- NAUWKEURIGHEID OF BETROUWBAARHEID
-- BEVEILIGING OF BESCHIKBAARHEID
-
----
-
-## 11. AANSPRAKELIJKHEIDSBEPERKING
-
-VOOR ZOVER WETTELIJK MAXIMAAL TOEGESTAAN IS DE UITGEVER NIET AANSPRAKELIJK VOOR:
-
-- INDIRECTE OF GEVOLGSCHADE
-- VERLIES VAN GEGEVENS, WINST OF BEDRIJFSVOERING
-- SYSTEEMSTORINGEN OF BEVEILIGINGSINCIDENTEN
-
-AANGEZIEN DE APP GRATIS WORDT GELEVERD, BEDRAAGT DE TOTALE AANSPRAKELIJKHEID NIET MEER DAN EUR 100.
-
----
-
-## 12. GEBRUIK MET HOOG RISICO
-
-De App is niet bedoeld voor gebruik in:
-
-- Veiligheidskritische systemen
-- Medische toepassingen
-- Financiële handelssystemen
-- Kritieke infrastructuur
-
-Gebruik in dergelijke contexten is voor uw eigen risico.
-
----
-
-## 13. VRIJWARING
-
-U stemt ermee in de Uitgever te vrijwaren tegen vorderingen die voortvloeien uit:
-
-- Uw gebruik van de App
-- Schending van deze Overeenkomst
-- Schending van de toepasselijke wetgeving
-
----
-
-## 14. BEËINDIGING
-
-De Uitgever kan deze Overeenkomst op elk moment beëindigen.
-
-Bij beëindiging moet u het gebruik staken en alle exemplaren van de App verwijderen. De MIT-licentie zelf, waaronder de broncode wordt geleverd, blijft onverlet en kan niet worden ingetrokken.
-
----
-
-## 15. EXPORT EN SANCTIES
-
-U stemt ermee in alle toepasselijke exportcontrole- en sanctiewetten na te leven.
-
----
-
-## 16. TOEPASSELIJK RECHT
-
-Deze Overeenkomst wordt beheerst door het Duitse recht.
-
-Dwingende consumentenbeschermingswetten van uw land van verblijf blijven onverlet.
-
----
-
-## 17. REGIONALE BEPALINGEN
-
-### 17.1 Europese Unie
-
-- Dwingende consumentenrechten (waaronder garantierechten) worden niet uitgesloten
-- Aansprakelijkheidsuitsluitingen gelden alleen voor zover toegestaan onder EU-recht
-
-### 17.2 Verenigde Staten
-
-- Sommige deelstaten staan geen beperking van bepaalde garanties of aansprakelijkheden toe
-- In dergelijke gevallen gelden beperkingen voor zover wettelijk maximaal toegestaan
-
-### 17.3 Verenigd Koninkrijk
-
-- Niets sluit aansprakelijkheid uit voor overlijden of persoonlijk letsel veroorzaakt door nalatigheid
-- De bescherming van de Consumer Rights Act blijft onverlet
-
-### 17.4 Canada
-
-- Consumentenbeschermingswetten verschillen per provincie en kunnen delen van deze Overeenkomst terzijde stellen
-
-### 17.5 Australië
-
-- Wettelijke garanties op grond van het Australian Consumer Law zijn van toepassing en kunnen niet worden uitgesloten
-
-### 17.6 Overige rechtsgebieden
-
-- Wanneer lokaal recht bepalingen van deze Overeenkomst beperkt, gelden dergelijke bepalingen slechts voor zover toegestaan
-
----
-
-## 18. SCHEIDBAARHEID
-
-Indien enige bepaling ongeldig is, blijft het overige van kracht.
-
----
-
-## 19. VOLLEDIGE OVEREENKOMST
-
-Deze Overeenkomst vormt de volledige overeenkomst tussen u en de Uitgever.
-
-Zij vult de voorwaarden van de MIT-licentie aan voor zover deze niet in strijd zijn.
-
----
-
-**DOOR DE APP TE GEBRUIKEN STEMT U IN MET DEZE OVEREENKOMST.**
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Alle rechten voorbehouden.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

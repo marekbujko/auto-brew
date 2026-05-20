@@ -1,110 +1,98 @@
 # MARKENHINWEIS
 
-## Für Anwendungen, die auf Marken oder Programme Dritter Bezug nehmen
+## AutoBrew
 
-**Gültig ab:** Mai 2026
+**Zuletzt aktualisiert:** Mai 2026
 
-**Herausgeber:**
-DigitalFreedom
-Eine Marke der Berger & Rosenstock GbR
-Dieselstr. 22e
-61231 Bad Nauheim
-Deutschland
-Kontakt: hello@digitalfreedom.co.za
+**Anbieter:**
+Berger & Rosenstock GbR (handelnd unter der Marke DigitalFreedom)
+Dieselstr. 22e, 61231 Bad Nauheim, Deutschland
+E-Mail: hello@digitalfreedom.co.za
 Website: https://digitalfreedom.co.za
 
 ---
 
-## 1. ZWECK UND GELTUNGSBEREICH
+## 1. Zweck
 
-Dieses Dokument klärt das Verhältnis zwischen den vom Herausgeber veröffentlichten Anwendungen und etwaigen Marken, Markennamen, Programmen oder Methodologien Dritter, auf die in diesen Anwendungen, in Marketingmaterialien oder in unterstützender Dokumentation Bezug genommen wird.
+Dieses Dokument stellt das Verhältnis zwischen **AutoBrew** und den innerhalb der Anwendung, ihres Quellcodes und ihrer Dokumentation genannten Marken, Markennamen und Software Dritter klar.
 
-Die Anwendungen des Herausgebers werden direkt über die Website des Herausgebers verteilt und sind weltweit verfügbar. Dieser Hinweis gilt weltweit. Der Herausgeber wendet das EU-Markenrecht (Verordnung (EU) 2017/1001 über die Unionsmarke und Richtlinie (EU) 2015/2436) sowie die Doktrin der nominellen Fair-Use-Verwendung als Mindeststandard an und beachtet darüber hinaus die Marken- und Fair-Use-Regeln jeder Rechtsordnung, in der die Anwendungen verfügbar gemacht werden.
+AutoBrew wird ausschließlich über den Homebrew-Tap [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap) sowie über die GitHub-Releases-Seite unter [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases) vertrieben. Es besteht keine Verbindung zum Apple App Store, zum Google Play Store oder zu einem sonstigen Download-Portal Dritter.
 
----
-
-## 2. NOMINELLE FAIR-USE-VERWENDUNG
-
-Bezugnahmen auf Marken, Markennamen, Programme oder Methodologien Dritter innerhalb der Anwendungen und Materialien des Herausgebers erfolgen im Rahmen der Doktrin der **nominellen Fair-Use-Verwendung** (oder vergleichbarer Doktrinen nach anwendbarem Markenrecht).
-
-Solche Bezugnahmen sollen:
-
-- Das Programm, die Methodologie oder das Produkt eines Dritten zutreffend identifizieren
-- Dem Nutzer Kontext zu Kompatibilität, Unterstützung oder Anwendbarkeit liefern
-- Sachliche Beschreibungen von Funktionen und Eigenschaften ermöglichen
-
-Bezugnahmen implizieren **nicht**:
-
-- Eine Empfehlung der Anwendung des Herausgebers durch den Markeninhaber
-- Eine Verbundenheit zwischen dem Herausgeber und dem Markeninhaber
-- Eine Sponsoring-Beziehung der Anwendung des Herausgebers durch den Markeninhaber
-- Eine Autorisierung, Zertifizierung oder Genehmigung durch den Markeninhaber
+Der Anbieter wendet das EU-Markenrecht (Verordnung (EU) 2017/1001 und Richtlinie (EU) 2015/2436) sowie die Lehre der nominativen lauteren Benutzung als Mindeststandard an und beachtet darüber hinaus die marken- und fair-use-rechtlichen Vorgaben jeder Rechtsordnung, in der AutoBrew heruntergeladen wird.
 
 ---
 
-## 3. MARKENINHABERSCHAFT
+## 2. Nominative lautere Benutzung
 
-Alle in den Anwendungen oder Materialien des Herausgebers genannten Marken, eingetragenen Marken, Dienstleistungsmarken, Markennamen und Geschäftsbezeichnungen sind Eigentum ihrer jeweiligen Inhaber.
-
-Der Herausgeber beansprucht kein Eigentum an solchem geistigen Eigentum Dritter und verwendet es ausschließlich zu den in Abschnitt 2 beschriebenen Zwecken.
-
-Konkrete Markenzuschreibungen für einzelne Anwendungen werden in der jeweiligen Anwendungsdokumentation, in In-App-Hinweisen oder in Marketingmaterialien aufgeführt.
-
-Insbesondere — ohne hierauf beschränkt zu sein:
-
-- **„Homebrew"** ist ein Projekt der Homebrew-Maintainer; das Homebrew-Logo und der Name werden hier ausschließlich nominell zur Beschreibung der Funktionalität von AutoBrew (Verwaltung von Homebrew-Paketen) verwendet
-- **„macOS", „App Store", „Apple"** und damit verbundene Marken sind Marken von Apple Inc.
-- **„GitHub"** ist eine Marke von GitHub, Inc.
-
-AutoBrew ist mit keiner dieser Parteien verbunden und wird von ihnen weder unterstützt noch gesponsert.
+Bezugnahmen auf Marken, Markennamen und Software Dritter innerhalb von AutoBrew und seinen Materialien erfolgen im Rahmen der Lehre der **nominativen lauteren Benutzung** (oder vergleichbarer Lehren nach anwendbarem Markenrecht). Solche Bezugnahmen dienen ausschließlich der Identifikation und Beschreibung der Drittprodukte, mit denen AutoBrew zusammenwirkt, und implizieren keinerlei Befürwortung, Sponsoring, Verbindung oder Partnerschaft.
 
 ---
 
-## 4. UNABHÄNGIGE ENTWICKLUNG
+## 3. AutoBrew-spezifische Markenzuordnungen
 
-Vom Herausgeber veröffentlichte Anwendungen werden unabhängig entwickelt.
+### 3.1 Homebrew
 
-- Die Anwendungen des Herausgebers sind weder mit einem Markeninhaber Dritter verbunden noch von ihm empfohlen, gesponsert oder genehmigt, soweit dies nicht ausdrücklich schriftlich erklärt wurde
-- Funktionale Ähnlichkeit zwischen einer Anwendung und einem Programm eines Dritten begründet keine Lizenzierung oder Partnerschaft
-- Kompatibilität mit einer Methodologie Dritter begründet keine Zertifizierung oder Akkreditierung
+Die Bezeichnungen **Homebrew** und **brew** sowie die zugehörigen Logos sind Marken oder eingetragene Marken ihrer jeweiligen Inhaber, insbesondere des Homebrew-Projekts ([brew.sh](https://brew.sh)). AutoBrew automatisiert und visualisiert Homebrew-Operationen und verwendet diese Namen ausschließlich zur Identifikation des zugrundeliegenden Werkzeugs. AutoBrew ist nicht mit dem Homebrew-Projekt verbunden, wird von ihm nicht befürwortet und nicht gesponsert.
+
+### 3.2 Apple, macOS, App Store
+
+**Apple**, **macOS**, **App Store**, **iTunes**, **TestFlight**, die Code-Signing-Werkzeuge von **Sparkle** sowie weitere Apple-Marken sind Marken der Apple Inc. AutoBrew läuft auf macOS und signiert seine Binärdateien mit dem Apple-Developer-ID-Programm, wie es für den Direktvertrieb erforderlich ist. AutoBrew ist nicht mit Apple Inc. verbunden.
+
+### 3.3 GitHub
+
+**GitHub**, **GitHub Releases** und **GitHub Sponsors** sind Marken der GitHub, Inc. AutoBrew wird auf GitHub gehostet und nutzt GitHub Sponsors als einzigen optionalen Spendenkanal. AutoBrew ist nicht mit GitHub, Inc. verbunden.
+
+### 3.4 Sparkle
+
+**Sparkle** ist das in AutoBrew eingesetzte Open-Source-Update-Framework. Der Name und das Logo Sparkle gehören dem Sparkle-Projekt ([sparkle-project.org](https://sparkle-project.org/)). AutoBrew bindet Sparkle als SwiftPM-Abhängigkeit unter dessen MIT-Lizenz ein (siehe [Open-Source-Lizenzen](OpenSourceLicenses.md), Abschnitt 2.1).
+
+### 3.5 Cask-Herausgeber
+
+Der BrewStore in AutoBrew listet Casks aus dem öffentlichen Homebrew-Katalog. Jeder einzelne Cask-Name (z. B. „Firefox", „Visual Studio Code", „Docker", „Slack"), jedes App-Icon und jeder Screenshot gehört dem jeweiligen Herausgeber. AutoBrew nimmt auf diese Namen und Icons ausschließlich Bezug, um dem Nutzer die Identifikation der Software zu erleichtern, die er gegebenenfalls über Homebrew installieren möchte; die zugehörigen Binärdateien werden weder gehostet, verbreitet noch verändert.
 
 ---
 
-## 5. RECHTE VORBEHALTEN
+## 4. AutoBrew- und DigitalFreedom-Marken
 
-Markeninhaber behalten sämtliche Rechte an ihren Marken. Die nominelle Fair-Use-Verwendung durch den Herausgeber überträgt, lizenziert oder gewährt keinerlei Rechte an den Marken Dritter.
+**AutoBrew** und **DigitalFreedom** sind nicht eingetragene Marken der Berger & Rosenstock GbR.
+
+### 4.1 Open-Source-Forks sind willkommen
+
+Der AutoBrew-Quellcode steht unter der MIT-Lizenz; Forks auf GitHub sind ausdrücklich gestattet. Im Rahmen der nominativen lauteren Benutzung darf der Nutzer in der README, in Release-Notes oder im Repository-Namen seines Forks beschreibend auf AutoBrew Bezug nehmen (z. B. „Fork of AutoBrew", „based on AutoBrew").
+
+### 4.2 Beschränkungen der Marken AutoBrew / DigitalFreedom
+
+Die Verwendung der Marken **AutoBrew** und **DigitalFreedom** ist **nicht** gestattet:
+
+- Als **Produktname** eines Forks oder abgeleiteten Werks (z. B. darf ein Fork nicht „AutoBrew Pro", „AutoBrew+", „DigitalFreedom Brew" oder ähnlich genannt werden)
+- Als Name oder Bezeichnung eines **konkurrierenden kostenpflichtigen Produkts oder Dienstes**, unabhängig davon, ob es vom AutoBrew-Code abgeleitet ist
+- In einer Weise, die Befürwortung, Sponsoring, Zertifizierung oder Verbindung durch den Anbieter suggeriert
+
+Logos, Icon-Grafiken sowie die visuelle Identität von AutoBrew und DigitalFreedom dürfen ohne unsere vorherige schriftliche Zustimmung nicht auf abgeleiteten Produkten wiederverwendet werden.
+
+### 4.3 Vorbehalt hinsichtlich kostenpflichtiger Funktionen
+
+Der Anbieter kann in Zukunft proprietäre kostenpflichtige Funktionen unter einer gesonderten Lizenz veröffentlichen (siehe [EULA](EULA.md), Abschnitt 1.3). Die MIT-Lizenz erstreckt sich nicht auf diese proprietären Funktionen. Das Recht, vergleichbare Funktionalität unabhängig und von Grund auf neu zu entwickeln, bleibt unberührt — die Beschränkung gilt der spezifischen Implementierung des Anbieters sowie der Verwendung der Marken AutoBrew / DigitalFreedom für konkurrierende kostenpflichtige Angebote.
 
 ---
 
-## 6. MARKENBESCHWERDEN
+## 5. Haftungsausschluss
 
-Sind Sie Markeninhaber und vertreten die Auffassung, dass eine Anwendung oder ein Material des Herausgebers Ihre Marke in einer Weise verwendet, die über die nominelle Fair-Use-Verwendung hinausgeht oder Ihre Rechte anderweitig verletzt, wenden Sie sich bitte an:
+Alle in AutoBrew, seinem Quellcode und seiner Dokumentation genannten Produkt- und Firmennamen sind Eigentum ihrer jeweiligen Markeninhaber. Ihre Verwendung impliziert weder eine Befürwortung von AutoBrew durch diese Inhaber noch umgekehrt.
 
-DigitalFreedom
-Eine Marke der Berger & Rosenstock GbR
+Sollte ein Markeninhaber der Auffassung sein, dass AutoBrew seine Marke in einer Weise verwendet, die nicht mit der nominativen lauteren Benutzung vereinbar ist, kann er sich an die oben angegebene Adresse wenden; wir werden den Hinweis umgehend bearbeiten.
+
+---
+
+## 6. Kontakt
+
+Berger & Rosenstock GbR (handelnd unter der Marke DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Deutschland
 E-Mail: hello@digitalfreedom.co.za
 Website: https://digitalfreedom.co.za
 
-Bitte fügen Sie bei:
-
-- Identifikation der betreffenden Marke (Registrierungsnummer, Rechtsordnung)
-- Identifikation der angeblich verletzenden Nutzung (konkrete Anwendung, Seite oder Material)
-- Beschreibung des gewünschten Abhilfeschrittes
-- Ihre Kontaktinformationen
-
-Der Herausgeber prüft solche Beschwerden nach Treu und Glauben und ergreift, soweit angezeigt, geeignete Maßnahmen.
-
 ---
 
-## 7. AKTUALISIERUNGEN
-
-Der Herausgeber kann diesen Markenhinweis von Zeit zu Zeit aktualisieren. Die jeweils aktuelle Fassung ist verfügbar unter:
-
-https://digitalfreedom.co.za/legal/trademark-disclaimer
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Alle Rechte vorbehalten.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

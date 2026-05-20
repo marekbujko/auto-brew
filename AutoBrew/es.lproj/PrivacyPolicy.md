@@ -1,8 +1,9 @@
 # POLÍTICA DE PRIVACIDAD
 
-## Aviso global de protección de datos y privacidad
+## AutoBrew
 
 **Fecha de entrada en vigor:** Mayo de 2026
+**Última actualización:** Mayo de 2026
 
 **Servicio operado por:** DigitalFreedom — una marca de Berger & Rosenstock GbR
 
@@ -23,335 +24,155 @@ Sitio web: https://digitalfreedom.co.za
 
 ## 1. INTRODUCCIÓN
 
-La presente Política de Privacidad explica cómo DigitalFreedom (una marca de Berger & Rosenstock GbR, conjuntamente «nosotros», «nos», «nuestro») recopila, utiliza, almacena y protege sus datos personales cuando utiliza nuestra aplicación AutoBrew y los servicios relacionados (los «Servicios»).
+La presente Política de Privacidad explica cómo DigitalFreedom (una marca de Berger & Rosenstock GbR — «nosotros», «nos», «nuestro») trata los datos en relación con la aplicación AutoBrew («AutoBrew», «el Software»).
 
-### 1.1 Sobre AutoBrew
+AutoBrew es **software de código abierto bajo la Licencia MIT**, **totalmente gratuito** y se distribuye directamente como un DMG notarizado y a través de un tap de Homebrew — no a través de la Apple App Store ni de la Google Play Store. No operamos ningún backend, no alojamos cuentas de usuario y no recopilamos, transmitimos, almacenamos ni tratamos datos personales en nuestros servidores.
 
-AutoBrew es una aplicación de barra de menús para macOS que automatiza las actualizaciones de Homebrew, incluye un catálogo BrewStore y un sistema AppSnapshot. AutoBrew es **software de código abierto bajo licencia MIT** y **totalmente gratuito**. No hay compras dentro de la aplicación, no hay niveles de pago, no hay analítica, no hay recopilación de datos en el servidor — todo se ejecuta de forma local en su Mac.
-
-### 1.2 Alcance global
-
-AutoBrew se distribuye directamente (descarga directa y Homebrew) para macOS y, por tanto, está disponible en todo país y territorio. Esta Política de Privacidad se aplica globalmente a todos los usuarios de los Servicios, con independencia del país en el que se descarguen, instalen o utilicen.
-
-### 1.3 RGPD como referencia global
-
-Adoptamos el **Reglamento General de Protección de Datos de la Unión Europea (RGPD)** y la legislación de protección de datos de la UE relacionada como estándar más estricto y lo aplicamos como **piso global** — todo usuario, en todo país, se beneficia al menos de las protecciones a nivel de RGPD establecidas en esta Política. Adicionalmente respetamos y cumplimos cualquier legislación local de protección de datos aplicable de la jurisdicción del usuario; y allí donde dicha ley local sea más protectora para el usuario, prevalece el estándar más protector.
-
-Nos comprometemos a proteger su privacidad y a cumplir con las leyes de protección de datos aplicables, incluidas, entre otras:
-
-- Reglamento General de Protección de Datos de la UE (RGPD) — aplicado como referencia global
-- Ley Federal Alemana de Protección de Datos (BDSG)
-- Reglamento General de Protección de Datos del Reino Unido (UK GDPR) y Ley de Protección de Datos de 2018
-- Ley Federal Suiza de Protección de Datos (FADP)
-- Ley de Privacidad del Consumidor de California (CCPA) / Ley de Derechos de Privacidad de California (CPRA) y otras leyes estatales de privacidad de EE. UU.
-- Ley Canadiense de Protección de la Información Personal y los Documentos Electrónicos (PIPEDA)
-- Ley Australiana de Privacidad de 1988
-- Ley General de Protección de Datos de Brasil (LGPD)
-- Ley Japonesa sobre la Protección de la Información Personal (APPI)
-- Ley de Protección de la Información Personal de Corea del Sur (PIPA)
-- Ley India de Protección de Datos Personales Digitales (Ley DPDP) y Ley TI
-- Ley Sudafricana de Protección de la Información Personal (POPIA)
-- Todos los demás regímenes nacionales aplicables de protección de datos en las jurisdicciones en las que se ofrecen los Servicios
+Adoptamos el Reglamento General de Protección de Datos de la Unión Europea (RGPD) como referencia más estricta y lo aplicamos como mínimo global — las protecciones descritas a continuación se aplican a todos los usuarios, con independencia de su país.
 
 ---
 
-## 2. PRINCIPIO DE RECOPILACIÓN CERO DE DATOS
+## 2. RECOPILACIÓN CERO DE DATOS
 
-**AutoBrew no recopila, almacena, transmite ni trata datos personales en nuestros servidores.**
+**No recopilamos ningún dato personal.**
 
-AutoBrew funciona íntegramente en su Mac. Toda la configuración, las preferencias y el estado se almacenan localmente. No disponemos de servidores que reciban sus datos. No operamos ninguna infraestructura backend para la recopilación de datos, la analítica, los informes de fallos ni la telemetría.
-
-Dado que no tratamos datos personales bajo nuestro control, la mayoría de las obligaciones previstas en las leyes de protección de datos (deberes del responsable del tratamiento, obligaciones relativas a las transferencias internacionales, notificación de brechas, etc.) no nos son aplicables como editor de esta aplicación. No obstante, la Sección 10 describe los derechos que le asisten conforme a la legislación aplicable.
+AutoBrew se ejecuta íntegramente en su Mac. No existe ninguna cuenta de AutoBrew, ni telemetría, ni analítica, ni informes de fallos, ni configuración remota. Dado que no tratamos datos personales bajo nuestro control, la mayoría de las obligaciones del operador conforme al RGPD (documentación de transferencias internacionales, contratos con encargados del tratamiento, notificación de brechas por nuestra parte) no se aplican a nosotros como editor del Software. No obstante, la Sección 6 describe los derechos que le asisten conforme a la legislación aplicable.
 
 ---
 
-## 3. DATOS ALMACENADOS EN SU DISPOSITIVO
+## 3. DATOS ALMACENADOS LOCALMENTE EN SU DISPOSITIVO
 
-AutoBrew almacena los siguientes datos de forma local en su Mac. Ninguno de estos datos se transmite a nuestros servidores.
+AutoBrew almacena los siguientes datos de forma local. **Ninguno de ellos sale de su Mac salvo que usted decida compartirlo.**
 
-### 3.1 Datos que usted proporciona
+### 3.1 Ajustes (UserDefaults)
 
-- Preferencias de la aplicación (programación de actualizaciones, opciones de notificación)
-- Configuración de favoritos del BrewStore
-- AppSnapshots (listas locales de las aplicaciones instaladas)
+- Modo de activación (inactividad / programado)
+- Umbral de inactividad (minutos) y hora programada
+- Marca de tiempo de la última ejecución
+- Preferencia de inicio automático al iniciar sesión
+- Preferencia de notificaciones
+- Ajustes de retención de snapshots
+- Valores por defecto de política de actualización (patch/minor/major × cask/formula) y anulaciones por paquete
+- Estado de onboarding
 
-### 3.2 Datos recopilados automáticamente en su dispositivo
+### 3.2 Estado de la política de actualización (Application Support)
 
-- Lista de paquetes y casks de Homebrew instalados (leídos de su instalación local de Homebrew)
-- Estado y resultados de las operaciones de Homebrew
-- Registros de actividad mostrados en la aplicación (no exportados)
+- `UpdateLedger.json` — cuándo apareció por primera vez cada `(kind, token, version)` como desactualizada, para poder medir la ventana de espera. Los tokens son nombres de paquetes de Homebrew; no contienen identificadores de usuario.
+- `PendingUpdates.json` — entradas de actualizaciones mayores pendientes de su decisión (aprobar / rechazar).
 
-### 3.3 Datos de terceros
+### 3.3 Caché de iconos (Application Support)
 
-- Metadatos públicos de fórmulas y casks de Homebrew (obtenidos de la API pública de Homebrew y del repositorio Homebrew Core)
-- Comprobaciones de actualización de Sparkle (consulta el appcast desde su Mac)
+- PNG en caché de iconos de casks obtenidos mediante la iTunes Search API (búsqueda anónima por nombre de aplicación) y icon.horse como alternativa. Almacenados en `~/Library/Application Support/AutoBrew/IconCache/`.
 
-### 3.4 Datos NO recopilados
+### 3.4 Snapshots de aplicaciones (Application Support)
 
-AutoBrew **no** recopila:
+- Copias empaquetadas en ZIP de `~/Library/Preferences`, `~/Library/Application Support`, `~/Library/Containers`, etc., para las aplicaciones de las que usted realice explícitamente un snapshot. Almacenadas en `~/Library/Application Support/AutoBrew/Snapshots/`.
 
-- ubicación
-- contactos / agenda de direcciones
-- contenidos de SMS / correo electrónico
-- historial de navegación
-- identificadores publicitarios
-- datos de pago (AutoBrew es gratuito; no hay procesamiento de pagos)
-- analítica, métricas de uso o telemetría
-- informes de fallos automáticos
+### 3.5 Registros (os.Logger)
 
----
+- Eventos de diagnóstico escritos mediante el sistema unificado de registro de Apple. Visibles en Consola.app. No se transmiten a ningún lugar.
 
-## 4. BASE JURÍDICA DEL TRATAMIENTO (RGPD)
-
-Dado que no actuamos como responsable ni como encargado del tratamiento de datos personales recopilados a través de AutoBrew, las bases del artículo 6 del RGPD para el tratamiento no nos son aplicables. En la medida en que el funcionamiento de AutoBrew implique un tratamiento local en su dispositivo, se realiza sobre la base de:
-
-- **Ejecución de un contrato** (art. 6.1.b RGPD) — proporcionar la funcionalidad para la que instaló AutoBrew
-- **Consentimiento** (art. 6.1.a RGPD) — cuando usted activa expresamente acciones como ejecutar `brew update`, instalar paquetes o crear AppSnapshots
-
-No se realiza ningún tratamiento en virtud del art. 6.1.c, d, e o f del RGPD en infraestructura operada por nosotros.
+Puede eliminar todos los datos almacenados localmente eliminando AutoBrew, su carpeta de soporte (`~/Library/Application Support/AutoBrew/`) y su plist de UserDefaults (`~/Library/Preferences/za.co.digitalfreedom.AutoBrew.plist`).
 
 ---
 
-## 5. CÓMO SE UTILIZAN LOS DATOS
+## 4. ACTIVIDAD DE RED
 
-Los datos de su dispositivo se utilizan exclusivamente para:
+AutoBrew realiza solicitudes salientes en tres situaciones. Ninguna de ellas transmite datos personales.
 
-- Ejecutar comandos de Homebrew en su Mac (actualizar, instalar, desinstalar, listar paquetes/casks)
-- Mostrar el catálogo BrewStore y los metadatos de paquetes
-- Crear y comparar AppSnapshots
-- Mostrarle el estado de las operaciones de Homebrew localmente
-- Comprobar si hay actualizaciones de la aplicación mediante Sparkle
+### 4.1 Operaciones de paquetes Homebrew
 
-Nosotros nunca compartimos, vendemos, alquilamos ni divulgamos de otro modo los datos a terceros.
+AutoBrew invoca el binario `brew` que usted ha instalado localmente. El proyecto Homebrew se pone entonces en contacto con `formulae.brew.sh`, GitHub, mirrors CDN y URL de descarga de casks individuales. No mantenemos relación con esos endpoints — están operados por el proyecto Homebrew y por los respectivos editores de casks bajo sus propias condiciones de privacidad.
+
+### 4.2 Catálogo de casks y resolución de iconos
+
+- `formulae.brew.sh/api/cask.json` — descarga anónima del catálogo público de casks
+- `formulae.brew.sh/api/analytics/cask-install/365d.json` — descarga anónima de estadísticas de instalación de 365 días
+- `itunes.apple.com/search` — búsqueda anónima de iconos de aplicaciones macOS por nombre visible
+- `icon.horse` — búsqueda alternativa de favicon basada en la URL `homepage` del cask
+
+### 4.3 Comprobación de actualizaciones automáticas
+
+Sparkle contacta periódicamente con la URL del appcast oficial de AutoBrew en GitHub para comprobar si hay nuevas versiones de AutoBrew. La solicitud contiene su versión de macOS y la versión de AutoBrew (`User-Agent` estándar), sin identificadores adicionales.
 
 ---
 
-## 6. COMPARTICIÓN DE DATOS Y DIVULGACIÓN
+## 5. SERVICIOS DE TERCEROS (NO SUBENCARGADOS)
 
-AutoBrew no comparte ningún dato personal con terceros porque no recopilamos ningún dato.
-
-### 6.1 Comunicación de red iniciada por la aplicación
-
-AutoBrew se comunica directamente con los siguientes servicios públicos desde su Mac. No somos parte en estas comunicaciones.
+No recurrimos a subencargados del tratamiento porque no tratamos sus datos. Los servicios de terceros con los que AutoBrew se comunica actúan de forma independiente y conforme a sus propias condiciones:
 
 | Servicio | Finalidad | Operador |
 |---|---|---|
-| API de Homebrew (`formulae.brew.sh`) | Obtener metadatos públicos de fórmulas y casks | Homebrew (proyecto de código abierto) |
-| GitHub (api.github.com, raw.githubusercontent.com) | Recursos públicos de Homebrew, appcast de Sparkle | GitHub, Inc. |
-| Endpoint del appcast de Sparkle | Comprobar si hay actualizaciones de AutoBrew | Servido vía GitHub Pages |
+| Homebrew + formulae.brew.sh | Gestión de paquetes y catálogo | Proyecto Homebrew |
+| Apple iTunes Search API | Búsqueda de iconos de aplicaciones | Apple Inc. |
+| icon.horse | Favicon de respaldo | icon.horse |
+| GitHub (appcast, releases) | Canal de distribución y actualizaciones | GitHub, Inc. |
 
-Cuando ejecuta `brew install`, `brew upgrade`, etc., Homebrew se comunica con sus servidores estándar (Bottles, GitHub, etc.). Nosotros no controlamos ni mediamos en dichas comunicaciones.
-
-### 6.2 Sin venta de datos personales
-
-No vendemos sus datos personales a terceros. Porque no recopilamos ninguno.
-
-### 6.3 Requisitos legales
-
-Dado que no conservamos ningún dato, no hay nada que divulgar ante un requerimiento legal.
+Cuando hace clic en un enlace de Sponsor dentro de AutoBrew, abandona la aplicación y su navegador accede a GitHub Sponsors — esa interacción se rige por la política de privacidad de GitHub.
 
 ---
 
-## 7. TRANSFERENCIAS INTERNACIONALES DE DATOS
+## 6. SUS DERECHOS
 
-No realizamos transferencias internacionales de datos personales porque no recopilamos ni tratamos datos personales.
+Dado que no almacenamos datos personales en nuestros servidores, los derechos de acceso / rectificación / supresión / portabilidad / oposición / limitación previstos en los artículos 15 a 22 del RGPD y en las leyes locales equivalentes quedan efectivamente satisfechos eliminando AutoBrew de su Mac.
 
-Los flujos de datos iniciados por usted (llamadas a la API de Homebrew, comprobaciones del appcast de Sparkle, descargas de Homebrew) pueden implicar una transmisión transfronteriza. Dichas transferencias se rigen por los avisos de privacidad y los mecanismos de transferencia de datos de los respectivos operadores (Homebrew, GitHub).
+No obstante, puede ponerse en contacto con nosotros en **data-protection@digitalfreedom.co.za** si tiene preguntas sobre esta política.
 
----
-
-## 8. CONSERVACIÓN DE LOS DATOS
-
-No conservamos ningún dato. Todos los datos de AutoBrew se almacenan localmente en su Mac y están bajo su control exclusivo.
-
-- **Desinstalar AutoBrew** elimina las preferencias y los AppSnapshots almacenados localmente
-- Los paquetes instalados por Homebrew permanecen en su sistema y los gestiona la propia Homebrew
+Puede presentar una reclamación ante su autoridad de protección de datos competente. En Alemania, esta es el Hessischer Beauftragter für Datenschutz und Informationsfreiheit (https://datenschutz.hessen.de). La UE publica el listado de autoridades nacionales en https://edpb.europa.eu/about-edpb/about-edpb/members_en.
 
 ---
 
-## 9. SEGURIDAD DE LOS DATOS
+## 7. MENORES
 
-Aunque no recopilamos sus datos, implementamos las siguientes medidas de seguridad dentro de AutoBrew:
-
-- **App Sandbox:** AutoBrew se ejecuta dentro del App Sandbox de macOS, con los permisos mínimos necesarios
-- **Hardened Runtime:** Endurecimiento de seguridad adicional en tiempo de ejecución
-- **Notarización por Apple:** la aplicación está firmada y notarizada por Apple para verificación de integridad
-- **Actualizaciones firmadas:** las actualizaciones a través de Sparkle están firmadas con EdDSA y se verifican antes de aplicarse
-- **Comunicación de red:** HTTPS/TLS para todas las comunicaciones de red
-- **Sin telemetría:** No se transmite ningún dato de uso, analítica ni informe de fallos a ningún lugar
-- **Código abierto:** el código fuente completo está disponible públicamente para su revisión bajo licencia MIT
-
-Ningún sistema es completamente seguro. AutoBrew ejecuta comandos de Homebrew en su nombre — usted es responsable de revisar lo que instala.
-
-### 9.1 Notificación de brechas
-
-Dado que no recopilamos datos personales, no se aplican los requisitos de notificación de brechas conforme al art. 33/34 RGPD respecto de los datos del usuario. Si se descubre una vulnerabilidad de seguridad en AutoBrew, se publicará un aviso a través del repositorio público de GitHub y mediante una actualización de la aplicación.
+AutoBrew es una utilidad para desarrolladores en macOS. No está dirigida a menores de 16 años. No recopilamos datos personales, por lo que tampoco tratamos datos de menores.
 
 ---
 
-## 10. SUS DERECHOS
+## 8. SEGURIDAD
 
-### 10.1 Derechos conforme al RGPD (UE/EEE/Reino Unido)
-
-Usted tiene derecho a:
-
-- **Acceso** a sus datos personales (art. 15 RGPD) — no aplicable, no conservamos datos sobre usted
-- **Rectificación** de datos inexactos (art. 16 RGPD) — no aplicable
-- **Supresión** / derecho al olvido (art. 17 RGPD) — no aplicable; puede eliminar los datos locales desinstalando AutoBrew
-- **Limitación** del tratamiento (art. 18 RGPD) — no aplicable
-- **Portabilidad de los datos** (art. 20 RGPD) — no aplicable
-- **Oposición** al tratamiento (art. 21 RGPD) — no aplicable
-- **Retirada del consentimiento** en cualquier momento (art. 7.3 RGPD) — puede dejar de utilizar AutoBrew en cualquier momento
-- **Presentar una reclamación** ante una autoridad de control
-
-Estos derechos quedan satisfechos por nuestra política de recopilación cero.
-
-### 10.2 Derechos conforme a la CCPA/CPRA (California)
-
-Los residentes de California tienen derecho a:
-
-- Conocer qué información personal se recopila
-- Solicitar la eliminación de información personal
-- Excluirse de la venta o el intercambio de información personal
-- No sufrir discriminación por ejercer derechos de privacidad
-- Corregir la información personal inexacta
-- Limitar el uso de información personal sensible
-
-No vendemos información personal. No recopilamos información personal según se define en la CCPA/CPRA.
-
-### 10.3 Derechos conforme a la PIPEDA (Canadá)
-
-Los residentes canadienses tienen derecho a:
-
-- Acceder a su información personal
-- Impugnar la exactitud de su información
-- Retirar el consentimiento (sujeto a restricciones legales o contractuales)
-
-### 10.4 Derechos conforme a la Ley Australiana de Privacidad
-
-Los residentes australianos tienen derecho a:
-
-- Acceder a su información personal
-- Solicitar la corrección de información inexacta
-- Presentar reclamaciones ante la Oficina del Comisionado de Información Australiano (OAIC)
-
-### 10.5 Derechos conforme a la LGPD (Brasil)
-
-Los residentes brasileños tienen derecho a:
-
-- Confirmación del tratamiento de datos
-- Acceso a los datos
-- Corrección de datos incompletos o inexactos
-- Anonimización, bloqueo o eliminación de datos innecesarios
-- Portabilidad de los datos
-- Información sobre los datos compartidos
-- Revocación del consentimiento
+- El binario de la aplicación está firmado con el certificado Apple Developer ID y notarizado por Apple.
+- Las actualizaciones automáticas se verifican frente a una firma EdDSA Ed25519 antes de aplicarse.
+- AutoBrew se ejecuta bajo Hardened Runtime; las aplicaciones de distribución directa que se comunican con herramientas del sistema no pueden utilizar App Sandbox completo sin romper el caso de uso, por lo que enviamos los entitlements mínimos necesarios.
+- El código fuente puede auditarse públicamente en [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew).
 
 ---
 
-## 11. PRIVACIDAD DE LOS MENORES
+## 9. TRANSFERENCIAS INTERNACIONALES
 
-Nuestros Servicios no están dirigidos a menores de 16 años (o la edad de consentimiento aplicable en su jurisdicción).
-
-No recopilamos intencionadamente datos personales de menores. Si llegáramos a tener constancia de que hemos recopilado datos de un menor, tomaríamos medidas para eliminarlos con prontitud.
+No realizamos transferencias de datos personales porque no los recopilamos. Los servicios de terceros a los que accede a través de AutoBrew (servidores del proyecto Homebrew, Apple, icon.horse, GitHub) pueden operar fuera de la UE; dichas transferencias se producen entre usted y ellos, no con nosotros.
 
 ---
 
-## 12. COOKIES Y SEGUIMIENTO
+## 10. CAMBIOS EN ESTA POLÍTICA
 
-AutoBrew es una aplicación nativa de macOS y no utiliza cookies, web beacons, píxeles, huellas digitales ni tecnologías de seguimiento similares.
+Podemos actualizar esta Política de Privacidad para reflejar cambios en la arquitectura de AutoBrew o en la legislación aplicable. La fecha de «Última actualización» que figura al principio refleja la revisión más reciente. Los cambios sustanciales se comunican en las notas de versión de AutoBrew.
 
-AutoBrew no contiene webviews integrados que carguen contenido de terceros.
+### 10.1 Futuras funciones de pago
 
----
+Actualmente AutoBrew es gratuito y opera sin ningún backend (véase la Sección 2). El Editor se reserva el derecho a introducir **funciones de pago**, **ediciones de pago** o **servicios complementarios de pago** opcionales en versiones futuras, que podrían requerir un tratamiento limitado de datos (por ejemplo, gestión de pagos a través de un tercero o comprobación de una clave de licencia). Cualquier cambio de este tipo será:
 
-## 13. DECISIONES AUTOMATIZADAS E IA
+- Anunciado con antelación en las notas de versión de AutoBrew y en esta Política de Privacidad
+- Estrictamente opt-in — la versión gratuita y sin recopilación de datos seguirá siendo utilizable
+- Documentado en una sección específica de esta Política de Privacidad antes de habilitar cualquier nuevo flujo de datos
 
-### 13.1 Decisiones automatizadas con efectos jurídicos o similares
-
-No llevamos a cabo decisiones automatizadas ni elaboración de perfiles que produzcan efectos jurídicos. AutoBrew no realiza decisiones automatizadas basadas en datos personales.
-
-### 13.2 Funciones de IA
-
-AutoBrew no incluye funciones de IA ni envía datos a proveedores de IA.
-
-### 13.3 Comunicaciones de marketing
-
-AutoBrew no envía comunicaciones de marketing. No hay sistema de correo electrónico ni listas de envío.
-
-### 13.4 Eliminación de la cuenta
-
-No hay cuenta de usuario que eliminar — AutoBrew no requiere registro. Para eliminar todos los datos locales, desinstale AutoBrew y elimine sus carpetas de soporte.
+La declaración actual de «recopilación cero de datos» se aplica a la versión presente de AutoBrew. No constituye una garantía perpetua para cada versión futura; mantendremos esta Política actualizada para que siempre describa el comportamiento real.
 
 ---
 
-## 14. ENLACES Y SERVICIOS DE TERCEROS
+## 11. CONTACTO
 
-AutoBrew puede contener enlaces a sitios web de terceros (por ejemplo, el sitio web de Homebrew, repositorios de GitHub, sitios web de proyectos). No somos responsables de las prácticas de privacidad ni del contenido de los servicios de terceros.
+Para consultas en materia de protección de datos:
+**data-protection@digitalfreedom.co.za**
 
----
+Para todo lo demás:
+**hello@digitalfreedom.co.za**
 
-## 15. CAMBIOS EN ESTA POLÍTICA
-
-Podemos actualizar esta Política de Privacidad periódicamente.
-
-- Los cambios sustanciales se comunicarán a través de la aplicación o del repositorio público
-- El uso continuado tras los cambios constituye su aceptación
-- La «Fecha de entrada en vigor» indicada al principio refleja la revisión más reciente
-
----
-
-## 16. CONTACTO
-
-Para consultas relacionadas con la privacidad o para ejercer sus derechos:
-
-DigitalFreedom
-Una marca de Berger & Rosenstock GbR
+Berger & Rosenstock GbR (operando como DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Alemania
-
-Protección de datos: data-protection@digitalfreedom.co.za
-Consultas generales: hello@digitalfreedom.co.za
 Sitio web: https://digitalfreedom.co.za
-Soporte: https://support.digitalfreedom.co.za/help/767340152
-
-Para los residentes de la UE, también puede dirigirse a la autoridad de control competente de su Estado miembro.
 
 ---
 
-## 17. DISPOSICIONES REGIONALES
-
-### 17.1 Unión Europea / EEE
-
-- El tratamiento cumple los requisitos del RGPD
-- La autoridad de control principal es la autoridad alemana de protección de datos competente
-- Las Evaluaciones de Impacto relativas a la Protección de Datos (EIPD) se realizan cuando es necesario
-
-### 17.2 Reino Unido
-
-- El tratamiento cumple con el UK GDPR y la Data Protection Act 2018
-- La autoridad de control es la Information Commissioner's Office (ICO)
-
-### 17.3 Estados Unidos
-
-- El tratamiento cumple con las leyes estatales de privacidad aplicables (CCPA/CPRA, VCDPA, CPA, etc.)
-- Las señales «Do Not Track» se respetan cuando es técnicamente viable
-
-### 17.4 Canadá
-
-- El tratamiento cumple con la PIPEDA y la legislación provincial aplicable en materia de privacidad
-- Las reclamaciones pueden dirigirse a la Oficina del Comisionado de Privacidad de Canadá
-
-### 17.5 Australia
-
-- El tratamiento cumple con la Privacy Act 1988 y los Australian Privacy Principles (APPs)
-
-### 17.6 Brasil
-
-- El tratamiento cumple con la Lei Geral de Proteção de Dados (LGPD)
-- La Autoridade Nacional de Proteção de Dados (ANPD) es la autoridad competente
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Todos los derechos reservados.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

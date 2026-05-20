@@ -1,6 +1,6 @@
 # IMPRESSUM
 
-## Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz) und anwendbaren internationalen Offenlegungspflichten
+## Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz), § 18 MStV (Medienstaatsvertrag) und Artikel 12 Digital Services Act (Verordnung (EU) 2022/2065)
 
 **Zuletzt aktualisiert:** Mai 2026
 
@@ -8,14 +8,14 @@
 
 ## 1. DIENSTEANBIETER
 
-Die Dienste werden unter der Marke **DigitalFreedom** angeboten. Die betreibende juristische Einheit (Diensteanbieter im Sinne des § 5 DDG) ist:
+AutoBrew wird unter der Marke **DigitalFreedom** veröffentlicht. Die betreibende juristische Einheit (Diensteanbieter) ist:
 
 Berger & Rosenstock GbR
 Dieselstr. 22e
 61231 Bad Nauheim
 Deutschland
 
-Geschäftsbezeichnung: **DigitalFreedom** (verwendet auf Websites, in Apps, Marketingmaterialien, Kundenkommunikation und Produkt-UI)
+Geschäftsbezeichnung: **DigitalFreedom** (verwendet auf Websites, in der Anwendungsoberfläche, auf Marketingmaterialien sowie in der Kundenkommunikation).
 
 **E-Mail:** hello@digitalfreedom.co.za
 **Website:** https://digitalfreedom.co.za
@@ -24,18 +24,20 @@ Geschäftsbezeichnung: **DigitalFreedom** (verwendet auf Websites, in Apps, Mark
 
 ## 2. RECHTSFORM
 
-Gesellschaft bürgerlichen Rechts (GbR) — nach §§ 705 ff. BGB (Bürgerliches Gesetzbuch)
+Gesellschaft bürgerlichen Rechts (GbR) — nach §§ 705 ff. BGB.
 
-**Vertretungsberechtigte Gesellschafter:**
+**Vertretungsberechtigte Gesellschafter (gemeinschaftlich):**
 Marcel R. G. Berger
 Jasmin Rosenstock
+
+Die Gesellschaft wird gemeinschaftlich durch beide Gesellschafter vertreten.
 
 ---
 
 ## 3. KONTAKT
 
 **Allgemeine Anfragen:** hello@digitalfreedom.co.za
-**Kundensupport:** support@digitalfreedom.co.za
+**AutoBrew-Support / Fehlermeldungen:** [github.com/marcelrgberger/auto-brew/issues](https://github.com/marcelrgberger/auto-brew/issues)
 **Datenschutzanfragen:** data-protection@digitalfreedom.co.za
 **Website:** https://digitalfreedom.co.za
 
@@ -45,143 +47,89 @@ Jasmin Rosenstock
 
 ### 4.1 Umsatzsteuer-Identifikationsnummer
 
-Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG (Umsatzsteuergesetz):
+USt-IdNr. gemäß § 27a UStG:
 
-DE455096022
+**DE455096022**
 
 ### 4.2 Handelsregister
 
 Nicht zutreffend — eine Gesellschaft bürgerlichen Rechts (GbR) nach deutschem Recht ist nicht zur Eintragung in das Handelsregister verpflichtet.
 
-### 4.3 Berufsrechtliche Regelungen
+### 4.3 Berufshaftpflichtversicherung
 
-Nicht zutreffend — keine reglementierten Berufe im Sinne des § 5 Abs. 1 Nr. 5 DDG.
+Nicht zutreffend — AutoBrew ist ein kostenloses Open-Source-Softwareprojekt; reglementierte berufliche Dienstleistungen werden hierüber nicht erbracht.
 
 ---
 
 ## 5. VERANTWORTLICH FÜR REDAKTIONELLE INHALTE
 
-Verantwortlich gemäß § 18 Abs. 2 MStV (Medienstaatsvertrag):
+Verantwortlich gemäß § 18 Abs. 2 MStV:
 
 Marcel R. G. Berger
-Dieselstr. 22e
-61231 Bad Nauheim
-Deutschland
+c/o Berger & Rosenstock GbR
+Dieselstr. 22e, 61231 Bad Nauheim, Deutschland
 
 ---
 
-## 6. STREITBEILEGUNG
+## 6. DIE SOFTWARE
 
-### 6.1 EU-Online-Streitbeilegung
+AutoBrew ist ein Menüleisten-Werkzeug für macOS und wird **ausschließlich** über folgende Kanäle vertrieben:
 
-Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-https://ec.europa.eu/consumers/odr
+- **GitHub Releases** — [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases)
+- Den **Homebrew-Tap** — [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap)
 
-### 6.2 Verbraucherschlichtung
-
-Der Anbieter ist weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle gemäß dem deutschen Verbraucherstreitbeilegungsgesetz (VSBG) teilzunehmen, sofern nicht gesetzlich erforderlich.
+AutoBrew wird **nicht** über den Apple App Store, den Google Play Store oder ein sonstiges Download-Portal Dritter angeboten. Die Software steht unter der **MIT-Lizenz**; die vollständige Liste der Zuordnungen findet sich im Dokument [Open-Source-Lizenzen](OpenSourceLicenses.md).
 
 ---
 
-## 7. HAFTUNG FÜR INHALTE
+## 7. STREITBEILEGUNG
 
-### 7.1 Eigene Inhalte
+### 7.1 EU-Online-Streitbeilegung
 
-Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG und den allgemeinen Gesetzen für eigene Inhalte auf diesen Seiten verantwortlich.
+Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit unter: https://ec.europa.eu/consumers/odr.
 
-### 7.2 Fremde Inhalte
+### 7.2 Verbraucherschlichtung
 
-Nach §§ 8 bis 10 DDG sind wir nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder Umstände zu untersuchen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden entsprechender Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
-
----
-
-## 8. HAFTUNG FÜR LINKS
-
-Unsere Dienste können Links zu externen Websites Dritter enthalten, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.
+Der Anbieter ist weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle gemäß dem deutschen Verbraucherstreitbeilegungsgesetz (VSBG) teilzunehmen, sofern dies nicht gesetzlich vorgeschrieben ist.
 
 ---
 
-## 9. URHEBERRECHT
+## 8. HAFTUNG FÜR INHALTE
 
-Die durch den Diensteanbieter auf diesen Seiten erstellten Inhalte und Werke unterliegen dem deutschen Urheberrecht (Urheberrechtsgesetz — UrhG). Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
+### 8.1 Eigene Inhalte
+
+Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG und den allgemeinen Gesetzen für eigene Inhalte verantwortlich.
+
+### 8.2 Fremde Inhalte
+
+Nach §§ 8 bis 10 DDG sind wir nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder Umstände zu untersuchen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung besteht jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung. Bei Bekanntwerden entsprechender Rechtsverletzungen entfernen wir diese Inhalte umgehend.
+
+Dies gilt insbesondere für den öffentlichen Homebrew-Cask-Katalog, der innerhalb des BrewStore dargestellt wird — der Katalog und die Casks selbst werden vom Homebrew-Projekt sowie den einzelnen Cask-Herausgebern gehostet; wir stellen lediglich einen Viewer für diese Daten bereit, nicht jedoch die Daten selbst.
 
 ---
 
-## 10. INTERNATIONALE OFFENLEGUNGSPFLICHTEN
+## 9. HAFTUNG FÜR LINKS
 
-### 10.1 Europäische Union / EWR
+AutoBrew verweist auf externe Ressourcen (GitHub-Repositories, formulae.brew.sh, einzelne Cask-Homepages, das DigitalFreedom-Support-Portal). Wir haben keinen Einfluss auf die Inhalte dieser externen Seiten. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft; eine permanente inhaltliche Kontrolle ist ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen entfernen wir die betroffenen Links umgehend.
 
-Dieses Impressum erfüllt die Anforderungen von:
+---
 
-- **Deutschland:** § 5 DDG (Digitale-Dienste-Gesetz), § 18 Abs. 2 MStV (Medienstaatsvertrag)
-- **EU:** Artikel 5 der E-Commerce-Richtlinie (2000/31/EG), Artikel 12 des Digital Services Act (Verordnung (EU) 2022/2065)
-- **Österreich:** § 5 ECG (E-Commerce-Gesetz), § 25 MedienG
-- **Frankreich:** Artikel 6, Gesetz Nr. 2004-575 (LCEN — Loi pour la confiance dans l'économie numérique)
-- **Italien:** D.Lgs. 70/2003 (Decreto legislativo 9 aprile 2003, n. 70)
-- **Spanien:** Ley 34/2002 (LSSI-CE — Ley de Servicios de la Sociedad de la Información)
-- **Niederlande:** Artikel 3:15d BW (Burgerlijk Wetboek)
-- **Belgien:** Gesetz vom 11. März 2003 über den elektronischen Geschäftsverkehr
-- **Portugal:** Decreto-Lei Nr. 7/2004
-- **Polen:** Gesetz über die Erbringung elektronischer Dienstleistungen (Ustawa o świadczeniu usług drogą elektroniczną)
-- **Schweden:** E-Commerce Act (Lag om elektronisk handel)
+## 10. URHEBERRECHT
 
-### 10.2 Vereinigtes Königreich
+Der Quellcode von AutoBrew steht unter der MIT-Lizenz (siehe [github.com/marcelrgberger/auto-brew/blob/main/LICENSE](https://github.com/marcelrgberger/auto-brew/blob/main/LICENSE) und [Open-Source-Lizenzen](OpenSourceLicenses.md)). Die in AutoBrew eingebetteten Drittkomponenten (Sparkle, bsdiff, sais-lite, pdqsort) unterliegen ihren jeweiligen Lizenzen.
 
-Dieses Impressum erfüllt die Anforderungen von:
-
-- The Electronic Commerce (EC Directive) Regulations 2002
-- Companies Act 2006 (für geschäftliche Websites)
-
-### 10.3 Vereinigte Staaten
-
-Die Offenlegungen zur Unternehmensidentifikation entsprechen:
-
-- FTC Act § 5 (unlautere oder irreführende Handlungen oder Praktiken)
-- Staatsspezifischen Offenlegungspflichten für Unternehmen
-- CAN-SPAM Act (für geschäftliche Kommunikation)
-
-### 10.4 Kanada
-
-- CASL (Canada's Anti-Spam Legislation) Identifikationspflichten
-- Provinzspezifische Offenlegungspflichten für Unternehmen
-
-### 10.5 Australien
-
-- Australian Consumer Law (ACL) Identifikationspflichten für Unternehmen
-- Spam Act 2003 Absenderidentifikationspflichten
-
-### 10.6 Japan
-
-- Act on Specified Commercial Transactions (特定商取引法) Offenlegungspflichten
-- Act on Regulation of Transmission of Specified Electronic Mail (特定電子メール法)
-
-### 10.7 Südkorea
-
-- Act on Consumer Protection in Electronic Commerce (전자상거래법) Offenlegungspflichten
-- Act on Promotion of Information and Communications Network Utilization (정보통신망법)
-
-### 10.8 Brasilien
-
-- Marco Civil da Internet (Gesetz Nr. 12.965/2014) Identifikationspflichten
-- Consumer Defence Code (CDC) Identifikationspflichten für Unternehmen
-
-### 10.9 Indien
-
-- Information Technology Act, 2000 — Offenlegungspflichten für Vermittler
-- Consumer Protection (E-Commerce) Rules, 2020
-
-### 10.10 Weitere Rechtsordnungen
-
-Der Anbieter hält die anwendbaren Identifikations- und Offenlegungspflichten in allen Rechtsordnungen ein, in denen die Dienste angeboten werden.
+Logos, Icon-Grafiken, Screenshots von Drittanbieter-Apps im BrewStore-Katalog sowie die in der Software genannten Markennamen verbleiben Eigentum der jeweiligen Inhaber (siehe [Markenhinweis](Trademark.md)).
 
 ---
 
 ## 11. DATENSCHUTZBEAUFTRAGTER
 
-Ein förmlicher Datenschutzbeauftragter wurde nicht bestellt, da der Anbieter die Schwellenwertkriterien für eine verpflichtende Bestellung nach Art. 37 DSGVO / § 38 BDSG nicht erreicht.
+Ein Datenschutzbeauftragter wurde nicht förmlich bestellt, da der Anbieter die Schwellenkriterien für eine Pflichtbestellung nach Art. 37 DSGVO / § 38 BDSG nicht erfüllt.
 
-Für alle datenschutzbezogenen Anfragen (Art. 13/14 DSGVO, Auskunfts-, Berichtigungs-, Löschungs-, Übertragbarkeits- und Widerspruchsersuchen) wenden Sie sich bitte an: data-protection@digitalfreedom.co.za
+Für alle datenschutzbezogenen Anfragen — Auskunft, Berichtigung, Löschung, Datenübertragbarkeit, Widerspruch, Einschränkung — wenden Sie sich bitte an: **data-protection@digitalfreedom.co.za**
+
+Die vollständige Datenschutzerklärung finden Sie unter [Datenschutzerklärung](PrivacyPolicy.md). Kurz gefasst: AutoBrew erhebt keine personenbezogenen Daten — die Anwendung läuft vollständig auf dem Mac des Nutzers.
 
 ---
 
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Alle Rechte vorbehalten.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

@@ -1,327 +1,146 @@
-# WARUNKI ŚWIADCZENIA USŁUG
+# WARUNKI UŻYTKOWANIA
 
-## Ogólne warunki i postanowienia
+## AutoBrew
 
-**Data wejścia w życie:** kwiecień 2026
+**Data wejścia w życie:** maj 2026
+**Ostatnia aktualizacja:** maj 2026
 
-**Dostawca:**
-DigitalFreedom
-Marka Berger & Rosenstock GbR
+Niniejsze Warunki Użytkowania („Warunki") regulują korzystanie przez Państwa z AutoBrew („Oprogramowanie"). Prosimy o ich uważne przeczytanie. Instalując lub używając AutoBrew, zgadzają się Państwo na związanie niniejszymi Warunkami.
+
+---
+
+## 1. DOSTAWCA
+
+Oprogramowanie jest publikowane pod marką **DigitalFreedom**. Stojącym za nim podmiotem prawnym jest:
+
+Berger & Rosenstock GbR (działająca jako DigitalFreedom)
+Dieselstr. 22e, 61231 Bad Nauheim, Niemcy
+Uprawnieni przedstawiciele: Marcel R. G. Berger, Jasmin Rosenstock
+E-mail: hello@digitalfreedom.co.za
+Strona internetowa: https://digitalfreedom.co.za
+
+Niniejsze Warunki obowiązują globalnie. Bezwzględnie obowiązujące prawa konsumenta oraz inne ustawowe prawa przyznane przez kraj zamieszkania użytkownika pozostają nienaruszone i mają pierwszeństwo wszędzie tam, gdzie zapewniają wyższą ochronę.
+
+---
+
+## 2. OPROGRAMOWANIE
+
+AutoBrew jest narzędziem paska menu dla systemu macOS, które automatyzuje aktualizacje Homebrew, przegląda katalog cask Homebrew oraz zarządza migawkami aplikacji do migracji między Macami. Jest:
+
+- **Open source** na licencji MIT — pełny kod źródłowy pod adresem [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew)
+- **Bezpłatny** — bez zakupów w aplikacji, bez subskrypcji, bez wariantu płatnego, bez okresu próbnego
+- **Dystrybuowany bezpośrednio** — notaryzowany plik DMG z GitHub Releases oraz tap Homebrew; nie poprzez Apple App Store ani Google Play Store
+- **Wyłącznie lokalny** — działa w całości na Państwa Macu, nie wymaga konta AutoBrew ani usługi backend (patrz [Polityka Prywatności](PrivacyPolicy.md))
+
+Niniejsze Warunki dotyczą pliku binarnego AutoBrew. Licencja MIT (powtórzona w [EULA](EULA.md) oraz [Licencje Open Source](OpenSourceLicenses.md)) reguluje kod źródłowy oraz wszelkie forki lub utwory pochodne.
+
+---
+
+## 3. LICENCJA UŻYTKOWA
+
+Z zastrzeżeniem przestrzegania niniejszych Warunków oraz licencji MIT mogą Państwo:
+
+- Instalować, uruchamiać, modyfikować i redystrybuować AutoBrew na dowolnej liczbie Maców, które Państwo kontrolują
+- Forkować kod źródłowy i tworzyć utwory pochodne na warunkach licencji MIT
+
+Nie mogą Państwo:
+
+- Wprowadzać w błąd co do pochodzenia Oprogramowania (licencja MIT wymaga zachowania oryginalnej noty copyright)
+- Usuwać osadzonych not licencyjnych Sparkle, bsdiff, sais-lite ani pdqsort podczas redystrybucji
+- Używać nazwy **AutoBrew** ani marki **DigitalFreedom** w utworach pochodnych bez naszej pisemnej zgody (znak towarowy, patrz dokument [Znaki towarowe](Trademark.md))
+
+---
+
+## 4. BEZ KONTA, BEZ PŁATNOŚCI (STAN AKTUALNY)
+
+AutoBrew obecnie nie wymaga rejestracji, zapisu ani jakiejkolwiek płatności. Link **Sponsor** wewnątrz aplikacji prowadzi do GitHub Sponsors i jest **całkowicie dobrowolny** — każdy wkład traktowany jest jako darowizna i nie tworzy uprawnień do funkcji ani wsparcia.
+
+### 4.1 Zastrzeżenie dotyczące przyszłych funkcji płatnych
+
+Dostawca zastrzega sobie prawo do wprowadzenia opcjonalnych **funkcji płatnych**, **edycji płatnych** lub **płatnych usług dodatkowych** w przyszłych wersjach AutoBrew. Każda taka przyszła płatna oferta:
+
+- Zostanie zapowiedziana z wyprzedzeniem za pośrednictwem interfejsu aplikacji oraz oficjalnych informacji o wydaniu
+- Będzie obowiązywać wyłącznie na przyszłość — Państwa prawo do dalszego korzystania z aktualnej bezpłatnej wersji pozostaje nienaruszone
+- Pozostawi nienaruszony rdzeń open-source: kod źródłowy pod adresem [github.com/marcelrgberger/auto-brew](https://github.com/marcelrgberger/auto-brew) pozostanie dostępny na licencji MIT
+
+Aktualny brak funkcji płatnych nie stanowi gwarancji, że AutoBrew pozostanie wolny od funkcji płatnych w każdej przyszłej wersji.
+
+---
+
+## 5. ZALEŻNOŚĆ OD HOMEBREW
+
+AutoBrew opiera się na działającej instalacji Homebrew, aby spełniać swój cel. AutoBrew uruchamia plik binarny `brew` oraz odczytuje i zapisuje dane przy użyciu własnych komend i konwencji projektu Homebrew. Nie jesteśmy powiązani z projektem Homebrew; nie kontrolujemy, które pakiety są dostępne, kiedy wydawane są wersje ani co poszczególni wydawcy cask robią ze swoimi instalatorami.
+
+Jeśli instalacja cask nie powiedzie się, zachowa się nieoczekiwanie lub spowoduje szkodę, dotyczy to relacji między Państwem a wydawcą cask i/lub projektem Homebrew — patrz sekcja 7 (Wyłączenie gwarancji) oraz sekcja 8 (Ograniczenie odpowiedzialności).
+
+---
+
+## 6. AKTUALIZACJE
+
+AutoBrew korzysta z frameworku Sparkle do dostarczania aktualizacji w aplikacji z oficjalnego appcast AutoBrew na GitHub. Aktualizacje są podpisywane kluczem EdDSA Ed25519 i weryfikowane przed zastosowaniem. Automatyczne aktualizacje można wyłączyć w Ustawieniach.
+
+Mogą Państwo zignorować aktualizacje w aplikacji i aktualizować plik binarny za pośrednictwem swojego tap Homebrew lub ręcznie pobierając nowszy DMG.
+
+---
+
+## 7. WYŁĄCZENIE GWARANCJI
+
+Oprogramowanie jest dostarczane **„TAK JAK JEST"** i **„W MIARĘ DOSTĘPNOŚCI"** bez jakichkolwiek gwarancji, wyraźnych lub dorozumianych, w tym m.in. dorozumianych gwarancji przydatności handlowej, przydatności do określonego celu i nienaruszania praw.
+
+Bez ograniczania powyższego nie gwarantujemy, że:
+
+- Oprogramowanie będzie działać nieprzerwanie lub bezbłędnie
+- Współdziałanie AutoBrew z Homebrew, z poszczególnymi cask lub z samym macOS zawsze przyniesie pożądany rezultat
+- Migawki tworzone przez AutoBrew idealnie uchwycą każdy aspekt stanu aplikacji — aplikacje, które przechowują dane poza standardowymi podkatalogami Library, mogą nie zostać w pełni uchwycone
+
+Ustawowe prawa gwarancyjne, których nie można wyłączyć w drodze umowy na podstawie lokalnego prawa ochrony konsumentów (np. niemiecka Mängelhaftung zgodnie z §§ 434 i nast. BGB, gdy ma zastosowanie), pozostają nienaruszone.
+
+---
+
+## 8. OGRANICZENIE ODPOWIEDZIALNOŚCI
+
+W maksymalnym zakresie dozwolonym przez obowiązujące prawo:
+
+- Nie ponosimy odpowiedzialności za jakiekolwiek pośrednie, przypadkowe, wynikowe, przykładowe lub karne szkody
+- Nie ponosimy odpowiedzialności za utratę danych, utracone zyski, przerwę w działalności ani jakiekolwiek szkody wynikające z oprogramowania stron trzecich (Homebrew, poszczególne cask) wywoływanego za pośrednictwem AutoBrew
+
+W odniesieniu do użytkowników mających zwykłe miejsce pobytu w Niemczech lub UE, nasza odpowiedzialność za szkody spowodowane **rażącym niedbalstwem lub umyślnym niewłaściwym postępowaniem**, za **naruszenie życia, zdrowia lub ciała** oraz na podstawie **bezwzględnie obowiązujących przepisów niemieckiej ustawy o odpowiedzialności za produkt (ProdHaftG)** pozostaje nienaruszona.
+
+---
+
+## 9. ROZWIĄZANIE
+
+Mogą Państwo w każdej chwili przestać korzystać z AutoBrew, odinstalowując go. Usunięcie AutoBrew oraz jego folderu wsparcia (`~/Library/Application Support/AutoBrew/`) przywraca Państwa Maca do stanu, w którym nie pozostają żadne artefakty AutoBrew.
+
+Możemy w każdej chwili zaprzestać dystrybucji AutoBrew. Ponieważ Oprogramowanie jest open source na licencji MIT, Państwo i społeczność pozostają wolni, aby je forkować, budować i niezależnie uruchamiać.
+
+---
+
+## 10. ZMIANY NINIEJSZYCH WARUNKÓW
+
+Możemy aktualizować niniejsze Warunki w celu odzwierciedlenia zmian w Oprogramowaniu lub w obowiązującym prawie. Istotne zmiany są komunikowane w informacjach o wydaniu AutoBrew. Data „Ostatniej aktualizacji" na górze odzwierciedla najnowszą wersję.
+
+---
+
+## 11. PRAWO WŁAŚCIWE I JURYSDYKCJA
+
+Niniejsze Warunki podlegają prawu Republiki Federalnej Niemiec, z wyłączeniem Konwencji Narodów Zjednoczonych o umowach międzynarodowej sprzedaży towarów (CISG).
+
+Dla konsumentów mających zwykłe miejsce pobytu poza Niemcami dodatkowo stosuje się bezwzględnie obowiązujące prawo ochrony konsumentów ich kraju zamieszkania. Niewyłącznym miejscem jurysdykcji dla sporów jest Bad Nauheim, Niemcy; konsumenci mogą nadal pozywać w miejscu swojego zamieszkania, jeżeli pozwala na to prawo lokalne.
+
+W przypadku sporów konsumenckich powstałych na gruncie prawa UE dostępna jest platforma internetowego rozstrzygania sporów Komisji Europejskiej pod adresem https://ec.europa.eu/consumers/odr. Nie jesteśmy zobowiązani ani skłonni do udziału w alternatywnych postępowaniach rozstrzygania sporów przed komisją arbitrażową konsumentów (Verbraucherschlichtungsstelle) zgodnie z § 36 VSBG.
+
+---
+
+## 12. KONTAKT
+
+Berger & Rosenstock GbR (działająca jako DigitalFreedom)
 Dieselstr. 22e
 61231 Bad Nauheim
 Niemcy
-Kontakt: hello@digitalfreedom.co.za
+E-mail: hello@digitalfreedom.co.za
 Strona internetowa: https://digitalfreedom.co.za
 
 ---
 
-## 1. ZAKRES I AKCEPTACJA
-
-### 1.1 Umowa
-
-Niniejsze Warunki Świadczenia Usług („Warunki") regulują dostęp do naszych stron internetowych, aplikacji, API i powiązanych usług („Usługi") oraz korzystanie z nich, świadczonych pod marką **DigitalFreedom** przez Berger & Rosenstock GbR („Dostawca").
-
-### 1.1.1 Zakres globalny
-
-AutoBrew jest dystrybuowany bezpośrednio jako natywna aplikacja macOS o otwartym kodzie źródłowym (licencja MIT) i jest udostępniany użytkownikom na całym świecie. Niniejsze Warunki mają zastosowanie globalnie do wszystkich użytkowników Usług, niezależnie od kraju dostępu lub korzystania. Dostawca przyjmuje Ogólne rozporządzenie UE o ochronie danych (RODO) oraz powiązane prawo UE jako standard bazowy i stosuje je jako globalny minimalny poziom; bezwzględnie obowiązujące prawa konsumenta i inne prawa ustawowe przyznane przez kraj zamieszkania użytkownika pozostają nienaruszone i mają pierwszeństwo, gdy zapewniają większą ochronę.
-
-### 1.2 Akceptacja
-
-Uzyskując dostęp do Usług lub korzystając z nich, zgadzają się Państwo na związanie niniejszymi Warunkami. Jeśli nie wyrażają Państwo zgody, nie wolno korzystać z Usług.
-
-### 1.3 Uprawnienia
-
-Aby korzystać z Usług, muszą Państwo mieć co najmniej 16 lat (lub odpowiedni wiek zgody w Państwa jurysdykcji). Korzystając z Usług, oświadczają Państwo, że spełniają ten wymóg.
-
-### 1.4 Użytek biznesowy
-
-Jeżeli korzystają Państwo z Usług w imieniu organizacji, oświadczają Państwo, że posiadają uprawnienia do związania tej organizacji niniejszymi Warunkami.
-
----
-
-## 2. USŁUGI
-
-### 2.1 Opis
-
-Dostawca oferuje aplikacje, narzędzia i powiązane usługi. AutoBrew jest natywną aplikacją macOS o otwartym kodzie źródłowym, która automatyzuje aktualizacje Homebrew, udostępnia katalog BrewStore oraz funkcjonalność AppSnapshot. Konkretny zakres i funkcjonalność każdej Usługi jest opisany w jej dokumentacji.
-
-### 2.2 Bezpłatne i open source
-
-AutoBrew jest **całkowicie bezpłatny** i wydany na licencji **MIT**. Nie ma zakupów w aplikacji, planu płatnego, subskrypcji ani jakiejkolwiek monetyzacji. Dobrowolne darowizny dla projektu można składać za pośrednictwem GitHub Sponsors; wsparcie projektu jest dobrowolne i nie odblokowuje żadnych dodatkowych funkcji.
-
-### 2.3 Modyfikacje
-
-Dostawca zastrzega sobie prawo do modyfikowania, zawieszania lub wstrzymywania dowolnej Usługi w dowolnym momencie, za uprzednim powiadomieniem lub bez niego. Istotne zmiany będą komunikowane, gdy będzie to wykonalne.
-
-### 2.4 Dostępność
-
-Usługi są świadczone na zasadzie „w miarę dostępności". Dostawca nie gwarantuje nieprzerwanego dostępu ani dostępności.
-
----
-
-## 3. KONTA
-
-### 3.1 Rejestracja
-
-AutoBrew nie wymaga konta u Dostawcy. Nie istnieje konto DigitalFreedom dla tej Usługi.
-
-### 3.2 Bezpieczeństwo
-
-Są Państwo odpowiedzialni za:
-
-- Bezpieczeństwo własnego komputera Mac
-- Wszystkie działania wykonywane przy użyciu aplikacji
-- Wszelkie konsekwencje operacji Homebrew zainicjowanych przez Państwa lub zaplanowanych przez Państwa
-
-### 3.3 Zawieszenie
-
-Nie dotyczy — brak kont u Dostawcy.
-
----
-
-## 4. TREŚCI UŻYTKOWNIKA
-
-### 4.1 Własność
-
-AutoBrew nie hostuje, nie przechowuje ani nie przesyła treści użytkownika na żaden serwer prowadzony przez Dostawcę. Zachowują Państwo wszelkie prawa do treści, danych i konfiguracji utworzonych lokalnie przy użyciu aplikacji.
-
-### 4.2 Udzielenie licencji
-
-Ponieważ żadne treści nie są przekazywane Dostawcy, żadna licencja na treści nie jest udzielana.
-
-### 4.3 Odpowiedzialność
-
-Są Państwo wyłącznie odpowiedzialni za swoją lokalną konfigurację oraz za wybór formuł i casks Homebrew zarządzanych przez AutoBrew.
-
-### 4.4 Usuwanie
-
-Nie dotyczy — Dostawca nie hostuje treści użytkownika.
-
----
-
-## 5. DOPUSZCZALNE UŻYCIE I FAIR USE
-
-Nie wolno:
-
-- Naruszać jakiegokolwiek obowiązującego prawa lub regulacji
-- Naruszać własności intelektualnej lub innych praw stron trzecich
-- Przesyłać złośliwego oprogramowania, spamu ani szkodliwych treści
-- Podejmować prób uzyskania nieautoryzowanego dostępu do Usług lub powiązanych systemów
-- Zakłócać działania ani bezpieczeństwa Usług
-- Wykorzystywać Usług w celach oszukańczych lub wprowadzających w błąd
-- Odsprzedawać ani redystrybuować Usług w sposób inny niż dozwolony przez licencję MIT
-
----
-
-## 6. WŁASNOŚĆ INTELEKTUALNA
-
-### 6.1 IP Dostawcy
-
-AutoBrew jest open source na licencji **MIT**. Kod źródłowy jest dostępny publicznie i może być używany, kopiowany, modyfikowany i dystrybuowany zgodnie z warunkami licencji MIT. Znaki towarowe, logo i nazwy marek (w tym „DigitalFreedom" i „AutoBrew") pozostają własnością Dostawcy i nie są objęte licencją MIT.
-
-### 6.2 Znaki towarowe
-
-Znaki towarowe i nazwy handlowe Dostawcy nie mogą być używane bez uprzedniej pisemnej zgody. Patrz Trademark Disclaimer w celu uzyskania szczegółowych informacji.
-
-### 6.3 Opinie zwrotne
-
-Wszelkie opinie lub sugestie, które Państwo przekazują, mogą być wykorzystane przez Dostawcę bez zobowiązań wobec Państwa.
-
-### 6.4 Znaki towarowe stron trzecich
-
-„Homebrew" jest znakiem towarowym Homebrew. „macOS", „Apple" oraz powiązane nazwy są znakami towarowymi Apple Inc. „GitHub" jest znakiem towarowym GitHub, Inc. Wszystkie inne znaki towarowe stanowią własność ich odpowiednich właścicieli.
-
----
-
-## 7. PŁATNOŚCI I SUBSKRYPCJE
-
-### 7.1 Aplikacja bezpłatna
-
-AutoBrew jest całkowicie bezpłatny. Nie ma cen, zakupów w aplikacji, subskrypcji ani opłat. Dobrowolne darowizny przez GitHub Sponsors są dobrowolne i nie tworzą żadnego stosunku umownego między Państwem a Dostawcą poza zwykłą darowizną.
-
-### 7.2 Przetwarzanie płatności
-
-Nie dotyczy. Wszelkie dobrowolne darowizny GitHub Sponsors są przetwarzane wyłącznie przez GitHub, Inc. zgodnie z jego warunkami.
-
-### 7.3 Subskrypcje
-
-Nie dotyczy. AutoBrew nie oferuje subskrypcji.
-
-### 7.4 Zwroty
-
-Nie dotyczy. AutoBrew jest bezpłatny. Zwroty dobrowolnych darowizn GitHub Sponsors są regulowane wyłącznie warunkami GitHub.
-
-### 7.5 Prawo odstąpienia (UE)
-
-Nie dotyczy z powodu braku transakcji handlowej. Konsumenci w UE zachowują wszelkie ustawowe prawa konsumenckie, jeśli i kiedy mają one zastosowanie.
-
----
-
-## 8. USŁUGI STRON TRZECICH
-
-### 8.1 Integracja
-
-Usługi integrują się z usługami stron trzecich, w tym Homebrew (formuły / casks), GitHub (hosting kodu źródłowego, kanał aktualizacji Sparkle, Sponsors) oraz Apple macOS (systemy operacyjne). Dostawca nie kontroluje ani nie popiera tych usług.
-
-### 8.2 Warunki
-
-Państwa korzystanie z usług stron trzecich podlega ich odpowiednim warunkom i politykom prywatności.
-
-### 8.3 Odpowiedzialność
-
-Dostawca nie ponosi odpowiedzialności za żadne szkody wynikające z Państwa korzystania z usług stron trzecich.
-
----
-
-## 9. WYŁĄCZENIE GWARANCJI
-
-W MAKSYMALNYM ZAKRESIE DOZWOLONYM PRZEZ PRAWO:
-
-- Usługi są dostarczane „TAK JAK SĄ" i „W MIARĘ DOSTĘPNOŚCI"
-- Dostawca wyłącza wszelkie gwarancje, wyraźne lub dorozumiane
-- Brak gwarancji dokładności, kompletności, niezawodności ani przydatności do określonego celu
-- Brak gwarancji, że Usługi będą działać nieprzerwanie, bezpiecznie lub bezbłędnie
-
-**Operacje Homebrew.** AutoBrew automatyzuje operacje Homebrew, które mogą instalować, aktualizować lub usuwać oprogramowanie na Państwa komputerze Mac. Dostawca nie ponosi odpowiedzialności za niezamierzone zmiany, niezgodności pakietów ani utratę danych wynikającą z tych operacji. Zalecane jest utrzymywanie niezależnych kopii zapasowych.
-
----
-
-## 10. OGRANICZENIE ODPOWIEDZIALNOŚCI
-
-W MAKSYMALNYM ZAKRESIE DOZWOLONYM PRZEZ PRAWO:
-
-- Dostawca nie ponosi odpowiedzialności za pośrednie, przypadkowe, specjalne, wynikowe lub karne szkody
-- Dostawca nie ponosi odpowiedzialności za utratę danych, zysków, przychodów ani szans biznesowych
-- Całkowita łączna odpowiedzialność nie przekroczy większej z (a) kwoty zapłaconej przez Państwa w 12 miesiącach poprzedzających roszczenie (która dla AutoBrew wynosi zero, ponieważ aplikacja jest bezpłatna), lub (b) EUR 100
-
----
-
-## 11. ZWOLNIENIE Z ODPOWIEDZIALNOŚCI
-
-Zgadzają się Państwo zwolnić Dostawcę z roszczeń, szkód, strat i wydatków (w tym uzasadnionych honorariów adwokackich) wynikających z:
-
-- Państwa korzystania z Usług
-- Państwa naruszenia niniejszych Warunków
-- Państwa naruszenia jakiegokolwiek prawa lub praw stron trzecich
-- Państwa lokalnej konfiguracji lub wyboru pakietów
-
----
-
-## 12. ROZWIĄZANIE
-
-### 12.1 Przez Państwa
-
-Mogą Państwo przestać korzystać z Usług w dowolnym momencie, odinstalowując AutoBrew.
-
-### 12.2 Przez Dostawcę
-
-Dostawca może rozwiązać lub zawiesić Państwa dostęp do Usług w dowolnym momencie, z przyczyną lub bez. Istotne naruszenia mogą skutkować natychmiastowym rozwiązaniem bez powiadomienia. Licencja MIT na sam kod źródłowy pozostaje nienaruszona.
-
-### 12.3 Skutek rozwiązania
-
-Po rozwiązaniu:
-
-- Państwa prawo do korzystania z Usług ustaje (z wyjątkiem praw przyznanych na mocy licencji MIT na kod źródłowy)
-- Postanowienia, które ze swojej natury powinny przetrwać, będą obowiązywać (w tym ograniczenia odpowiedzialności, zwolnienie z odpowiedzialności, prawo właściwe)
-
----
-
-## 13. PRAWO WŁAŚCIWE I ROZSTRZYGANIE SPORÓW
-
-### 13.1 Prawo właściwe
-
-Niniejsze Warunki podlegają prawu Republiki Federalnej Niemiec.
-
-### 13.2 Jurysdykcja
-
-Spory podlegają wyłącznej jurysdykcji sądów w Niemczech, chyba że bezwzględnie obowiązujące prawo o ochronie konsumentów stanowi inaczej.
-
-### 13.3 Spory konsumenckie (UE)
-
-Komisja Europejska udostępnia platformę internetowego rozstrzygania sporów pod adresem https://ec.europa.eu/consumers/odr. Dostawca nie jest zobowiązany ani skłonny do udziału w postępowaniach rozstrzygania sporów przed komisją arbitrażową konsumentów, chyba że wymaga tego prawo.
-
----
-
-## 14. POSTANOWIENIA REGIONALNE
-
-### 14.1 Unia Europejska
-
-- Bezwzględnie obowiązujące prawa konsumenta na mocy dyrektyw UE (w tym dyrektywy o prawach konsumentów oraz dyrektywy o treściach cyfrowych) pozostają nienaruszone
-- Ustawowe prawo odstąpienia ma zastosowanie do zakupów treści cyfrowych zgodnie z prawem
-- Prawa gwarancyjne dla treści cyfrowych na mocy dyrektywy (UE) 2019/770 nie są wyłączone
-
-### 14.2 Polska
-
-- Konsumenci zachowują prawa wynikające z polskiej ustawy o prawach konsumenta oraz Kodeksu cywilnego
-- Ustawa o świadczeniu usług drogą elektroniczną ma zastosowanie
-
-### 14.3 Stany Zjednoczone
-
-- Tam, gdzie zabrania tego prawo stanowe, ograniczenia odpowiedzialności lub gwarancji nie mają zastosowania
-- Postanowienia arbitrażowe mogą nie mieć zastosowania w jurysdykcjach, w których arbitraż konsumencki jest ograniczony
-
-### 14.4 Zjednoczone Królestwo
-
-- Mają zastosowanie ochrony Consumer Rights Act 2015
-- Odpowiedzialność za śmierć lub obrażenia ciała spowodowane zaniedbaniem nie jest wyłączona
-
-### 14.5 Kanada
-
-- Prowincjonalne ustawy o ochronie konsumentów mogą przeważać nad niektórymi postanowieniami
-
-### 14.6 Australia
-
-- Gwarancje konsumenckie na mocy Australian Consumer Law nie mogą być wyłączone
-- Odpowiedzialność jest ograniczona do ponownego dostarczenia Usług lub zapłaty kosztu ich ponownego dostarczenia
-
-### 14.7 Pozostałe jurysdykcje
-
-- Tam, gdzie lokalne bezwzględnie obowiązujące prawo ogranicza jakiekolwiek postanowienie, postanowienie to ma zastosowanie tylko w dozwolonym zakresie
-
----
-
-## 15. SIŁA WYŻSZA
-
-Żadna ze stron nie ponosi odpowiedzialności za opóźnienie lub niewykonanie zobowiązań wynikających z niniejszych Warunków w zakresie, w jakim opóźnienie lub niewykonanie spowodowane jest zdarzeniami poza uzasadnioną kontrolą, w tym m.in. siłą wyższą, wojną, niepokojami społecznymi, terroryzmem, cyberatakami, działaniami rządowymi, pandemią, pożarem, powodzią, długotrwałymi przerwami w dostawie energii lub telekomunikacji lub awarią infrastruktury podmiotów wyższego rzędu. Strona, której to dotyczy, niezwłocznie powiadomi drugą stronę i podejmie uzasadnione starania w celu ograniczenia skutków.
-
-Niniejsza sekcja nie wpływa na obowiązek zapłaty należnych już kwot ani na żadne bezwzględnie obowiązujące prawo konsumenta w kraju zamieszkania użytkownika.
-
----
-
-## 16. POSTANOWIENIA OGÓLNE
-
-### 16.1 Rozdzielność postanowień
-
-Jeśli jakiekolwiek postanowienie zostanie uznane za nieważne, pozostałe postanowienia pozostają w pełnej mocy.
-
-### 16.2 Zrzeczenie się
-
-Niewyegzekwowanie któregokolwiek postanowienia nie stanowi zrzeczenia się.
-
-### 16.3 Cesja
-
-Dostawca może dokonać cesji niniejszych Warunków (na przykład w związku z planowaną reorganizacją podmiotu prowadzącego z Berger & Rosenstock GbR (Niemcy) na DigitalFreedom Pty (Ltd) (Republika Południowej Afryki)). Użytkownicy zostaną poinformowani co najmniej 30 dni przed jakąkolwiek zmianą podmiotu umownego, a tam, gdzie wymaga tego prawo, zostanie pozyskana nowa zgoda. Nie mogą Państwo dokonać cesji bez uprzedniej pisemnej zgody.
-
-### 16.4 Całość porozumienia
-
-Niniejsze Warunki wraz z Polityką Prywatności, EULA, Trademark Disclaimer, Open Source Notices i wszelkimi innymi przywołanymi politykami stanowią całość porozumienia między Państwem a Dostawcą.
-
-### 16.5 Zmiany
-
-Dostawca może aktualizować niniejsze Warunki. Istotne zmiany są zgłaszane z co najmniej 30-dniowym wyprzedzeniem za pośrednictwem Usług lub e-mailem oraz, gdy wymaga tego obowiązujące prawo o ochronie konsumentów, wchodzą w życie dopiero po ponownej akceptacji. Dalsze korzystanie po nieistotnych zmianach stanowi ich akceptację.
-
-### 16.6 Okres przedawnienia
-
-Roszczenia z tytułu niniejszych Warunków podlegają ustawowym okresom przedawnienia prawa właściwego (dla prawa niemieckiego: § 195 BGB — trzy lata od końca roku, w którym powstało roszczenie i dowiedzieli się Państwo o nim). Nie ma to wpływu na żaden bezwzględnie obowiązujący okres przedawnienia kraju zamieszkania użytkownika.
-
-### 16.7 Zawiadomienia
-
-Zawiadomienia do Dostawcy powinny być wysyłane na adres `hello@digitalfreedom.co.za` (ogólne) lub `data-protection@digitalfreedom.co.za` (prywatność / RODO). Zawiadomienia dla Państwa mogą być wysyłane przez powiadomienie w aplikacji lub poprzez stronę projektu.
-
-### 16.8 Język
-
-Niniejsze Warunki są dostarczane w języku angielskim. Tłumaczenia mogą być dostarczane dla wygody; w przypadku rozbieżności pierwszeństwo ma wersja angielska, chyba że bezwzględnie obowiązujące prawo lokalne stanowi inaczej.
-
----
-
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Wszelkie prawa zastrzeżone.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.

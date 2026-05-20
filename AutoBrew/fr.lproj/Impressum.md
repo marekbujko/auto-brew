@@ -1,21 +1,21 @@
 # MENTIONS LÉGALES
 
-## Informations conformément au § 5 DDG (Digitale-Dienste-Gesetz) et aux obligations internationales applicables en matière de divulgation
+## Informations conformément au § 5 DDG (Digitale-Dienste-Gesetz), au § 18 MStV (Medienstaatsvertrag) et à l'article 12 du règlement sur les services numériques (règlement (UE) 2022/2065)
 
-**Dernière mise à jour :** Mai 2026
+**Dernière mise à jour :** mai 2026
 
 ---
 
 ## 1. FOURNISSEUR DU SERVICE
 
-Les Services sont proposés sous la marque **DigitalFreedom**. L'entité juridique exploitante (Diensteanbieter / fournisseur de services au sens du § 5 DDG) est :
+AutoBrew est publié sous la marque **DigitalFreedom**. L'entité juridique d'exploitation (Diensteanbieter / fournisseur du service) est :
 
 Berger & Rosenstock GbR
 Dieselstr. 22e
 61231 Bad Nauheim
 Allemagne
 
-Nom commercial : **DigitalFreedom** (utilisé sur les sites web, applications, supports marketing, communications clients et interface utilisateur des produits)
+Nom commercial : **DigitalFreedom** (utilisé sur les sites web, dans l'interface de l'application, sur les supports marketing et dans la communication client).
 
 **Courriel :** hello@digitalfreedom.co.za
 **Site web :** https://digitalfreedom.co.za
@@ -24,18 +24,20 @@ Nom commercial : **DigitalFreedom** (utilisé sur les sites web, applications, s
 
 ## 2. FORME JURIDIQUE
 
-Gesellschaft bürgerlichen Rechts (GbR) — société de droit civil au titre du droit allemand
+Gesellschaft bürgerlichen Rechts (GbR) — société de droit civil au titre des §§ 705 et suivants du BGB.
 
-**Représentants autorisés :**
+**Représentants autorisés (conjointement) :**
 Marcel R. G. Berger
 Jasmin Rosenstock
+
+La société est représentée conjointement par les deux associés.
 
 ---
 
 ## 3. CONTACT
 
 **Demandes générales :** hello@digitalfreedom.co.za
-**Assistance client :** support@digitalfreedom.co.za
+**Support AutoBrew / signalements de bugs :** [github.com/marcelrgberger/auto-brew/issues](https://github.com/marcelrgberger/auto-brew/issues)
 **Demandes relatives à la protection des données :** data-protection@digitalfreedom.co.za
 **Site web :** https://digitalfreedom.co.za
 
@@ -45,143 +47,89 @@ Jasmin Rosenstock
 
 ### 4.1 Numéro d'identification à la TVA
 
-Numéro de TVA conformément au § 27a de la loi allemande sur la TVA (UStG) :
+Numéro de TVA conformément au § 27a UStG (loi allemande sur la TVA) :
 
-DE455096022
+**DE455096022**
 
 ### 4.2 Registre du commerce
 
-Non applicable — une Gesellschaft bürgerlichen Rechts (GbR) de droit allemand n'est pas soumise à l'inscription au registre du commerce.
+Non applicable — une Gesellschaft bürgerlichen Rechts (GbR) de droit allemand n'est pas tenue d'être inscrite au registre du commerce.
 
-### 4.3 Réglementation professionnelle
+### 4.3 Assurance responsabilité professionnelle
 
-Non applicable — aucune profession réglementée au sens du § 5(1) nº 5 DDG.
+Non applicable — AutoBrew est un projet libre et gratuit de logiciel open source ; aucune prestation professionnelle réglementée n'y est proposée.
 
 ---
 
 ## 5. RESPONSABLE DU CONTENU ÉDITORIAL
 
-Responsable conformément au § 18(2) MStV (Medienstaatsvertrag) :
+Conformément au § 18, al. 2 MStV :
 
 Marcel R. G. Berger
-Dieselstr. 22e
-61231 Bad Nauheim
-Allemagne
+c/o Berger & Rosenstock GbR
+Dieselstr. 22e, 61231 Bad Nauheim, Allemagne
 
 ---
 
-## 6. RÈGLEMENT DES LITIGES
+## 6. LE LOGICIEL
 
-### 6.1 Règlement en ligne des litiges de l'UE
+AutoBrew est un utilitaire pour la barre de menus macOS distribué **exclusivement** via :
 
-La Commission européenne met à disposition une plateforme de règlement en ligne des litiges (RLL) :
-https://ec.europa.eu/consumers/odr
+- **GitHub Releases** — [github.com/marcelrgberger/auto-brew/releases](https://github.com/marcelrgberger/auto-brew/releases)
+- Le **tap Homebrew** — [github.com/marcelrgberger/homebrew-tap](https://github.com/marcelrgberger/homebrew-tap)
 
-### 6.2 Arbitrage consommateur
-
-Le Fournisseur n'est ni tenu ni disposé à participer à des procédures de règlement des litiges devant un organisme d'arbitrage consommateur (Verbraucherschlichtungsstelle) au sens de la loi allemande sur le règlement des litiges de consommation (VSBG), sauf obligation légale.
+AutoBrew **n'est pas** proposé via l'Apple App Store, le Google Play Store ni aucun portail de téléchargement tiers. Le Logiciel est publié sous **licence MIT** ; voir le document [Licences open source](OpenSourceLicenses.md) pour la liste complète des attributions.
 
 ---
 
-## 7. RESPONSABILITÉ DU CONTENU
+## 7. RÈGLEMENT DES LITIGES
 
-### 7.1 Contenus propres
+### 7.1 Règlement en ligne des litiges de l'UE
 
-En tant que fournisseur de services, nous sommes responsables de nos propres contenus sur ces pages conformément au § 7(1) DDG et aux lois générales.
+La Commission européenne met à disposition une plateforme de règlement en ligne des litiges (RLL) à l'adresse https://ec.europa.eu/consumers/odr.
 
-### 7.2 Contenus de tiers
+### 7.2 Arbitrage consommateur
 
-Conformément aux §§ 8 à 10 DDG, nous ne sommes pas tenus de surveiller les informations de tiers transmises ou stockées, ni d'enquêter sur des circonstances indiquant une activité illégale. Les obligations de retirer ou de bloquer l'utilisation d'informations au titre des lois générales demeurent inchangées. Toute responsabilité à cet égard n'est toutefois envisageable qu'à compter du moment où une infraction concrète à la loi est connue. Dès que nous aurons connaissance de telles infractions, nous supprimerons immédiatement le contenu concerné.
-
----
-
-## 8. RESPONSABILITÉ DES LIENS
-
-Nos Services peuvent contenir des liens vers des sites web de tiers sur le contenu desquels nous n'avons aucune influence. Nous ne pouvons donc assumer aucune responsabilité pour ces contenus externes. Le fournisseur ou l'exploitant respectif des pages est toujours responsable du contenu des pages liées. Les pages liées ont été vérifiées quant à d'éventuelles infractions à la loi au moment de la création du lien. Aucun contenu illégal n'était identifiable à ce moment. Une surveillance permanente des pages liées n'est pas raisonnable sans indices concrets de violation. Dès que nous aurons connaissance d'infractions, nous supprimerons immédiatement ces liens.
+Le Fournisseur n'est ni tenu ni disposé à participer à des procédures de règlement des litiges devant un organisme d'arbitrage consommateur (Verbraucherschlichtungsstelle) conformément à la loi allemande sur le règlement des litiges de consommation (VSBG), sauf obligation légale.
 
 ---
 
-## 9. DROIT D'AUTEUR
+## 8. RESPONSABILITÉ DU CONTENU
 
-Les contenus et œuvres créés par les exploitants du site sur ces pages sont soumis au droit d'auteur allemand (Urheberrechtsgesetz — UrhG). La reproduction, l'édition, la distribution et toute forme d'exploitation en dehors des limites du droit d'auteur requièrent le consentement écrit de l'auteur ou du créateur respectif. Les téléchargements et copies de ce site ne sont autorisés que pour un usage privé et non commercial. Dans la mesure où le contenu de ce site n'a pas été créé par l'exploitant, les droits d'auteur de tiers sont respectés. Les contenus tiers sont identifiés comme tels. Si vous veniez néanmoins à constater une violation du droit d'auteur, veuillez nous en informer. Dès que nous aurons connaissance d'infractions, nous supprimerons immédiatement ces contenus.
+### 8.1 Contenu propre
+
+En tant que fournisseur de services, nous sommes responsables de nos propres contenus conformément au § 7, al. 1 DDG et aux lois générales.
+
+### 8.2 Contenu de tiers
+
+Conformément aux §§ 8 à 10 DDG, nous ne sommes pas tenus de surveiller les informations de tiers transmises ou stockées, ni d'enquêter sur des circonstances qui indiqueraient une activité illégale. Les obligations de retrait ou de blocage de l'utilisation d'informations au titre des lois générales demeurent inchangées. Toute responsabilité à cet égard n'est envisageable qu'à partir du moment où une infraction concrète à la loi est connue. Dès que nous aurons connaissance de telles infractions, nous supprimerons immédiatement le contenu concerné.
+
+Cela vaut en particulier pour le catalogue public de casks Homebrew affiché dans le BrewStore — le catalogue et les casks eux-mêmes sont hébergés par le projet Homebrew et les éditeurs de casks individuels ; nous fournissons un visualiseur pour ces données, non les données elles-mêmes.
 
 ---
 
-## 10. OBLIGATIONS INTERNATIONALES DE DIVULGATION
+## 9. RESPONSABILITÉ DES LIENS
 
-### 10.1 Union européenne / EEE
+AutoBrew renvoie vers des ressources externes (dépôts GitHub, formulae.brew.sh, pages d'accueil de casks individuels, portail d'assistance DigitalFreedom). Nous n'avons aucune influence sur le contenu de ces sites externes. Les fournisseurs ou exploitants respectifs des pages liées sont toujours responsables de leur contenu. Les liens ont été vérifiés au moment de leur inclusion ; une surveillance permanente n'est pas raisonnable en l'absence d'indices concrets d'infraction. Dès que nous aurons connaissance d'une infraction, nous supprimerons immédiatement les liens concernés.
 
-Les présentes mentions légales satisfont aux exigences suivantes :
+---
 
-- **Allemagne :** § 5 DDG (Digitale-Dienste-Gesetz), § 18(2) MStV (Medienstaatsvertrag)
-- **UE :** Article 5 de la directive sur le commerce électronique (2000/31/CE), article 12 du règlement sur les services numériques (règlement (UE) 2022/2065)
-- **Autriche :** § 5 ECG (E-Commerce-Gesetz), § 25 MedienG
-- **France :** Article 6 de la loi nº 2004-575 (LCEN — Loi pour la confiance dans l'économie numérique)
-- **Italie :** D.Lgs. 70/2003 (Decreto legislativo 9 aprile 2003, n. 70)
-- **Espagne :** Ley 34/2002 (LSSI-CE — Ley de Servicios de la Sociedad de la Información)
-- **Pays-Bas :** Article 3:15d BW (Burgerlijk Wetboek)
-- **Belgique :** Loi du 11 mars 2003 sur le commerce électronique
-- **Portugal :** Décret-loi nº 7/2004
-- **Pologne :** Loi sur la fourniture de services électroniques (Ustawa o świadczeniu usług drogą elektroniczną)
-- **Suède :** Loi sur le commerce électronique (Lag om elektronisk handel)
+## 10. DROIT D'AUTEUR
 
-### 10.2 Royaume-Uni
+Le code source d'AutoBrew est sous licence MIT (voir [github.com/marcelrgberger/auto-brew/blob/main/LICENSE](https://github.com/marcelrgberger/auto-brew/blob/main/LICENSE) et [Licences open source](OpenSourceLicenses.md)). Les composants tiers intégrés à AutoBrew (Sparkle, bsdiff, sais-lite, pdqsort) sont soumis à leurs licences respectives.
 
-Les présentes mentions satisfont aux exigences suivantes :
-
-- The Electronic Commerce (EC Directive) Regulations 2002
-- Companies Act 2006 (pour les sites web d'entreprise)
-
-### 10.3 États-Unis
-
-Les divulgations d'identification commerciale sont conformes à :
-
-- Section 5 du FTC Act (actes ou pratiques déloyaux ou trompeurs)
-- Obligations de divulgation propres à chaque État
-- CAN-SPAM Act (pour les communications commerciales)
-
-### 10.4 Canada
-
-- Obligations d'identification de la LCAP (Loi canadienne anti-pourriel)
-- Obligations provinciales de divulgation commerciale
-
-### 10.5 Australie
-
-- Obligations d'identification commerciale au titre de l'Australian Consumer Law (ACL)
-- Obligations d'identification de l'expéditeur au titre du Spam Act 2003
-
-### 10.6 Japon
-
-- Obligations de divulgation de la loi sur les transactions commerciales spécifiées (特定商取引法)
-- Loi sur la régulation de la transmission de courriers électroniques spécifiés (特定電子メール法)
-
-### 10.7 Corée du Sud
-
-- Obligations de divulgation de la loi sur la protection des consommateurs dans le commerce électronique (전자상거래법)
-- Loi sur la promotion de l'utilisation des réseaux d'information et de communication (정보통신망법)
-
-### 10.8 Brésil
-
-- Obligations d'identification du Marco Civil da Internet (loi nº 12.965/2014)
-- Obligations d'identification commerciale du Code de défense du consommateur (CDC)
-
-### 10.9 Inde
-
-- Information Technology Act 2000 — obligations de divulgation des intermédiaires
-- Consumer Protection (E-Commerce) Rules 2020
-
-### 10.10 Autres juridictions
-
-Le Fournisseur se conforme aux obligations applicables d'identification commerciale et de divulgation dans toutes les juridictions où les Services sont proposés.
+Les logos, les illustrations d'icônes, les captures d'écran d'applications tierces affichées dans le catalogue BrewStore et les noms commerciaux référencés dans le Logiciel demeurent la propriété de leurs détenteurs respectifs (voir [Marques](Trademark.md)).
 
 ---
 
 ## 11. DÉLÉGUÉ À LA PROTECTION DES DONNÉES
 
-Aucun délégué formel à la protection des données n'a été désigné, le Fournisseur ne remplissant pas les critères de seuil pour une désignation obligatoire au titre de l'art. 37 RGPD / § 38 BDSG.
+Aucun délégué à la protection des données n'a été formellement désigné, le Fournisseur ne remplissant pas les critères de seuil rendant la désignation obligatoire au titre de l'art. 37 RGPD / § 38 BDSG.
 
-Pour toute demande relative à la protection des données (art. 13/14 RGPD, accès, rectification, effacement, portabilité, opposition), veuillez contacter : data-protection@digitalfreedom.co.za
+Pour toutes les demandes relatives à la protection des données — accès, rectification, effacement, portabilité, opposition, limitation — veuillez contacter : **data-protection@digitalfreedom.co.za**
+
+La notice complète sur la protection des données figure dans la [Politique de confidentialité](PrivacyPolicy.md). En résumé : AutoBrew ne collecte aucune donnée personnelle — il s'exécute entièrement sur le Mac de l'utilisateur.
 
 ---
 
-(c) 2025-2026 DigitalFreedom — Berger & Rosenstock GbR. Tous droits réservés.
+(c) 2026 DigitalFreedom — Berger & Rosenstock GbR.
