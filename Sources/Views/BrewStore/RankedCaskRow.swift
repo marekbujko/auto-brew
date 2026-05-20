@@ -24,6 +24,7 @@ struct RankedCaskRow: View {
                          homepage: entry.homepage,
                          size: 56)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .help(tooltipText)
 
             Text("\(rank)")
                 .font(.title3.weight(.regular))
@@ -49,6 +50,7 @@ struct RankedCaskRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .help(tooltipText)
 
             installButton
         }
@@ -61,6 +63,21 @@ struct RankedCaskRow: View {
         } message: { msg in
             Text(msg)
         }
+    }
+
+    /// Hover tooltip: header line + description + token. Useful when the
+    /// row truncates the description to two lines or when several casks
+    /// share the same presentation name (alfred / alfred 4 / alfred prerelease)
+    /// and the token disambiguates them.
+    private var tooltipText: String {
+        var lines = [entry.presentationName]
+        if let desc = entry.description, !desc.isEmpty {
+            lines.append(desc)
+        }
+        if entry.presentationName != entry.token {
+            lines.append("brew: \(entry.token)")
+        }
+        return lines.joined(separator: "\n")
     }
 
     @ViewBuilder
