@@ -29,11 +29,16 @@ struct AutoBrewApp: App {
         }
         .defaultSize(width: 760, height: 640)
         .commands {
+            // No File > New for the Legal window — it's read-only content.
             CommandGroup(replacing: .newItem) { }
         }
     }
 }
 
+/// Bridges `NotificationCenter` events to SwiftUI's `openWindow` action.
+/// Used because `@Environment(\.openWindow)` is only accessible from a `View`,
+/// but our entry points (URL handler, menu commands, AppDelegate callbacks)
+/// live outside the view tree.
 private struct OpenWindowOnNotification: ViewModifier {
     let windowID: String
     let notification: Notification.Name

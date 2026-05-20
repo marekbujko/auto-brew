@@ -225,6 +225,10 @@ struct SettingsView: View {
                 }
 
                 Section("Legal") {
+                    // Each row jumps directly into the standalone Legal window
+                    // pre-selected on the chosen document. `NSApp.activate` is
+                    // necessary because the menu-bar extra doesn't bring the
+                    // app forward on its own.
                     ForEach(LegalDocument.allCases) { doc in
                         Button {
                             LegalNavigation.shared.requestedDocument = doc

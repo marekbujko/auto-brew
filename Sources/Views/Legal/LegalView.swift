@@ -1,12 +1,24 @@
 import SwiftUI
 
+/// Standalone window that shows the legal documents. Deep-link entry points
+/// (Settings buttons, About sheet, future onboarding) set
+/// `LegalNavigation.shared.requestedDocument` and post `.openLegalWindow`;
+/// this view picks up the change through the observed singleton.
+@MainActor
 struct LegalView: View {
     @State private var navigation = LegalNavigation.shared
-    @State private var selectedDocument: LegalDocument = LegalNavigation.shared.requestedDocument
+    // Parsed markdown is cached per document so switching tabs doesn't
+    // re-parse from disk. The cache lives as long as the window does.
+    @State private var blocksCache: [LegalDocument: [MarkdownBlock]] = [:]
 
     var body: some View {
+        let selection = Binding(
+            get: { navigation.requestedDocument },
+            set: { navigation.requestedDocument = $0 }
+        )
+
         VStack(spacing: 0) {
-            Picker("", selection: $selectedDocument) {
+            Picker("", selection: selection) {
                 ForEach(LegalDocument.allCases) { doc in
                     Text(LocalizedStringKey(doc.titleKey)).tag(doc)
                 }
@@ -19,20 +31,22 @@ struct LegalView: View {
             Divider()
 
             ScrollView {
-                MarkdownView(content: selectedDocument.load())
+                // First visit shows an empty stack for one tick while the
+                // `.task` below loads + parses; for documents this size the
+                // gap is imperceptible. Subsequent visits hit the cache.
+                MarkdownView(blocks: blocksCache[navigation.requestedDocument] ?? [])
                     .padding(24)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .id(selectedDocument)
+                    .id(navigation.requestedDocument)
             }
         }
         .frame(minWidth: 640, idealWidth: 760, minHeight: 480, idealHeight: 640)
         .navigationTitle("Legal")
-        .onAppear {
-            selectedDocument = navigation.requestedDocument
-        }
-        .onChange(of: navigation.requestedDocument) { _, newValue in
-            selectedDocument = newValue
+        .task(id: navigation.requestedDocument) {
+            let doc = navigation.requestedDocument
+            guard blocksCache[doc] == nil else { return }
+            blocksCache[doc] = MarkdownParser.parse(doc.load())
         }
     }
 }

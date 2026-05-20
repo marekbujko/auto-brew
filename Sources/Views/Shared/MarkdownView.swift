@@ -1,7 +1,11 @@
 import SwiftUI
 
+/// Block-level Markdown renderer built on top of `AttributedString` for inline
+/// styling. Hand-rolled rather than pulled from SPM because the legal texts
+/// only use a handful of constructs and we don't want a third-party dependency
+/// for something this small.
 struct MarkdownView: View {
-    let content: String
+    let blocks: [MarkdownBlock]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -9,10 +13,6 @@ struct MarkdownView: View {
                 render(block)
             }
         }
-    }
-
-    private var blocks: [MarkdownBlock] {
-        MarkdownParser.parse(content)
     }
 
     @ViewBuilder
@@ -67,6 +67,9 @@ struct MarkdownView: View {
         }
     }
 
+    /// Inline parser handles `**bold**`, `*italic*`, `` `code` ``, `[link](url)`.
+    /// Block-level constructs are pre-stripped by `MarkdownParser`; if Apple's
+    /// parser still fails we render the raw text rather than dropping it.
     private func inline(_ text: String) -> AttributedString {
         (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
             ?? AttributedString(text)
@@ -84,7 +87,13 @@ enum MarkdownBlock: Equatable, Sendable {
 }
 
 enum MarkdownParser {
+    /// Line-oriented parser. Greedy: collects consecutive paragraph / list
+    /// lines into buffers and flushes them on blank lines, headings, or rules.
     static func parse(_ text: String) -> [MarkdownBlock] {
+        // Some editors save legal docs with CRLF; strip the carriage return
+        // up front so heading / bullet detection still works.
+        let normalized = text.replacingOccurrences(of: "\r\n", with: "\n")
+
         var blocks: [MarkdownBlock] = []
         var paragraphBuffer: [String] = []
         var bulletBuffer: [String] = []
@@ -114,8 +123,8 @@ enum MarkdownParser {
             flushNumbered()
         }
 
-        for rawLine in text.components(separatedBy: "\n") {
-            let line = rawLine.trimmingCharacters(in: .whitespaces)
+        for rawLine in normalized.components(separatedBy: "\n") {
+            let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
 
             if line.isEmpty {
                 flushAll()
@@ -158,6 +167,7 @@ enum MarkdownParser {
                 continue
             }
 
+            // Paragraph line — soft-wrap by appending to the current buffer.
             flushBullets()
             flushNumbered()
             paragraphBuffer.append(line)
@@ -167,6 +177,8 @@ enum MarkdownParser {
         return blocks
     }
 
+    /// Recognises `1. text`, `42. text`, etc. Returns the trimmed text after
+    /// the period; returns `nil` if the line does not look like a numbered item.
     private static func parseNumberedItem(_ line: String) -> String? {
         var index = line.startIndex
         while index < line.endIndex, line[index].isNumber {
