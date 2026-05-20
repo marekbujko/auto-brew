@@ -28,6 +28,7 @@ struct BrewStoreSidebar: View {
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
             .padding(.horizontal, 12)
             .padding(.top, 8)
+            .padding(.bottom, 12)
 
             List(selection: Binding(
                 get: { Optional(selection) },
