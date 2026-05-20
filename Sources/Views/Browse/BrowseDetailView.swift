@@ -8,6 +8,12 @@ struct BrowseDetailView: View {
     let entry: CaskCatalogEntry
     @State private var isInstalling = false
     @State private var installError: String?
+    @State private var showPolicySheet = false
+    @State private var settings = SettingsStore.shared
+
+    private var hasOverride: Bool {
+        settings.packageOverrides.contains { $0.token == entry.token && !$0.isEmpty }
+    }
 
     var body: some View {
         ScrollView {
@@ -19,12 +25,26 @@ struct BrowseDetailView: View {
                                  homepage: entry.homepage,
                                  size: 64)
                     VStack(alignment: .leading) {
-                        Text(entry.displayName).font(.title2).bold()
+                        Text(entry.presentationName).font(.title2).bold()
                         Text(entry.token).font(.caption).foregroundStyle(.secondary).monospaced()
                         Text(String(localized: "Version: \(entry.version)")).font(.caption)
                     }
                     Spacer()
-                    installButton
+                    VStack(alignment: .trailing, spacing: 6) {
+                        installButton
+                        Button {
+                            showPolicySheet = true
+                        } label: {
+                            Label(
+                                hasOverride
+                                    ? String(localized: "Update Policy (custom)")
+                                    : String(localized: "Update Policy"),
+                                systemImage: "slider.horizontal.3"
+                            )
+                            .font(.caption)
+                        }
+                        .buttonStyle(.borderless)
+                    }
                 }
                 Divider()
                 if let desc = entry.description {
@@ -47,6 +67,9 @@ struct BrowseDetailView: View {
                presenting: installError) { _ in
             Button("OK") { installError = nil }
         } message: { msg in Text(msg) }
+        .sheet(isPresented: $showPolicySheet) {
+            PackagePolicyOverrideSheet(token: entry.token, displayName: entry.presentationName)
+        }
     }
 
     @ViewBuilder

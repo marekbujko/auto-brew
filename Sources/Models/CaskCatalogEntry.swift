@@ -17,7 +17,27 @@ struct CaskCatalogEntry: Decodable, Identifiable, Sendable, Hashable {
     let appNames: [String]
 
     var id: String { token }
+    /// Raw upstream name (without the variant suffix). Use this when matching
+    /// against installed apps or looking up artwork.
     var displayName: String { nameValues.first ?? token }
+
+    /// Name shown in the BrewStore lists. Casks that pin a specific major
+    /// version (`alfred@4`) or ship a non-stable channel (`alfred@prerelease`)
+    /// share their `displayName` with the default cask, which is confusing.
+    /// Surface the variant straight from the token: `Alfred 4`,
+    /// `Alfred (Prerelease)`, `Docker (Beta)`, …
+    var presentationName: String {
+        guard let separator = token.range(of: "@") else { return displayName }
+        let suffix = token[separator.upperBound...]
+        guard !suffix.isEmpty else { return displayName }
+
+        if let major = Int(suffix) {
+            return "\(displayName) \(major)"
+        }
+        // Channel-style suffixes like `prerelease`, `beta`, `nightly`, `dev`.
+        let pretty = suffix.prefix(1).uppercased() + suffix.dropFirst()
+        return "\(displayName) (\(pretty))"
+    }
 
     enum CodingKeys: String, CodingKey {
         case token, name, desc, homepage, url, version, artifacts

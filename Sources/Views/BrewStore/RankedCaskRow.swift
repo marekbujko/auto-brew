@@ -35,7 +35,7 @@ struct RankedCaskRow: View {
                 onOpenDetail()
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(entry.displayName)
+                    Text(entry.presentationName)
                         .font(.system(.body, weight: .semibold))
                         .lineLimit(1)
                     if let desc = entry.description {

@@ -43,6 +43,7 @@ struct CategoryListView: View {
                 category.matches(entry) && (
                     entry.token.lowercased().contains(q) ||
                     entry.displayName.lowercased().contains(q) ||
+                    entry.presentationName.lowercased().contains(q) ||
                     (entry.description?.lowercased().contains(q) ?? false)
                 )
             }

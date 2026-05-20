@@ -4,7 +4,9 @@ A native macOS menu bar app that automatically keeps Homebrew and all installed 
 
 ## Features
 
-- **Automatic Updates** — Runs `brew update → brew upgrade → brew upgrade --cask --greedy → brew cleanup` once daily
+- **Automatic Updates** — Runs `brew update → policy gate → selective brew upgrade → brew cleanup` once daily
+- **Selective Update Policy** — Per-bump-type and per-package rules: patches roll out fast, minors wait a configurable cool-off, majors require explicit approval
+- **In-App Legal Section** — Privacy, Terms, EULA, Imprint, Trademark, Open-Source licenses — localized into all supported languages
 - **Idle-Based Trigger** — Waits for configurable idle time before running (default: 30 min)
 - **Scheduled Trigger** — Alternatively, run at a fixed time of day
 - **Works While Locked** — Uses IOKit idle detection, independent of screen lock state
@@ -39,6 +41,46 @@ Capture complete app state: `Library/Preferences`, `Library/Application Support`
 
 ### Auto-Cleanup
 In Settings: automatically remove old snapshots after N days (default 90). Cleanup runs after each successful Brew update.
+
+## Selective Update Policy
+
+AutoBrew classifies each pending update as **patch**, **minor**, or **major** (based on SemVer parsing) and routes it through one of four policies:
+
+| Policy | Behaviour |
+|---|---|
+| **Auto** | Install on the next scheduled run |
+| **Wait N days** | Install once the version has been available for at least N days |
+| **Ask me** | Stay in the "Pending Approvals" list until the user approves or rejects |
+| **Skip** | Never install for that bump type |
+
+### Defaults
+
+Conservative starter values picked so security patches land fast while breaking changes stay opt-in:
+
+|  | Casks | Formulae |
+|---|---|---|
+| Patch | Wait 2 days | Auto |
+| Minor | Wait 14 days | Wait 7 days |
+| Major | Ask me | Ask me |
+
+Configure in **Settings → Update Policy**.
+
+### Per-Package Overrides
+
+Open any cask in the BrewStore detail view and click **Update Policy** to set patch/minor/major rules just for that package. Leave a row on "Default" to inherit the global setting.
+
+### Pending Approvals
+
+Major updates (and anything classified as `unknown` because the version string isn't SemVer-shaped) wait for the user. They show up in:
+- **BrewStore → Pending Approvals** — sidebar entry only appears when there's something pending
+- **Menu bar icon** — small orange dot
+- **Notification** — fires once when the pending count grows; tapping it opens the approvals view directly
+
+Rejected entries stay sticky until a newer version arrives, so you're not re-asked about the same major release on every scan.
+
+### Cool-off Tracking
+
+A small JSON ledger in `~/Library/Application Support/AutoBrew/UpdateLedger.json` records when each `(kind, token, version)` first appeared as outdated. The "Wait N days" policy measures the window from that first sighting, not from each scan, so multiple scheduler runs don't reset the timer.
 
 ## Install
 
@@ -108,7 +150,9 @@ classDiagram
         +brewPath: String?
         +isHomebrewInstalled: Bool
         +installHomebrew()
-        +runFullUpdate()
+        +runUpdate()
+        +runUpgrade(formulae, casks)
+        +runCleanup()
         +fetchOutdated()
     }
 
@@ -119,6 +163,32 @@ classDiagram
     class BrewError
     class OutdatedPackage
 
+    class UpdateEvaluator {
+        +evaluate(outdated, ledger, now): UpdateDecisionBundle
+    }
+
+    class UpdateDecisionBundle {
+        +autoInstall: [OutdatedPackage]
+        +waitingForCooldown: [WaitingEntry]
+        +needsApproval: [PendingUpdate]
+        +skipped: [SkippedEntry]
+    }
+
+    class UpdateLedgerStore {
+        +touch(kind, token, version): Date
+        +purge(keeping)
+    }
+
+    class PendingUpdatesStore {
+        +updates: [PendingUpdate]
+        +pendingCount: Int
+        +approvedTokens: [String]
+        +approve(id)
+        +reject(id)
+        +replace(with)
+        +remove(tokens)
+    }
+
     class SettingsStore {
         +triggerMode: TriggerMode
         +idleMinutes: Int
@@ -127,6 +197,8 @@ classDiagram
         +lastRunDate: Date?
         +loginItemEnabled: Bool
         +snapshotRetentionDays: Int
+        +policyDefaults: UpdatePolicyDefaults
+        +packageOverrides: [PackagePolicyOverride]
     }
 
     class IdleDetector {
@@ -167,6 +239,10 @@ classDiagram
     SchedulerService --> NotificationManager
     SchedulerService --> IdleDetector
     SchedulerService --> SnapshotService : auto-cleanup
+    SchedulerService --> UpdateEvaluator
+    SchedulerService --> UpdateLedgerStore
+    SchedulerService --> PendingUpdatesStore
+    UpdateEvaluator --> UpdateDecisionBundle
     BrewManager --> BrewProcess
     BrewManager --> OutdatedPackage
     BrewManager ..> BrewError
@@ -402,13 +478,27 @@ flowchart TD
     P --> J
 
     M --> Q[brew update]
-    Q --> R[brew upgrade]
-    R --> S[brew upgrade --cask --greedy]
+    Q --> Q1[fetchOutdated]
+    Q1 --> Q2[UpdateEvaluator.evaluate]
+    Q2 --> Q3{For each package}
+    Q3 -->|policy=auto| R1[Add to autoInstall]
+    Q3 -->|policy=delayedDays| Q4{Cooled off?}
+    Q4 -->|Yes| R1
+    Q4 -->|No| R2[Wait — keep ledger entry]
+    Q3 -->|policy=manualApproval| Q5{Prior decision?}
+    Q5 -->|Approved| R1
+    Q5 -->|Rejected/Pending| R3[Add to PendingUpdatesStore]
+    Q3 -->|policy=skip| R4[Skip]
+    R1 --> R[brew upgrade selected formulae]
+    R --> S[brew upgrade --cask selected casks]
     S --> T[brew cleanup --prune=7]
     T --> U{Success?}
 
     U -->|Yes| V[Save Last Run Date]
-    V --> W[Show Success Notification]
+    V --> V1{New approvals?}
+    V1 -->|Yes| V2[Show Pending Approvals Notification]
+    V1 -->|No| W[Show Success Notification]
+    V2 --> W
 
     U -->|No| X[Show Error Notification]
 
