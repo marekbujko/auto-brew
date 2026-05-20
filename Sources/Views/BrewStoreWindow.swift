@@ -54,32 +54,48 @@ struct BrewStoreWindow: View {
         }
     }
 
+    private var trimmedSearch: String {
+        searchText.trimmingCharacters(in: .whitespaces)
+    }
+
+    private var isSearching: Bool { !trimmedSearch.isEmpty }
+
     @ViewBuilder
     private var detailView: some View {
-        switch selection {
-        case .discover:
-            DiscoverView(store: catalog, onSelect: { detailEntry = $0 })
-        case .category(let cat):
-            CategoryListView(category: cat, store: catalog, searchText: $searchText)
-        case .installed:
-            InstalledAppsView()
-        case .snapshots:
-            SnapshotsRootView()
-        case .updates:
-            UpdatesView()
-        case .pendingApprovals:
-            PendingApprovalsView()
+        if isSearching {
+            // Search hijacks the detail pane regardless of the selected
+            // section — clearing the field returns the user to whatever
+            // they were looking at before.
+            SearchResultsView(store: catalog, query: trimmedSearch, onClear: { searchText = "" })
+        } else {
+            switch selection {
+            case .discover:
+                DiscoverView(store: catalog, onSelect: { detailEntry = $0 })
+            case .category(let cat):
+                CategoryListView(category: cat, store: catalog, searchText: $searchText)
+            case .installed:
+                InstalledAppsView()
+            case .snapshots:
+                SnapshotsRootView()
+            case .updates:
+                UpdatesView()
+            case .pendingApprovals:
+                PendingApprovalsView()
+            }
         }
     }
 
     private var titleForSelection: String {
+        if isSearching {
+            return String(localized: "Search: \(trimmedSearch)")
+        }
         switch selection {
-        case .discover: String(localized: "Discover")
-        case .category(let cat): cat.displayName
-        case .installed: String(localized: "Installed")
-        case .snapshots: String(localized: "Snapshots")
-        case .updates: String(localized: "Updates")
-        case .pendingApprovals: String(localized: "Pending Approvals")
+        case .discover: return String(localized: "Discover")
+        case .category(let cat): return cat.displayName
+        case .installed: return String(localized: "Installed")
+        case .snapshots: return String(localized: "Snapshots")
+        case .updates: return String(localized: "Updates")
+        case .pendingApprovals: return String(localized: "Pending Approvals")
         }
     }
 
