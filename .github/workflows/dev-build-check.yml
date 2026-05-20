@@ -1,0 +1,77 @@
+name: 02. Dev Build Check
+
+# Quick build + test on every push to development. No signing, no
+# artefacts, no release — just verifies the project still compiles
+# and the unit tests pass before changes land on test/beta/main.
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development, test, beta, main]
+  workflow_dispatch:
+
+concurrency:
+  group: dev-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_NAME: AutoBrew
+  SCHEME: AutoBrew
+
+jobs:
+  build-check:
+    name: Build & Test
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Set up Xcode ^26
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '^26'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          xcodegen generate
+          bash scripts/patch-localizations.sh || true
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project "$APP_NAME.xcodeproj" \
+            -scheme "$SCHEME"
+
+      - name: Build (Debug)
+        run: |
+          xcodebuild build \
+            -project "$APP_NAME.xcodeproj" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project "$APP_NAME.xcodeproj" \
+            -scheme "$SCHEME" \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Job Summary
+        if: always()
+        run: |
+          {
+            echo "## Dev Build Check"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Branch | $GITHUB_REF_NAME |"
+            echo "| Build | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

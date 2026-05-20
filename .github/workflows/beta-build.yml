@@ -1,13 +1,17 @@
-name: 04. Release Build (Main)
+name: 03. Beta / Test Build
+
+# Auto-builds signed and notarized DMGs for the test and beta branches
+# and uploads them as a GitHub Pre-Release. The DMG file name carries
+# the branch suffix (AutoBrew-test.dmg / AutoBrew-beta.dmg) so internal
+# testers can tell at a glance which channel they grabbed.
 
 on:
-  # Manual only - running on every push to main produced a release per
-  # commit (including doc-only pushes). Trigger from the Actions tab
-  # via Run workflow when an actual release is ready.
+  push:
+    branches: [test, beta]
   workflow_dispatch:
 
 concurrency:
-  group: macos-build-${{ github.ref_name }}
+  group: beta-build-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -18,27 +22,10 @@ env:
   SCHEME: AutoBrew
 
 jobs:
-  determine-environment:
-    name: Determine Environment
-    runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.determine.outputs.environment }}
-    steps:
-      - name: Determine environment
-        id: determine
-        env:
-          BRANCH: ${{ github.ref_name }}
-        run: |
-          case "$BRANCH" in
-            main)   echo "environment=prod" >> "$GITHUB_OUTPUT" ;;
-            *)      echo "environment=dev" >> "$GITHUB_OUTPUT" ;;
-          esac
-
   build:
-    name: Build, Sign & Notarize
+    name: Build, Sign, Notarize
     runs-on: macos-15
     timeout-minutes: 30
-    needs: determine-environment
     steps:
       - name: Set up Xcode ^26
         uses: maxim-lobanov/setup-xcode@v1
@@ -63,6 +50,7 @@ jobs:
           BUILD=$(grep CURRENT_PROJECT_VERSION project.yml | head -1 | awk '{print $2}' | tr -d '"')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "channel=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Install Developer ID Certificate
         env:
@@ -82,13 +70,11 @@ jobs:
           security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           security find-identity -v
-          echo "Developer ID certificate imported."
 
       - name: Prepare App Store Connect API Key
         env:
           API_KEY_BASE64: ${{ secrets.MACOS_APPSTORE_API_KEY_BASE64 }}
           API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
-          API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
         run: |
           set -e
           mkdir -p "$RUNNER_TEMP/private_keys"
@@ -155,131 +141,79 @@ jobs:
 
           xcrun stapler staple "$APP_PATH"
 
-      - name: Create DMG
+      - name: Create suffixed DMG
         env:
           API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
+          CHANNEL: ${{ steps.version.outputs.channel }}
         run: |
           set -e
           mkdir -p build/dmg
           cp -R "build/export/$APP_NAME.app" build/dmg/
           ln -s /Applications build/dmg/Applications
 
+          DMG_NAME="${APP_NAME}-${CHANNEL}.dmg"
           hdiutil create -volname "$APP_NAME" \
             -srcfolder build/dmg \
             -ov -format UDZO \
-            "build/$APP_NAME.dmg"
+            "build/$DMG_NAME"
 
-          xcrun notarytool submit "build/$APP_NAME.dmg" \
+          xcrun notarytool submit "build/$DMG_NAME" \
             --key "$API_KEY_PATH" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
             --wait
 
-          xcrun stapler staple "build/$APP_NAME.dmg"
+          xcrun stapler staple "build/$DMG_NAME"
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: AutoBrew-${{ steps.version.outputs.version }}
-          path: |
-            build/AutoBrew.dmg
-            build/AutoBrew.zip
-
-      - name: Sign update for Sparkle
-        if: github.ref == 'refs/heads/main'
-        env:
-          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
-        run: |
-          set -e
-          # Get Sparkle tools from SPM cache
-          SPARKLE_BIN=$(find "$HOME/Library/Developer/Xcode/DerivedData" -name "sign_update" -path "*/Sparkle/bin/*" 2>/dev/null | head -1)
-          if [ -z "$SPARKLE_BIN" ]; then
-            echo "sign_update not found, downloading Sparkle tools..."
-            curl -sL "https://github.com/sparkle-project/Sparkle/releases/latest/download/Sparkle-2.9.0.tar.xz" | tar xJ -C /tmp
-            SPARKLE_BIN="/tmp/bin/sign_update"
-          fi
-
-          # Sign the ZIP
-          echo "$SPARKLE_KEY" > /tmp/sparkle_key
-          SIGNATURE=$("$SPARKLE_BIN" "build/$APP_NAME.zip" --ed-key-file /tmp/sparkle_key 2>&1 | grep "sparkle:edSignature" | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
-          LENGTH=$(stat -f%z "build/$APP_NAME.zip")
-          rm -f /tmp/sparkle_key
-
-          echo "SPARKLE_SIGNATURE=$SIGNATURE" >> "$GITHUB_ENV"
-          echo "ZIP_LENGTH=$LENGTH" >> "$GITHUB_ENV"
-
-      - name: Update appcast.xml
-        if: github.ref == 'refs/heads/main'
+      - name: Create or update Pre-Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
           BUILD: ${{ steps.version.outputs.build }}
+          CHANNEL: ${{ steps.version.outputs.channel }}
         run: |
           set -e
-          cat > appcast.xml << EOF
-          <?xml version="1.0" encoding="utf-8"?>
-          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-              <channel>
-                  <title>AutoBrew</title>
-                  <link>https://github.com/marcelrgberger/auto-brew</link>
-                  <description>AutoBrew update feed</description>
-                  <language>en</language>
-                  <item>
-                      <title>Version $VERSION</title>
-                      <pubDate>$(date -R)</pubDate>
-                      <sparkle:version>$BUILD</sparkle:version>
-                      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
-                      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-                      <enclosure
-                          url="https://github.com/marcelrgberger/auto-brew/releases/download/v$VERSION/AutoBrew.zip"
-                          length="$ZIP_LENGTH"
-                          type="application/octet-stream"
-                          sparkle:edSignature="$SPARKLE_SIGNATURE"
-                      />
-                  </item>
-              </channel>
-          </rss>
-          EOF
+          TAG="v${VERSION}-${CHANNEL}"
+          TITLE="AutoBrew ${VERSION} (${CHANNEL})"
 
-          git config user.name "Marcel R. G. Berger"
-          git config user.email "hello@marcelrgberger.com"
-          git add appcast.xml
-          git commit -m "Update appcast for v$VERSION" || true
-          git push origin HEAD:main || true
+          # Replace any existing pre-release for this version+channel so the
+          # latest artefact is always the canonical download for testers.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" --yes
+          fi
 
-      - name: Create GitHub Release
-        if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          gh release create "v$VERSION" \
-            --title "AutoBrew v$VERSION" \
-            --notes "## AutoBrew v$VERSION
+          {
+            echo "## $TITLE"
+            echo ""
+            echo "Build $BUILD from the $CHANNEL channel."
+            echo ""
+            echo "Download \`$DMG_NAME\`, open it, and drag AutoBrew to Applications."
+          } > build/release-notes.md
 
-          Download \`AutoBrew.dmg\`, open it, and drag AutoBrew to Applications.
-
-          See [commits](https://github.com/marcelrgberger/auto-brew/commits/main) for details." \
-            "build/$APP_NAME.dmg" \
+          gh release create "$TAG" \
+            --title "$TITLE" \
+            --prerelease \
+            --notes-file build/release-notes.md \
+            "build/$DMG_NAME" \
             "build/$APP_NAME.zip"
 
       - name: Job Summary
         if: always()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" << SUMMARY
-          ## macOS Build Summary
-
-          | Field | Value |
-          |-------|-------|
-          | Environment | ${{ needs.determine-environment.outputs.environment }} |
-          | Branch | ${{ github.ref_name }} |
-          | Version | ${{ steps.version.outputs.version }} (${{ steps.version.outputs.build }}) |
-          | Build | ${{ job.status }} |
-          SUMMARY
+          {
+            echo "## Beta / Test Build Summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Channel | $GITHUB_REF_NAME |"
+            echo "| Version | ${{ steps.version.outputs.version }} (${{ steps.version.outputs.build }}) |"
+            echo "| Build | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Clean up keychain
         if: always()
         run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" || true
           rm -f "$RUNNER_TEMP/private_keys/"*.p8 || true
