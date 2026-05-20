@@ -66,13 +66,13 @@ struct BrewStoreWindow: View {
             // Search hijacks the detail pane regardless of the selected
             // section — clearing the field returns the user to whatever
             // they were looking at before.
-            SearchResultsView(store: catalog, query: trimmedSearch, onClear: { searchText = "" })
+            SearchResultsView(store: catalog, query: trimmedSearch)
         } else {
             switch selection {
             case .discover:
                 DiscoverView(store: catalog, onSelect: { detailEntry = $0 })
             case .category(let cat):
-                CategoryListView(category: cat, store: catalog, searchText: $searchText)
+                CategoryListView(category: cat, store: catalog)
             case .installed:
                 InstalledAppsView()
             case .snapshots:

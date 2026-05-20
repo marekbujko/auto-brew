@@ -65,16 +65,18 @@ struct RankedCaskRow: View {
         }
     }
 
-    /// Hover tooltip: header line + description + token. Useful when the
-    /// row truncates the description to two lines or when several casks
-    /// share the same presentation name (alfred / alfred 4 / alfred prerelease)
-    /// and the token disambiguates them.
+    /// Hover tooltip: header line + description. The brew token is only
+    /// appended for `@variant` casks where the suffix is the disambiguator
+    /// between siblings (alfred / alfred@4 / alfred@prerelease) — otherwise
+    /// the token would clutter the tooltip for almost every cask, since
+    /// catalog tokens lowercase-and-hyphen names (`1password`, `vs-code`)
+    /// don't normally match their display name byte-for-byte.
     private var tooltipText: String {
         var lines = [entry.presentationName]
         if let desc = entry.description, !desc.isEmpty {
             lines.append(desc)
         }
-        if entry.presentationName != entry.token {
+        if entry.token.contains("@") {
             lines.append("brew: \(entry.token)")
         }
         return lines.joined(separator: "\n")

@@ -3,17 +3,21 @@ import SwiftUI
 /// Filtered "all casks in this category" list, sorted by install popularity.
 /// Detail opens in a sheet rather than pushing — keeps the BrewStore window
 /// chrome stable while users browse.
+///
+/// Global search is handled by `SearchResultsView` in
+/// `BrewStoreWindow.detailView`; once a non-empty query is in the sidebar
+/// field, this view is no longer rendered. That's why there's no search
+/// filter inside the category list itself — it would be unreachable.
 struct CategoryListView: View {
     let category: BrowseCategory
     @Bindable var store: CatalogStore
-    @Binding var searchText: String
 
     @State private var selectedEntry: CaskCatalogEntry?
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(Array(filtered.enumerated()), id: \.element.id) { index, entry in
+                ForEach(Array(ranked.enumerated()), id: \.element.id) { index, entry in
                     RankedCaskRow(rank: index + 1, entry: entry, onOpenDetail: { selectedEntry = entry })
                 }
             }
@@ -33,23 +37,13 @@ struct CategoryListView: View {
         }
     }
 
-    /// Category filter first, then optional substring match on token / display
-    /// name / description, finally sorted by Homebrew analytics install count.
-    private var filtered: [CaskCatalogEntry] {
-        let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
-        let base = q.isEmpty
-            ? store.allCasks.filter { category.matches($0) }
-            : store.allCasks.filter { entry in
-                category.matches(entry) && (
-                    entry.token.lowercased().contains(q) ||
-                    entry.displayName.lowercased().contains(q) ||
-                    entry.presentationName.lowercased().contains(q) ||
-                    (entry.description?.lowercased().contains(q) ?? false)
-                )
+    /// Category filter, then sorted by Homebrew install popularity.
+    private var ranked: [CaskCatalogEntry] {
+        store.allCasks
+            .filter { category.matches($0) }
+            .sorted {
+                (store.analytics?.installCount(for: $0.token) ?? 0) >
+                (store.analytics?.installCount(for: $1.token) ?? 0)
             }
-        return base.sorted {
-            (store.analytics?.installCount(for: $0.token) ?? 0) >
-            (store.analytics?.installCount(for: $1.token) ?? 0)
-        }
     }
 }

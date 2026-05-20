@@ -7,7 +7,6 @@ import SwiftUI
 struct SearchResultsView: View {
     @Bindable var store: CatalogStore
     let query: String
-    let onClear: () -> Void
 
     @State private var selectedEntry: CaskCatalogEntry?
 
