@@ -13,12 +13,17 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
     private let center = UNUserNotificationCenter.current()
 
     nonisolated private static let missedRunCategory = "MISSED_RUN"
+    nonisolated private static let pendingApprovalsCategory = "PENDING_APPROVALS"
     nonisolated private static let runNowAction = "RUN_NOW"
     nonisolated private static let skipAction = "SKIP"
+    nonisolated private static let reviewApprovalsAction = "REVIEW_APPROVALS"
 
     /// Fires when the user taps "Update Now" on the missed-run notification —
     /// the bridge from notification action to scheduler.
     var onRunNowRequested: (@MainActor () -> Void)?
+
+    /// Fires when the user taps "Review" on the pending-approvals notification.
+    var onReviewApprovalsRequested: (@MainActor () -> Void)?
 
     override private init() {
         super.init()
@@ -34,12 +39,24 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
             title: String(localized: "Skip"),
             options: .destructive
         )
-        let category = UNNotificationCategory(
+        let missedCategory = UNNotificationCategory(
             identifier: Self.missedRunCategory,
             actions: [runAction, skipAction],
             intentIdentifiers: []
         )
-        center.setNotificationCategories([category])
+
+        let reviewAction = UNNotificationAction(
+            identifier: Self.reviewApprovalsAction,
+            title: String(localized: "Review"),
+            options: .foreground
+        )
+        let pendingCategory = UNNotificationCategory(
+            identifier: Self.pendingApprovalsCategory,
+            actions: [reviewAction],
+            intentIdentifiers: []
+        )
+
+        center.setNotificationCategories([missedCategory, pendingCategory])
     }
 
     func requestAuthorization() async {
@@ -71,6 +88,31 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
         }
     }
 
+    /// Notifies the user that one or more major updates need their decision.
+    /// `sampleNames` is a short preview shown in the body — keep the list
+    /// short to avoid the notification getting truncated.
+    func showPendingApprovals(count: Int, sampleNames: [String]) {
+        guard count > 0 else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "AutoBrew"
+        let preview = sampleNames.prefix(3).joined(separator: ", ")
+        let extra = count > sampleNames.count ? " +\(count - sampleNames.count) more" : ""
+        content.body = String(localized: "\(count) updates need approval (\(preview)\(extra))")
+        content.sound = .default
+        content.categoryIdentifier = Self.pendingApprovalsCategory
+
+        let request = UNNotificationRequest(
+            identifier: "pending-approvals-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: nil
+        )
+        center.add(request) { [weak self] error in
+            if let error {
+                self?.logger.error("Failed to show pending-approvals notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
     func showCompletionNotification(success: Bool, detail: String? = nil) {
         let content = UNMutableNotificationContent()
         content.title = "AutoBrew"
@@ -92,9 +134,18 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if response.actionIdentifier == Self.runNowAction {
+        let actionID = response.actionIdentifier
+        if actionID == Self.runNowAction {
             Task { @MainActor in
                 onRunNowRequested?()
+            }
+        } else if actionID == Self.reviewApprovalsAction
+                    || (actionID == UNNotificationDefaultActionIdentifier
+                        && response.notification.request.content.categoryIdentifier == Self.pendingApprovalsCategory) {
+            // Default tap on the pending-approvals notification also opens
+            // the review view — most users tap the body, not the action.
+            Task { @MainActor in
+                onReviewApprovalsRequested?()
             }
         }
         completionHandler()

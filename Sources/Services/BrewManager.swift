@@ -67,7 +67,20 @@ final class BrewManager {
         currentStage = .done
     }
 
+    /// Convenience wrapper that runs the whole cycle without any policy
+    /// gating — used by callers that aren't aware of the selective-update
+    /// machinery (e.g. test helpers). The scheduler calls the more granular
+    /// `runUpdate`, `runUpgrade(formulae:casks:)`, `runCleanup` directly so
+    /// it can fit the evaluator in between.
     func runFullUpdate() async throws {
+        try await runUpdate()
+        try await runUpgrade(formulae: nil, casks: nil)
+        try await runCleanup()
+    }
+
+    /// Runs `brew update` (refresh the package index). Always safe to run —
+    /// doesn't change anything that's installed.
+    func runUpdate() async throws {
         guard !isRunning else { return }
         guard let brew = brewExecutable, let path = brewPath else {
             throw BrewError.notFound
@@ -81,43 +94,94 @@ final class BrewManager {
             if lastError == nil { currentStage = .done }
         }
 
-        logger.info("Starting full brew update cycle")
-
+        logger.info("brew update")
         currentStage = .updating
-        let updateResult = try await BrewProcess.run(executable: brew, arguments: ["update"], brewPath: path)
-        if !updateResult.succeeded {
-            lastError = updateResult.stderr
-            throw BrewError.updateFailed(updateResult.stderr)
+        let result = try await BrewProcess.run(executable: brew, arguments: ["update"], brewPath: path)
+        if !result.succeeded {
+            lastError = result.stderr
+            throw BrewError.updateFailed(result.stderr)
         }
-        lastOutput += updateResult.stdout
+        lastOutput += result.stdout
+    }
 
-        currentStage = .upgrading
-        let upgradeResult = try await BrewProcess.run(executable: brew, arguments: ["upgrade"], brewPath: path)
-        if !upgradeResult.succeeded {
-            lastError = upgradeResult.stderr
-            throw BrewError.upgradeFailed(upgradeResult.stderr)
+    /// Runs `brew upgrade` for formulae and casks separately. Pass `nil` for a
+    /// pass-through "upgrade everything in this category" (matches the old
+    /// `brew upgrade` and `brew upgrade --cask --greedy` behaviour). Pass an
+    /// empty array to skip the category entirely. Pass a token list to upgrade
+    /// only those packages.
+    func runUpgrade(formulae: [String]?, casks: [String]?) async throws {
+        guard !isRunning else { return }
+        guard let brew = brewExecutable, let path = brewPath else {
+            throw BrewError.notFound
         }
-        lastOutput += upgradeResult.stdout
 
-        currentStage = .upgradingCasks
-        let caskResult = try await BrewProcess.run(executable: brew, arguments: ["upgrade", "--cask", "--greedy"], brewPath: path)
-        lastOutput += caskResult.stdout
-        if !caskResult.succeeded {
-            // Don't throw on cask errors — one broken app shouldn't block the
-            // rest of the cycle, especially cleanup.
-            logger.warning("Cask upgrade had issues: \(caskResult.stderr)")
-            lastOutput += "\n[Cask warning] \(caskResult.stderr)"
+        isRunning = true
+        lastError = nil
+        defer {
+            isRunning = false
+            if lastError == nil { currentStage = .done }
+        }
+
+        if shouldRun(selection: formulae) {
+            currentStage = .upgrading
+            var args = ["upgrade"]
+            if let formulae { args.append(contentsOf: formulae) }
+            logger.info("brew \(args.joined(separator: " "))")
+            let result = try await BrewProcess.run(executable: brew, arguments: args, brewPath: path)
+            lastOutput += result.stdout
+            if !result.succeeded {
+                lastError = result.stderr
+                throw BrewError.upgradeFailed(result.stderr)
+            }
+        }
+
+        if shouldRun(selection: casks) {
+            currentStage = .upgradingCasks
+            var args = ["upgrade", "--cask"]
+            if let casks {
+                args.append(contentsOf: casks)
+            } else {
+                args.append("--greedy")
+            }
+            logger.info("brew \(args.joined(separator: " "))")
+            let result = try await BrewProcess.run(executable: brew, arguments: args, brewPath: path)
+            lastOutput += result.stdout
+            if !result.succeeded {
+                // One broken cask shouldn't take down the rest of the cycle.
+                logger.warning("Cask upgrade had issues: \(result.stderr)")
+                lastOutput += "\n[Cask warning] \(result.stderr)"
+            }
+        }
+    }
+
+    /// Runs `brew cleanup --prune=7` to free disk space.
+    func runCleanup() async throws {
+        guard !isRunning else { return }
+        guard let brew = brewExecutable, let path = brewPath else {
+            throw BrewError.notFound
+        }
+
+        isRunning = true
+        defer {
+            isRunning = false
+            if lastError == nil { currentStage = .done }
         }
 
         currentStage = .cleanup
-        let cleanupResult = try await BrewProcess.run(executable: brew, arguments: ["cleanup", "--prune=7"], brewPath: path)
-        if !cleanupResult.succeeded {
-            lastError = cleanupResult.stderr
-            throw BrewError.cleanupFailed(cleanupResult.stderr)
+        logger.info("brew cleanup --prune=7")
+        let result = try await BrewProcess.run(executable: brew, arguments: ["cleanup", "--prune=7"], brewPath: path)
+        if !result.succeeded {
+            lastError = result.stderr
+            throw BrewError.cleanupFailed(result.stderr)
         }
-        lastOutput += cleanupResult.stdout
+        lastOutput += result.stdout
+    }
 
-        logger.info("Full brew update cycle completed successfully")
+    /// Empty selection (`[]`) means "skip this category"; `nil` and any
+    /// non-empty list both mean "run upgrade".
+    private func shouldRun(selection: [String]?) -> Bool {
+        guard let selection else { return true }
+        return !selection.isEmpty
     }
 
     /// Reads `brew outdated --json=v2`. Fails silently — it only feeds the UI,

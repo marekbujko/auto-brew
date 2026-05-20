@@ -51,6 +51,25 @@ final class SettingsStore {
         didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") }
     }
 
+    /// Per-bump policy defaults for casks and formulae. Stored as JSON because
+    /// `UserDefaults` can't represent nested enums on its own.
+    var policyDefaults: UpdatePolicyDefaults {
+        didSet {
+            if let data = try? JSONEncoder().encode(policyDefaults) {
+                defaults.set(data, forKey: "policyDefaults")
+            }
+        }
+    }
+
+    /// Per-package opt-outs from the policy defaults.
+    var packageOverrides: [PackagePolicyOverride] {
+        didSet {
+            if let data = try? JSONEncoder().encode(packageOverrides) {
+                defaults.set(data, forKey: "packageOverrides")
+            }
+        }
+    }
+
     var didRunToday: Bool {
         guard let last = lastRunDate else { return false }
         return Calendar.current.isDateInToday(last)
@@ -91,5 +110,19 @@ final class SettingsStore {
         autoCleanupSnapshots = d.bool(forKey: "autoCleanupSnapshots")
 
         onboardingCompleted = d.bool(forKey: "onboardingCompleted")
+
+        if let data = d.data(forKey: "policyDefaults"),
+           let decoded = try? JSONDecoder().decode(UpdatePolicyDefaults.self, from: data) {
+            policyDefaults = decoded
+        } else {
+            policyDefaults = .safeDefaults
+        }
+
+        if let data = d.data(forKey: "packageOverrides"),
+           let decoded = try? JSONDecoder().decode([PackagePolicyOverride].self, from: data) {
+            packageOverrides = decoded
+        } else {
+            packageOverrides = []
+        }
     }
 }
