@@ -43,7 +43,7 @@ final class UpdateEvaluatorTests: XCTestCase {
 
         var ledger = UpdateLedger()
         let seenEightDaysAgo = referenceDate.addingTimeInterval(-8 * 86_400)
-        _ = ledger.touch(token: "firefox", version: "120.0.1", now: seenEightDaysAgo)
+        _ = ledger.touch(kind: .cask, token: "firefox", version: "120.0.1", now: seenEightDaysAgo)
 
         let evaluator = UpdateEvaluator(defaults: defaults)
         let result = evaluator.evaluate([cask("firefox", "120.0.0", "120.0.1")], ledger: ledger, now: referenceDate)
@@ -83,7 +83,7 @@ final class UpdateEvaluatorTests: XCTestCase {
         XCTAssertTrue(result.needsApproval.isEmpty)
     }
 
-    func testRejectedManualEntryGoesToSkipped() {
+    func testRejectedManualEntryStaysStickyInNeedsApproval() {
         var defaults = UpdatePolicyDefaults.safeDefaults
         defaults.caskMajor = .manualApproval
 
@@ -100,8 +100,12 @@ final class UpdateEvaluatorTests: XCTestCase {
 
         let evaluator = UpdateEvaluator(defaults: defaults, existingPending: [priorRejection])
         let result = evaluator.evaluate([cask("vscode", "1.83.0", "2.0.0")], ledger: UpdateLedger(), now: referenceDate)
-        XCTAssertEqual(result.skipped.count, 1)
-        XCTAssertEqual(result.skipped.first?.reason, .rejected)
+        // Rejected entries must stay in needsApproval so the scheduler keeps
+        // them in the pending store — otherwise the user would be re-asked
+        // about the same major version on the next run.
+        XCTAssertEqual(result.needsApproval.count, 1)
+        XCTAssertTrue(result.needsApproval.first?.decision.isRejected ?? false)
+        XCTAssertTrue(result.autoInstall.isEmpty)
     }
 
     func testNewerVersionResetsPriorRejection() {

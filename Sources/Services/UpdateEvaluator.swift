@@ -34,7 +34,9 @@ enum SkipReason: String, Sendable, Equatable {
 struct UpdateEvaluator {
     let defaults: UpdatePolicyDefaults
     let overrides: [String: PackagePolicyOverride]
-    var existingPending: [String: PendingUpdate]  // keyed by token
+    /// Keyed by `(kind, token)` so cask/formula with the same name don't
+    /// share a decision.
+    var existingPending: [String: PendingUpdate]
 
     init(
         defaults: UpdatePolicyDefaults,
@@ -42,8 +44,16 @@ struct UpdateEvaluator {
         existingPending: [PendingUpdate] = []
     ) {
         self.defaults = defaults
-        self.overrides = Dictionary(uniqueKeysWithValues: overrides.map { ($0.token, $0) })
-        self.existingPending = Dictionary(uniqueKeysWithValues: existingPending.map { ($0.token, $0) })
+        // `reduce(into:)` over `Dictionary(uniqueKeysWithValues:)` because
+        // duplicate tokens in persisted data shouldn't crash — last write wins.
+        self.overrides = overrides.reduce(into: [:]) { $0[$1.token] = $1 }
+        self.existingPending = existingPending.reduce(into: [:]) { $0[Self.pendingKey(kind: $1.kind, token: $1.token)] = $1 }
+    }
+
+    /// Composite key for the existing-pending lookup. Kept package-private
+    /// (via static func) so callers don't have to mirror the format.
+    static func pendingKey(kind: PackageKind, token: String) -> String {
+        "\(kind.rawValue)::\(token)"
     }
 
     func evaluate(_ outdated: [OutdatedPackage], ledger: UpdateLedger, now: Date) -> UpdateDecisionBundle {
@@ -58,7 +68,6 @@ struct UpdateEvaluator {
             let override = overrides[package.name]
             let policy = override?.policy(for: bump) ?? defaults.policy(for: kind, bump: bump)
 
-            // Decide based on policy.
             switch policy {
             case .skip:
                 bundle.skipped.append(SkippedEntry(package: package, reason: .policySkip))
@@ -67,7 +76,7 @@ struct UpdateEvaluator {
                 bundle.autoInstall.append(package)
 
             case .delayedDays(let cooldown):
-                let firstSeen = workingLedger.touch(token: package.name, version: package.newVersion, now: now)
+                let firstSeen = workingLedger.touch(kind: kind, token: package.name, version: package.newVersion, now: now)
                 let elapsed = daysBetween(firstSeen, and: now)
                 if elapsed >= cooldown {
                     bundle.autoInstall.append(package)
@@ -81,21 +90,24 @@ struct UpdateEvaluator {
                 }
 
             case .manualApproval:
-                let firstSeen = workingLedger.touch(token: package.name, version: package.newVersion, now: now)
-                let prior = existingPending[package.name]
+                let firstSeen = workingLedger.touch(kind: kind, token: package.name, version: package.newVersion, now: now)
+                let prior = existingPending[Self.pendingKey(kind: kind, token: package.name)]
 
                 if let prior, prior.availableVersion == package.newVersion {
+                    // Same `(kind, token, version)`: carry the prior decision
+                    // forward so the store keeps approve/reject sticky.
                     switch prior.decision {
                     case .approved:
                         bundle.autoInstall.append(package)
-                    case .rejected:
-                        bundle.skipped.append(SkippedEntry(package: package, reason: .rejected))
-                    case .pending:
+                    case .rejected, .pending:
+                        // Both stay in needsApproval so the scheduler can
+                        // re-hydrate the pending store and keep rejected
+                        // entries sticky between runs.
                         bundle.needsApproval.append(prior)
                     }
                 } else {
-                    // Either no prior decision, or this is a newer version.
-                    // In both cases the user gets a fresh pending entry.
+                    // No prior decision for this version (either nothing
+                    // existed, or a newer version superseded it).
                     let pending = PendingUpdate(
                         id: prior?.id ?? UUID(),
                         token: package.name,

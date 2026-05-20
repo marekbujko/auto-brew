@@ -22,6 +22,12 @@ final class SchedulerService {
     private var pollingTask: Task<Void, Never>?
     private var scheduledTask: Task<Void, Never>?
 
+    /// Scheduler-level reentrancy guard. `BrewManager.isRunning` toggles per
+    /// stage so it can't tell us "a whole pipeline is in flight" — between
+    /// `runUpdate` and `runUpgrade` the flag is briefly false and a second
+    /// trigger could slip in. This bool covers the whole sequence.
+    private var pipelineInProgress = false
+
     var lastRunDate: Date? { settings.lastRunDate }
     var isRunning: Bool { brewManager.isRunning }
     var currentStage: BrewStage? { brewManager.currentStage }
@@ -139,13 +145,21 @@ final class SchedulerService {
     // MARK: - Brew Execution
 
     private func runBrewUpdate() async {
-        guard !brewManager.isRunning else { return }
+        guard !pipelineInProgress else {
+            logger.info("Brew run skipped — pipeline already in progress")
+            return
+        }
 
         guard brewManager.isHomebrewInstalled else {
             state = .failed("Homebrew not installed")
             logger.warning("Brew update skipped — Homebrew not installed")
             return
         }
+
+        pipelineInProgress = true
+        defer { pipelineInProgress = false }
+
+        var upgradeError: Error?
 
         do {
             // 1. brew update — refresh the index so fetchOutdated sees latest.
@@ -170,9 +184,13 @@ final class SchedulerService {
             // Persist firstSeen + housekeeping on the ledger so the cool-off
             // window is measured from the first sighting next run too.
             for package in outdated {
-                _ = ledgerStore.touch(token: package.name, version: package.newVersion, now: now)
+                let kind: PackageKind = package.isCask ? .cask : .formula
+                _ = ledgerStore.touch(kind: kind, token: package.name, version: package.newVersion, now: now)
             }
-            let activeKeys = Set(outdated.map { UpdateLedger.key(token: $0.name, version: $0.newVersion) })
+            let activeKeys = Set(outdated.map { package -> String in
+                let kind: PackageKind = package.isCask ? .cask : .formula
+                return UpdateLedger.key(kind: kind, token: package.name, version: package.newVersion)
+            })
             ledgerStore.purge(keeping: activeKeys)
 
             // Carry the user's prior decisions forward and surface anything
@@ -182,23 +200,38 @@ final class SchedulerService {
             let newPendingCount = pendingStore.pendingCount
 
             // 3. Pick everything that's allowed to install right now.
+            let formulaeToUpgrade = bundle.autoInstall.filter { !$0.isCask }.map(\.name)
+            let casksToUpgrade = bundle.autoInstall.filter { $0.isCask }.map(\.name)
             let approvedTokens = Set(pendingStore.approvedTokens)
-            let installable = bundle.autoInstall.filter { !approvedTokens.contains($0.name) }
-                + bundle.autoInstall.filter { approvedTokens.contains($0.name) }
-            let formulaeToUpgrade = installable.filter { !$0.isCask }.map(\.name)
-            let casksToUpgrade = installable.filter { $0.isCask }.map(\.name)
 
             if formulaeToUpgrade.isEmpty && casksToUpgrade.isEmpty {
                 logger.info("Nothing to upgrade — \(bundle.waitingForCooldown.count) waiting, \(bundle.needsApproval.count) pending approval")
             } else {
-                try await brewManager.runUpgrade(formulae: formulaeToUpgrade, casks: casksToUpgrade)
-                // Approved entries that just got installed can drop out of the
-                // pending list — they're no longer relevant.
-                pendingStore.remove(tokens: approvedTokens)
+                do {
+                    try await brewManager.runUpgrade(formulae: formulaeToUpgrade, casks: casksToUpgrade)
+                    // Only drop approved entries from the pending list after
+                    // the upgrade actually went through — a failure should
+                    // leave them queued so the next run retries.
+                    pendingStore.remove(tokens: approvedTokens)
+                } catch {
+                    // Swallow here so cleanup still runs; rethrow shape is
+                    // preserved via `upgradeError` below.
+                    upgradeError = error
+                }
             }
 
             // 4. cleanup — disk hygiene regardless of upgrade outcome.
-            try await brewManager.runCleanup()
+            do {
+                try await brewManager.runCleanup()
+            } catch {
+                // If the upgrade succeeded but cleanup failed, surface that;
+                // otherwise the upgrade failure takes precedence.
+                if upgradeError == nil { upgradeError = error }
+            }
+
+            if let upgradeError {
+                throw upgradeError
+            }
 
             settings.lastRunDate = Date()
             if settings.autoCleanupSnapshots {
@@ -230,7 +263,7 @@ final class SchedulerService {
                     notificationManager.showPendingApprovals(count: newPendingCount, sampleNames: Array(preview))
                 }
             }
-            logger.info("Brew run done — \(installable.count) upgraded, \(bundle.waitingForCooldown.count) waiting, \(newPendingCount) pending")
+            logger.info("Brew run done — \(bundle.autoInstall.count) upgraded, \(bundle.waitingForCooldown.count) waiting, \(newPendingCount) pending")
         } catch {
             state = .failed(error.localizedDescription)
             if settings.showNotifications {

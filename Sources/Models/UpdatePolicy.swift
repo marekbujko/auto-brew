@@ -84,11 +84,10 @@ struct UpdatePolicyDefaults: Codable, Sendable, Equatable {
         switch (kind, effectiveBump) {
         case (.cask, .patch): return caskPatch
         case (.cask, .minor): return caskMinor
-        case (.cask, .major): return caskMajor
+        case (.cask, .major), (.cask, .unknown): return caskMajor
         case (.formula, .patch): return formulaPatch
         case (.formula, .minor): return formulaMinor
-        case (.formula, .major): return formulaMajor
-        case (_, .unknown): return .manualApproval  // unreachable, see effectiveBump
+        case (.formula, .major), (.formula, .unknown): return formulaMajor
         }
     }
 }
@@ -106,12 +105,10 @@ struct PackagePolicyOverride: Codable, Sendable, Equatable, Identifiable {
     var isEmpty: Bool { patch == nil && minor == nil && major == nil }
 
     func policy(for bump: VersionBumpType) -> UpdatePolicy? {
-        let effectiveBump: VersionBumpType = (bump == .unknown) ? .major : bump
-        switch effectiveBump {
+        switch bump {
         case .patch: return patch
         case .minor: return minor
-        case .major: return major
-        case .unknown: return major  // unreachable
+        case .major, .unknown: return major
         }
     }
 }

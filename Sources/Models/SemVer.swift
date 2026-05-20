@@ -28,14 +28,16 @@ struct SemVer: Equatable, Comparable, Sendable {
         let parts = core.split(separator: ".", omittingEmptySubsequences: false)
         guard parts.count >= 2 else { return nil }
 
-        let nums = parts.compactMap { Int($0) }
-        // Must have at least major + minor as integers; otherwise this isn't
-        // a version we can reason about.
-        guard nums.count >= 2 else { return nil }
-
-        let major = nums[0]
-        let minor = nums[1]
-        let patch = nums.count >= 3 ? nums[2] : 0
+        // Parse positionally so `1.a.3` doesn't collapse to `1.3.0` —
+        // segments must parse where they sit, or the whole string is rejected.
+        guard let major = Int(parts[0]), let minor = Int(parts[1]) else { return nil }
+        let patch: Int
+        if parts.count >= 3 {
+            guard let p = Int(parts[2]) else { return nil }
+            patch = p
+        } else {
+            patch = 0
+        }
 
         // Heuristic: `2024.10.1` looks like a date stamp, not a SemVer.
         // Treat those as unknown so the caller routes them through major.

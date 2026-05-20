@@ -10,9 +10,11 @@ private let ledgerLogger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", ca
 /// Persisted as JSON in Application Support — small enough to read/write
 /// synchronously on the scheduler thread.
 struct UpdateLedger: Sendable, Equatable {
-    /// One row per `(token, version)`. The composite key lets us reset the
-    /// timer when a newer version shows up.
+    /// One row per `(kind, token, version)`. The composite key includes
+    /// `kind` so a cask and formula with the same name don't clobber each
+    /// other.
     struct Entry: Codable, Sendable, Equatable {
+        let kind: PackageKind
         let token: String
         let version: String
         let firstSeen: Date
@@ -25,30 +27,28 @@ struct UpdateLedger: Sendable, Equatable {
     }
 
     /// Returns the existing `firstSeen` or inserts `now` if this is the first
-    /// time we see this specific `(token, version)`. Updating the version
-    /// resets the timer.
-    mutating func touch(token: String, version: String, now: Date) -> Date {
-        let key = Self.key(token: token, version: version)
+    /// time we see this specific `(kind, token, version)`. Updating the
+    /// version resets the timer for that `(kind, token)`.
+    mutating func touch(kind: PackageKind, token: String, version: String, now: Date) -> Date {
+        let key = Self.key(kind: kind, token: token, version: version)
         if let existing = entries[key] {
             return existing.firstSeen
         }
-        // A different version exists for this token → drop the old entry.
-        entries = entries.filter { $0.value.token != token }
-        let entry = Entry(token: token, version: version, firstSeen: now)
+        // A different version exists for this `(kind, token)` → drop the old entry.
+        entries = entries.filter { !($0.value.kind == kind && $0.value.token == token) }
+        let entry = Entry(kind: kind, token: token, version: version, firstSeen: now)
         entries[key] = entry
         return now
     }
 
-    /// Drops entries whose `(token, version)` is no longer outdated. Called
-    /// after each run so the file doesn't grow forever.
+    /// Drops entries whose `(kind, token, version)` is no longer outdated.
+    /// Called after each run so the file doesn't grow forever.
     mutating func purge(keeping activeKeys: Set<String>) {
         entries = entries.filter { activeKeys.contains($0.key) }
     }
 
-    /// Composite key — used for both the in-memory map and tests that need
-    /// to peek at the file format.
-    static func key(token: String, version: String) -> String {
-        "\(token)::\(version)"
+    static func key(kind: PackageKind, token: String, version: String) -> String {
+        "\(kind.rawValue)::\(token)::\(version)"
     }
 }
 
@@ -88,8 +88,8 @@ final class UpdateLedgerStore {
         }
     }
 
-    func touch(token: String, version: String, now: Date = Date()) -> Date {
-        let result = ledger.touch(token: token, version: version, now: now)
+    func touch(kind: PackageKind, token: String, version: String, now: Date = Date()) -> Date {
+        let result = ledger.touch(kind: kind, token: token, version: version, now: now)
         save()
         return result
     }

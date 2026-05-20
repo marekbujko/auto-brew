@@ -34,15 +34,27 @@ final class PendingUpdatesStore {
     }
 
     /// Replaces the store with the fresh evaluator output. Keeps existing
-    /// `approved`/`rejected` decisions when the token + version match.
+    /// `approved`/`rejected` decisions when `(kind, token, version)` match —
+    /// the evaluator already preserves those via `existingPending`, so this
+    /// is the second line of defence in case the evaluator was constructed
+    /// without prior decisions.
     func replace(with bundle: [PendingUpdate]) {
-        var merged: [PendingUpdate] = []
-        let existing = Dictionary(uniqueKeysWithValues: updates.map { ($0.token, $0) })
+        // `reduce(into:)` instead of `Dictionary(uniqueKeysWithValues:)` —
+        // duplicate keys (corrupt persisted state) shouldn't crash.
+        let existing: [String: PendingUpdate] = updates.reduce(into: [:]) {
+            $0[Self.key(for: $1)] = $1
+        }
 
+        var merged: [PendingUpdate] = []
         for incoming in bundle {
-            if let prior = existing[incoming.token],
-               prior.availableVersion == incoming.availableVersion {
-                // Same package + version: keep the user's prior decision.
+            if let prior = existing[Self.key(for: incoming)],
+               prior.availableVersion == incoming.availableVersion,
+               !incoming.decision.isPending {
+                // Incoming already carries a settled decision — keep it.
+                merged.append(incoming)
+            } else if let prior = existing[Self.key(for: incoming)],
+                      prior.availableVersion == incoming.availableVersion {
+                // Same `(kind, token, version)`: keep the user's prior decision.
                 var copy = incoming
                 copy.decision = prior.decision
                 merged.append(copy)
@@ -52,6 +64,10 @@ final class PendingUpdatesStore {
         }
         updates = merged
         save()
+    }
+
+    private static func key(for update: PendingUpdate) -> String {
+        "\(update.kind.rawValue)::\(update.token)"
     }
 
     func approve(_ id: PendingUpdate.ID, now: Date = Date()) {
