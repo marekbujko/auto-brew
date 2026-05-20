@@ -1,6 +1,9 @@
 import SwiftUI
 import AppKit
 
+/// Row in the Installed list. Brew actions (upgrade/uninstall) are gated on
+/// the presence of a cask token — apps installed outside Homebrew only get
+/// the snapshot action.
 struct InstalledAppRowView: View {
     let app: InstalledApp
     let onUpgrade: () -> Void

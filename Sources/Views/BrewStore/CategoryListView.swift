@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// Filtered "all casks in this category" list, sorted by install popularity.
+/// Detail opens in a sheet rather than pushing — keeps the BrewStore window
+/// chrome stable while users browse.
 struct CategoryListView: View {
     let category: BrowseCategory
     @Bindable var store: CatalogStore
@@ -30,6 +33,8 @@ struct CategoryListView: View {
         }
     }
 
+    /// Category filter first, then optional substring match on token / display
+    /// name / description, finally sorted by Homebrew analytics install count.
     private var filtered: [CaskCatalogEntry] {
         let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
         let base = q.isEmpty

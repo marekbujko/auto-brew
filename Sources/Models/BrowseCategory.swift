@@ -1,5 +1,9 @@
 import Foundation
 
+/// Sidebar taxonomy for the BrewStore. `all`, `popular` and `recent` are
+/// ordering buckets (they don't filter content), the rest are real categories
+/// derived from a mix of curated token lists and keyword heuristics — the
+/// Homebrew API does not provide categories, so we synthesise them client-side.
 enum BrowseCategory: String, CaseIterable, Identifiable, Sendable {
     case all, popular, recent
     case browsers

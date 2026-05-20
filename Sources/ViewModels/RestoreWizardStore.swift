@@ -1,6 +1,9 @@
 import Foundation
 import os
 
+/// Drives the multi-step restore flow: pick a bundle, review what's inside,
+/// run install + data restore, show the result. One instance per wizard
+/// session — discarded when the sheet closes.
 @Observable
 @MainActor
 final class RestoreWizardStore {
@@ -19,6 +22,9 @@ final class RestoreWizardStore {
 
     private let logger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", category: "RestoreWizard")
 
+    /// Accepts either a full restore bundle (directory) or a single snapshot
+    /// archive. In the single-file case we synthesise a one-entry RestoreList
+    /// so the review step has a uniform structure to render.
     func loadBundle(at url: URL) async {
         loadError = nil
         sourceURL = url
@@ -45,6 +51,9 @@ final class RestoreWizardStore {
         }
     }
 
+    /// Runs install (optional) followed by data restore, per selected entry.
+    /// If install fails we try a name-based cask search as a last resort
+    /// before recording the entry as failed and skipping data restore.
     func performRestore() async {
         step = .running
         failedBundles = []

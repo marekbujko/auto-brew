@@ -7,6 +7,9 @@ protocol URLSessionProtocol: Sendable {
 
 extension URLSession: URLSessionProtocol {}
 
+/// Loads the full cask catalog and 365-day install analytics from
+/// formulae.brew.sh and caches both to disk. We hit the HTTP API rather than
+/// `brew search` — it's faster and exposes analytics the CLI doesn't.
 @Observable
 @MainActor
 final class BrewCatalogService {
@@ -70,6 +73,8 @@ final class BrewCatalogService {
         }
     }
 
+    /// Startup fallback when there's no network. `lastRefresh` then reflects
+    /// the cache file's mtime, not "now".
     func loadCache() async throws {
         let caskFile = cacheDir.appendingPathComponent("cask.json")
         guard FileManager.default.fileExists(atPath: caskFile.path) else {

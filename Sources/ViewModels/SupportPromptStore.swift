@@ -2,6 +2,10 @@
 import Foundation
 import Observation
 
+/// Tracks how long the app has been installed and decides whether the
+/// "support this project" sheet is due. Stages fire once each (week, then
+/// quarter) and stay dismissed forever once the user opts out or confirms
+/// they've already supported.
 @Observable
 @MainActor
 final class SupportPromptStore {
@@ -30,6 +34,8 @@ final class SupportPromptStore {
         self.userHasSupported = defaults.bool(forKey: Keys.userHasSupported)
     }
 
+    /// Stamps "install date" on first launch. Idempotent — subsequent calls
+    /// are no-ops so reinstalls don't reset the clock if defaults survive.
     func ensureInstallDate() {
         guard installDate == nil else { return }
         let date = now()
@@ -37,6 +43,9 @@ final class SupportPromptStore {
         defaults.set(date, forKey: Keys.installDate)
     }
 
+    /// The highest-priority stage currently due, or nil if none. Quarter beats
+    /// week so a long-time user who never saw the week prompt still gets the
+    /// quarter one rather than a stale earlier prompt.
     var pendingStage: SupportStage? {
         guard !userHasSupported, let installDate else { return nil }
         let days = Calendar.current.dateComponents([.day], from: installDate, to: now()).day ?? 0

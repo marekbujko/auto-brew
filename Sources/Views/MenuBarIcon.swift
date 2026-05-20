@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// The glyph rendered in the system menu bar. The mug stays put; a tiny
+/// badge appears for the three states a glance-able user actually cares
+/// about: running, just-finished, and failed.
 struct MenuBarIcon: View {
     let state: SchedulerState
 

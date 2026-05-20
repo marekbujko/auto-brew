@@ -1,6 +1,9 @@
 import Foundation
 import os
 
+/// View-model for the Snapshots section of BrewStore. Reads the on-disk
+/// snapshot index through `SnapshotService` and exposes grouped/sorted
+/// projections suited to the list UI.
 @Observable
 @MainActor
 final class SnapshotsStore {
@@ -12,6 +15,8 @@ final class SnapshotsStore {
 
     private let logger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", category: "SnapshotsStore")
 
+    /// Snapshots grouped per bundle ID, newest-first within a group and
+    /// alphabetical by app name between groups.
     var groupedByApp: [(bundleID: String, items: [AppSnapshot])] {
         let dict = Dictionary(grouping: snapshots, by: \.bundleID)
         return dict.map { ($0.key, $0.value.sorted { $0.createdAt > $1.createdAt }) }

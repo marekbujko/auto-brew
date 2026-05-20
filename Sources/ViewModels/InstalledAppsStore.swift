@@ -1,5 +1,7 @@
 import Foundation
 
+/// Lists the apps discovered in `/Applications`, mapped against the cask
+/// catalog so each entry can show whether Homebrew manages it.
 @Observable
 @MainActor
 final class InstalledAppsStore {
@@ -19,6 +21,8 @@ final class InstalledAppsStore {
         }
     }
 
+    /// Rescan `/Applications`. The catalog is warmed on demand because the
+    /// menu bar may be opened before BrewStore has ever loaded the cache.
     func refresh() async {
         isLoading = true
         defer { isLoading = false }

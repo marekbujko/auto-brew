@@ -1,11 +1,18 @@
 import SwiftUI
 
+/// App-Store-style landing page for the cask catalog. Rankings come from
+/// `CatalogStore.topInstalledOverall` / `topByCategory` (precomputed from
+/// Homebrew analytics) so this view does not sort anything itself. Shows a
+/// spinner on cold start and a `ContentUnavailableView` if the catalog fetch
+/// failed.
 struct DiscoverView: View {
     @Bindable var store: CatalogStore
     let onSelect: (CaskCatalogEntry) -> Void
 
     @State private var service = BrewCatalogService.shared
 
+    /// Curated subset of categories that get their own Discover row. Not every
+    /// category earns a row — too many would dilute the page.
     private let categoriesToShow: [BrowseCategory] = [
         .developerTools, .productivity, .browsers, .communication, .media
     ]

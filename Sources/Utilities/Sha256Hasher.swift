@@ -1,6 +1,10 @@
 import Foundation
 import CryptoKit
 
+/// Streaming SHA-256 over a file. We read in 64 KB chunks inside an
+/// `autoreleasepool` because `FileHandle.readData` returns autoreleased `Data`
+/// — without the pool a multi-gigabyte snapshot would balloon resident memory
+/// until the call returns.
 enum Sha256Hasher {
     static func hash(file url: URL) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)

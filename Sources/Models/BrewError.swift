@@ -1,5 +1,8 @@
 import Foundation
 
+/// Errors surfaced from the brew pipeline. Each case maps to a distinct user
+/// message and, in some flows, to a different recovery action (`.notFound`
+/// triggers the install prompt; the others render the underlying stderr).
 enum BrewError: LocalizedError, Sendable {
     case notFound
     case installFailed(String)

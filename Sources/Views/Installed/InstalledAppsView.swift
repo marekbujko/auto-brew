@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// Installed tab: scans `/Applications`, resolves cask tokens against the
+/// brew catalog, and lets the user upgrade/uninstall/snapshot per app.
+/// The list refreshes on appear and after every brew action so the cask
+/// token column reflects the post-operation state — the catalog isn't
+/// observed reactively.
 struct InstalledAppsView: View {
     @State private var store = InstalledAppsStore.shared
     @State private var snapshotTarget: InstalledApp?

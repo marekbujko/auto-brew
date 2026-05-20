@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// SwiftUI entry point. The `MenuBarExtra` is the primary surface; the two
+/// auxiliary `Window` scenes (BrewStore, Legal) are only opened on demand via
+/// `OpenWindowOnNotification`, which is why `File > New` is suppressed on both.
 @main
 struct AutoBrewApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate

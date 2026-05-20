@@ -1,6 +1,9 @@
 import Foundation
 import SwiftUI
 
+/// Observable mirror of every user-facing preference. Each property writes
+/// through to `UserDefaults` via `didSet` so the only place that needs to
+/// know about storage keys is this file.
 @Observable
 @MainActor
 final class SettingsStore {

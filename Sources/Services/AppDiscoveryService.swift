@@ -1,6 +1,9 @@
 import Foundation
 import AppKit
 
+/// Scans `/Applications` and tags each entry with its cask token if Homebrew
+/// knows the app. Apple system apps are filtered out — otherwise every
+/// preinstalled bundle would clutter the list.
 struct AppDiscoveryService: Sendable {
     func scan(directories: [URL] = [URL(fileURLWithPath: "/Applications")],
               resolver: CaskNameResolver) async -> [InstalledApp] {

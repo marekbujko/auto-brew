@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// Per-app status line during a running restore. Restores are sequential and
+/// can each take minutes (brew install + ditto copy), so the user gets a
+/// readable label per bundle rather than a single indeterminate spinner.
 struct RestoreProgressView: View {
     @Bindable var store: RestoreWizardStore
 

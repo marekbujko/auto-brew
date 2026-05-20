@@ -2,6 +2,9 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
+/// Right-hand detail panel in `SnapshotsRootView`. Restore and delete both go
+/// through `confirmationDialog` — they overwrite or wipe the current app
+/// state, so an accidental click would be expensive.
 struct SnapshotDetailView: View {
     let snapshot: AppSnapshot
     @State private var showRestoreConfirm = false

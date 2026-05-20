@@ -1,6 +1,9 @@
 import AppKit
 import SwiftUI
 
+/// Settings page rendered inside the menu-bar popover. Changes to the trigger
+/// section restart `SchedulerService` immediately so the new mode takes effect
+/// without an app relaunch.
 struct SettingsView: View {
     @State private var settings = SettingsStore.shared
     @State private var scheduler = SchedulerService.shared
@@ -263,6 +266,8 @@ struct SettingsView: View {
         }
     }
 
+    /// Reads the on-disk icon cache directly so the size shown reflects
+    /// reality (incl. files the loader hasn't seen yet this session).
     @MainActor
     private func refreshCacheStats() {
         iconCacheSize = RemoteIconLoader.shared.diskCacheSize()

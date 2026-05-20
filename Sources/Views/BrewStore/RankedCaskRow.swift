@@ -1,6 +1,11 @@
 import AppKit
 import SwiftUI
 
+/// App-Store-style row: icon, rank number, name + description, action button.
+/// The whole text block is a button so the tap target is large; the install
+/// pill is its own button to avoid swallowing the open-detail intent. Icon
+/// uses `CaskIconView` so the local-app icon shows up when present and we
+/// fall back gracefully when it isn't.
 struct RankedCaskRow: View {
     let rank: Int
     let entry: CaskCatalogEntry
@@ -102,6 +107,8 @@ struct RankedCaskRow: View {
 
     private var isInstalled: Bool { installedAppPath != nil }
 
+    /// Doubles as "Open" when the app is already on disk — same button label
+    /// flips between Install and Open based on `installedAppPath`.
     @MainActor
     private func install() async {
         if let path = installedAppPath {

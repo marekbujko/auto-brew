@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// One App-Store-style Discover row: title, two-column grid of ranked
+/// entries, trailing divider. `entries` is already in rank order — this view
+/// doesn't sort.
 struct DiscoverSection: View {
     let title: String
     let entries: [CaskCatalogEntry]

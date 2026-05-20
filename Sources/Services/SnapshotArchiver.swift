@@ -1,5 +1,8 @@
 import Foundation
 
+/// Uses `ditto` instead of `zip`/`unzip` because ditto preserves resource
+/// forks and extended attributes on macOS bundles. Otherwise restores would
+/// lose Spotlight metadata and quarantine flags.
 enum SnapshotArchiver {
     enum ArchiveError: LocalizedError {
         case zipFailed(String)

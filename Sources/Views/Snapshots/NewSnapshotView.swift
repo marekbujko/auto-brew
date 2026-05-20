@@ -1,6 +1,10 @@
 import SwiftUI
 import AppKit
 
+/// Sheet that confirms creating a snapshot for one already-installed app.
+/// There is no input to validate here — the app reference comes from the
+/// Installed list — so the view only surfaces what the store returns via
+/// `lastError` and otherwise hands the work off immediately.
 struct NewSnapshotView: View {
     let app: InstalledApp
     let onDone: () -> Void

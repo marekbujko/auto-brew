@@ -1,5 +1,9 @@
 import SwiftUI
 
+/// Lists pending updates across managed packages. Source is
+/// `BrewManager.outdatedPackages`, populated by `brew outdated` on first
+/// appearance. `hasLoaded` separates "still loading" from "actually empty" so
+/// the empty state doesn't flash.
 struct UpdatesView: View {
     @State private var brewManager = BrewManager.shared
     @State private var hasLoaded = false

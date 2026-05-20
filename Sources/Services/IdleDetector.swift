@@ -2,6 +2,9 @@ import Foundation
 import IOKit
 
 enum IdleDetector: Sendable {
+    /// Reads `HIDIdleTime` from the `IOHIDSystem` registry entry. The only
+    /// reliable path without Accessibility — `CGEventSource` would tamper with
+    /// inputs and needs extra entitlements.
     static func systemIdleTime() -> TimeInterval? {
         var iterator: io_iterator_t = 0
         let result = IOServiceGetMatchingServices(

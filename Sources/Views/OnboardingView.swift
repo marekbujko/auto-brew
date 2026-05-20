@@ -1,5 +1,9 @@
 import SwiftUI
 
+/// First-launch flow. Order matters: ask about login-item first (cheapest
+/// commitment), then verify or install Homebrew (the only step that can
+/// actually fail), then a confirmation that flips `onboardingCompleted` and
+/// hands control back to `MenuBarView`.
 struct OnboardingView: View {
     @State private var brewManager = BrewManager.shared
     @State private var settings = SettingsStore.shared

@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Sidebar list grouped by bundle ID — one section per app, snapshots inside
+/// sorted by the store. Selection is driven from `SnapshotsRootView`.
 struct SnapshotListView: View {
     @Binding var selection: AppSnapshot?
     @Bindable var store: SnapshotsStore

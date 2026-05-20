@@ -1,5 +1,8 @@
 import Foundation
 
+/// Linear progression of a brew run. Drives both the menu-bar icon animation
+/// and the progress label, so the order here matches the order in which
+/// `BrewManager` actually invokes brew.
 enum BrewStage: Sendable {
     case detecting
     case installing

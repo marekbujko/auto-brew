@@ -1,6 +1,9 @@
 import Foundation
 import os
 
+/// Triggers `BrewManager.runFullUpdate()` in either idle or scheduled mode.
+/// Also watches sleep/wake to catch up on runs missed during sleep. Doesn't
+/// react to settings changes on its own — callers invoke `restartScheduling()`.
 @Observable
 @MainActor
 final class SchedulerService {
@@ -58,6 +61,8 @@ final class SchedulerService {
 
     // MARK: - Idle Mode
 
+    /// 60-second polling is plenty — the user won't notice 30 seconds either
+    /// way, and we avoid waking the CPU every second.
     private func startIdlePolling() {
         pollingTask = Task { [weak self] in
             while !Task.isCancelled {
@@ -105,6 +110,8 @@ final class SchedulerService {
                     await self.runBrewUpdate()
                 }
 
+                // One-hour cooldown — otherwise the loop would immediately
+                // compute `secondsUntilNextRun` for tomorrow and spin needlessly.
                 try? await Task.sleep(for: .seconds(3600))
             }
         }

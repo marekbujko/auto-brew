@@ -6,6 +6,10 @@ enum MenuPage: Equatable {
     case log
 }
 
+/// Contents of the `MenuBarExtra` popover. We deliberately host Settings and
+/// Log as in-popover pages (with slide transitions) rather than separate
+/// windows — keeps the whole control surface within one click of the icon.
+/// Onboarding takes over the whole popover until the user finishes it.
 struct MenuBarView: View {
     @State private var scheduler = SchedulerService.shared
     @State private var brewManager = BrewManager.shared
@@ -241,6 +245,8 @@ struct MenuBarView: View {
         }
     }
 
+    /// Compact status indicator shown next to the title — spinner while
+    /// running, check/warning glyph after a finished run, dot otherwise.
     @ViewBuilder
     private var statusBadge: some View {
         switch scheduler.state {

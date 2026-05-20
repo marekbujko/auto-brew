@@ -1,6 +1,9 @@
 import Foundation
 import os
 
+/// Orchestrates the full `brew update → upgrade → upgrade --cask → cleanup`
+/// cycle and serialises it via `isRunning`. Running two in parallel would hit
+/// Homebrew's global lock and fail both.
 @Observable
 @MainActor
 final class BrewManager {
@@ -14,6 +17,8 @@ final class BrewManager {
 
     private let logger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", category: "BrewManager")
 
+    /// Directory containing `brew`. Apple Silicon uses a different prefix than
+    /// Intel, so check both before falling back to `which`.
     var brewPath: String? {
         // Check standard locations first
         let arm = "/opt/homebrew/bin"
@@ -98,6 +103,8 @@ final class BrewManager {
         let caskResult = try await BrewProcess.run(executable: brew, arguments: ["upgrade", "--cask", "--greedy"], brewPath: path)
         lastOutput += caskResult.stdout
         if !caskResult.succeeded {
+            // Don't throw on cask errors — one broken app shouldn't block the
+            // rest of the cycle, especially cleanup.
             logger.warning("Cask upgrade had issues: \(caskResult.stderr)")
             lastOutput += "\n[Cask warning] \(caskResult.stderr)"
         }
@@ -113,6 +120,8 @@ final class BrewManager {
         logger.info("Full brew update cycle completed successfully")
     }
 
+    /// Reads `brew outdated --json=v2`. Fails silently — it only feeds the UI,
+    /// so if brew is busy or the output isn't parseable, the old list stays.
     func fetchOutdated() async {
         guard !isRunning else { return }
         guard let brew = brewExecutable, let path = brewPath else { return }

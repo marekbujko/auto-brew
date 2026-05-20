@@ -1,5 +1,9 @@
 import Foundation
 
+/// Collects every standard location where macOS stores app data —
+/// Preferences, Containers, Caches, Saved State, etc. Each path is checked
+/// individually instead of recursively scanning `~/Library`, which would take
+/// hours.
 struct SnapshotPathResolver: Sendable {
     let bundleID: String
     let home: URL
@@ -26,6 +30,9 @@ struct SnapshotPathResolver: Sendable {
         ]
     }
 
+    /// Group containers often have cryptic prefixes (e.g. `ABCDE12345.com.app`),
+    /// so we substring-match on the bundle ID or its last component. False
+    /// positives are fine — better to back up one extra than lose user data.
     func groupContainerPaths() -> [URL] {
         let root = groupContainerSearchRoot
         guard let contents = try? FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil) else {

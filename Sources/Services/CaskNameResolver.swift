@@ -1,5 +1,8 @@
 import Foundation
 
+/// Maps app bundle names (e.g. `Firefox.app`) to their cask token. Lookup is
+/// case-insensitive because catalog and on-disk spellings drift
+/// (`VSCode.app` vs. `Visual Studio Code.app`).
 struct CaskNameResolver: Sendable {
     private let appNameToToken: [String: String]
 

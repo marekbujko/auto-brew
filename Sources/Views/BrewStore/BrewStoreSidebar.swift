@@ -1,9 +1,14 @@
 import SwiftUI
 
+/// Left rail of BrewStore. Fixed-order top section (Discover/Installed/Snapshots/
+/// Updates) above the category list. The category order here is intentionally
+/// hand-curated, not alphabetical — most-used surfaces sit higher.
 struct BrewStoreSidebar: View {
     @Binding var selection: BrewStoreSection
     @Binding var searchText: String
 
+    /// Order matches the precomputed rankings in `CatalogStore.rankedCategories`
+    /// so the sidebar and Discover sections stay in sync.
     private let contentCategories: [BrowseCategory] = [
         .browsers, .developerTools, .communication, .productivity,
         .media, .graphics, .utilities, .security, .games, .storage

@@ -7,7 +7,7 @@ enum SupportStage: String, CaseIterable, Sendable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Tage seit Installation, nach denen diese Stage fällig wird.
+    /// Days since install at which this stage becomes due.
     var thresholdDays: Int {
         switch self {
         case .week: return 7

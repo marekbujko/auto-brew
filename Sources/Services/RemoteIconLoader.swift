@@ -2,6 +2,9 @@ import AppKit
 import Foundation
 import os
 
+/// Two-tier cache (NSCache + disk) for cask icons. Sources are iTunes Search
+/// (for Mac App Store apps) with icon.horse as fallback. Misses are persisted
+/// as a sentinel so we don't refire failing HTTP calls on every render.
 @MainActor
 @Observable
 final class RemoteIconLoader {

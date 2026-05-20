@@ -2,6 +2,9 @@ import Foundation
 import UserNotifications
 import os
 
+/// Wrapper around `UNUserNotificationCenter`. `@unchecked Sendable` because
+/// the delegate protocol forces `nonisolated` callbacks — the MainActor hop
+/// then happens manually in the delegate methods.
 @MainActor
 final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
@@ -13,6 +16,8 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
     nonisolated private static let runNowAction = "RUN_NOW"
     nonisolated private static let skipAction = "SKIP"
 
+    /// Fires when the user taps "Update Now" on the missed-run notification —
+    /// the bridge from notification action to scheduler.
     var onRunNowRequested: (@MainActor () -> Void)?
 
     override private init() {

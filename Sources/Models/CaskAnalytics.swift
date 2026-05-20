@@ -1,5 +1,9 @@
 import Foundation
 
+/// Install counts pulled from `formulae.brew.sh/api/analytics/cask-install/...`.
+/// The API returns counts as strings with thousands separators (`"12,345"`),
+/// which is why we parse them manually instead of letting `Decodable` map them
+/// to `Int` directly.
 struct CaskAnalytics: Decodable, Sendable {
     private let counts: [String: Int]
 

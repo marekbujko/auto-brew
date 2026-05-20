@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
 
+/// In-memory cache for icons resolved from already-installed `.app` bundles.
+/// `localChecked` records misses so we don't hit the filesystem for every
+/// render of every catalog row — once a token is known to have no local app,
+/// the lookup short-circuits until the process restarts.
 @Observable
 @MainActor
 final class CaskIconCache {
@@ -8,6 +12,8 @@ final class CaskIconCache {
     private var localCache: [String: NSImage] = [:]
     private var localChecked: Set<String> = []
 
+    /// Returns the NSWorkspace icon for the first matching app under
+    /// `/Applications`, or nil if none of `appNames` is installed.
     func localIcon(for token: String, appNames: [String]) -> NSImage? {
         if let cached = localCache[token] { return cached }
         if localChecked.contains(token) { return nil }
@@ -25,6 +31,11 @@ final class CaskIconCache {
     }
 }
 
+/// Resolution order: local app icon (cheap, always best fidelity) →
+/// `RemoteIconLoader` (fetched + cached, optionally remembered as a miss) →
+/// SF Symbol fallback. Remote fetch only fires after the local lookup has
+/// failed, and a recorded miss in `RemoteIconLoader` suppresses repeat
+/// network traffic across views.
 struct CaskIconView: View {
     let token: String
     let appNames: [String]

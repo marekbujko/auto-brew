@@ -32,6 +32,10 @@ enum SnapshotError: LocalizedError {
     }
 }
 
+/// Backs up and restores app data (Preferences, Application Support,
+/// Containers). Restore is a two-phase backup-and-swap so a failure midway
+/// rolls back every touched component instead of leaving user data
+/// half-overwritten.
 @MainActor
 final class SnapshotService {
     static let shared = SnapshotService()
@@ -53,6 +57,9 @@ final class SnapshotService {
         try? fm.createDirectory(at: self.storageRoot, withIntermediateDirectories: true)
     }
 
+    /// Creates a new snapshot. Fails if no components were found — empty
+    /// snapshots would show up in the UI and restore to nothing, which kills
+    /// trust in the feature.
     func createSnapshot(bundleID: String, displayName: String, caskToken: String?, sourceAppVersion: String?) async throws -> AppSnapshot {
         guard Self.isValidBundleID(bundleID) else {
             throw SnapshotError.invalidManifest("Invalid bundleID: \(bundleID)")
@@ -184,6 +191,10 @@ final class SnapshotService {
         try await SnapshotArchiver.zip(directory: snapshot.bundleURL, to: destination)
     }
 
+    /// Accepts an `.autobrewsnapshot` from another Mac. Validates schema
+    /// version, bundleID format and hashes before anything lands in live
+    /// storage — a tampered archive must not be able to overwrite existing
+    /// snapshots.
     func importSnapshot(from archiveURL: URL) async throws -> AppSnapshot {
         let extractRoot = storageRoot.appendingPathComponent("_import_\(UUID().uuidString)", isDirectory: true)
         try fm.createDirectory(at: extractRoot, withIntermediateDirectories: true)

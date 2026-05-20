@@ -2,6 +2,9 @@ import Foundation
 import AppKit
 import os
 
+/// Listens to `NSWorkspace` sleep/wake events and flags a missed run when the
+/// system was asleep during the scheduled time. Needed because `Task.sleep`
+/// pauses during system sleep and silently swallows the deadline.
 @Observable
 @MainActor
 final class SleepWakeObserver {

@@ -1,5 +1,12 @@
 import Foundation
 
+/// A single entry from `formulae.brew.sh/api/cask.json`. We only decode the
+/// fields we actually render; the upstream payload is much larger (uninstall
+/// stanzas, zap targets, sha256s, depends_on, …) and changes frequently, so we
+/// stay deliberately narrow and tolerate missing keys with `try?` fallbacks.
+///
+/// `appNames` is flattened out of the nested `artifacts` array because that's
+/// the only place Homebrew records the `.app` bundles a cask installs.
 struct CaskCatalogEntry: Decodable, Identifiable, Sendable, Hashable {
     let token: String
     let nameValues: [String]

@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
 
+/// Sheet asking the user for a GitHub star or a sponsorship. Shown by the
+/// menu-bar view when `SupportPromptStore.pendingStage` reports a due stage;
+/// dismissal is intentionally non-interactive so the four explicit buttons
+/// are the only way out.
 struct SupportPromptView: View {
     let stage: SupportStage
     let onStar: () -> Void

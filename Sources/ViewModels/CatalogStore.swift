@@ -1,5 +1,8 @@
 import Foundation
 
+/// Source of truth for the cask catalog shown in BrewStore. Holds the raw
+/// catalog plus precomputed rankings so SwiftUI doesn't re-sort ~7000 entries
+/// on every render.
 @Observable
 @MainActor
 final class CatalogStore {
@@ -55,6 +58,8 @@ final class CatalogStore {
         }
     }
 
+    /// Swap in a freshly-loaded catalog. Triggers a one-shot ranking pass so
+    /// later reads of `topInstalledOverall`/`topByCategory` are O(1).
     func replaceAll(_ casks: [CaskCatalogEntry], analytics: CaskAnalytics?) {
         allCasks = casks
         self.analytics = analytics

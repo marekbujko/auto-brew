@@ -2,6 +2,12 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
+/// Four-step wizard (select → review → running → done) driven by
+/// `RestoreWizardStore.step`. The store owns all state transitions; this view
+/// is a pure switch over the current step so back-navigation isn't possible
+/// once a restore is in flight — that's intentional, partial restores would
+/// be hard to reason about. Failures are collected and shown on the done
+/// screen instead of interrupting the loop.
 struct RestoreWizardView: View {
     @State private var store = RestoreWizardStore()
     let onClose: () -> Void
@@ -113,6 +119,9 @@ struct RestoreWizardView: View {
         }
     }
 
+    /// Accepts either a single `.autobrewsnapshot` file or a folder exported
+    /// with "Export All…" — the store branches on `hasDirectoryPath` to decide
+    /// which importer to call.
     private func pick() async {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true

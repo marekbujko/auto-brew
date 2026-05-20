@@ -1,6 +1,10 @@
 import SwiftUI
 import AppKit
 
+/// Snapshots tab: split view with the snapshot list on the left and the
+/// detail on the right. The Restore wizard is reachable from here (not the
+/// Installed tab) because importing a bundle from another Mac conceptually
+/// belongs to the snapshot library, even though no snapshot is selected yet.
 struct SnapshotsRootView: View {
     @State private var store = SnapshotsStore.shared
     @State private var selected: AppSnapshot?
@@ -55,6 +59,9 @@ struct SnapshotsRootView: View {
         }
     }
 
+    /// Bundles every snapshot into a single `.autobrewbundle` folder. The
+    /// timestamp in the name prevents collisions when the same destination is
+    /// picked twice.
     @MainActor
     private func exportAll() async {
         let panel = NSOpenPanel()

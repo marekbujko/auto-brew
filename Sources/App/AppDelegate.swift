@@ -2,6 +2,11 @@ import AppKit
 import os
 import SwiftUI
 
+/// Application lifecycle owner. Three responsibilities live here because they
+/// each need access to `NSApp` before any SwiftUI scene is on screen:
+/// switching to accessory (menu-bar-only) activation, wiring the
+/// `autobrew://` URL scheme, and kicking off the scheduler once Homebrew is
+/// confirmed present.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let logger = Logger(subsystem: "za.co.digitalfreedom.AutoBrew", category: "AppDelegate")
@@ -55,6 +60,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// Whitelist that mirrors Homebrew's own cask-token grammar. Keeps shell
+    /// metacharacters out of the install pipeline even though we never go
+    /// through a shell — defense in depth for an externally-supplied value.
     private func isValidCaskToken(_ token: String) -> Bool {
         token.range(of: #"^[a-zA-Z0-9][a-zA-Z0-9._-]*$"#, options: .regularExpression) != nil
     }

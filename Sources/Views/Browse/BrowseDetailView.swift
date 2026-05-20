@@ -1,5 +1,9 @@
 import SwiftUI
 
+/// Detail sheet for a single cask. Drives installation through `BrewInstaller`
+/// and triggers an `InstalledAppsStore.refresh()` afterwards so Discover/Browse
+/// rows immediately flip from Install to Open. Errors surface in an alert
+/// rather than inline so the layout doesn't jump.
 struct BrowseDetailView: View {
     let entry: CaskCatalogEntry
     @State private var isInstalling = false
