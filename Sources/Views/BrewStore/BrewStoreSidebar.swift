@@ -51,9 +51,49 @@ struct BrewStoreSidebar: View {
                         sidebarRow(BrewStoreSection.category(cat), label: cat.displayName, systemImage: cat.systemImage)
                     }
                 }
+
+                // External resources — kept in their own section so they're
+                // always visible below the categories and never selectable
+                // like a BrewStoreSection.
+                Section {
+                    externalLinkRow(
+                        title: String(localized: "Help & Support"),
+                        systemImage: "questionmark.circle",
+                        url: "https://support.digitalfreedom.co.za/help/767340152"
+                    )
+                    externalLinkRow(
+                        title: String(localized: "Sponsor this Project"),
+                        systemImage: "heart",
+                        url: "https://github.com/sponsors/marcelrgberger"
+                    )
+                    externalLinkRow(
+                        title: String(localized: "Source Code"),
+                        systemImage: "chevron.left.forwardslash.chevron.right",
+                        url: "https://github.com/marcelrgberger/auto-brew"
+                    )
+                }
             }
             .listStyle(.sidebar)
         }
+    }
+
+    /// Renders an external link the same way `SettingsView` does — `Link`
+    /// rather than `Button` so the system reports it as a URL target to
+    /// VoiceOver and respects the user's default browser.
+    @ViewBuilder
+    private func externalLinkRow(title: String, systemImage: String, url: String) -> some View {
+        Link(destination: URL(string: url)!) {
+            HStack {
+                Label(title, systemImage: systemImage)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 4)
     }
 
     @ViewBuilder
