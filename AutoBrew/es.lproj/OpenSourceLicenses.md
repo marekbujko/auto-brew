@@ -14,7 +14,7 @@ Cada componente se rige por su propia licencia, reproducida o referenciada a con
 
 ```
 Component:   AutoBrew
-Version:     2.1.0
+Version:     2.2.0
 License:     MIT
 Copyright:   Copyright (c) 2026 Marcel R. G. Berger
 Repository:  https://github.com/marcelrgberger/auto-brew
