@@ -21,19 +21,102 @@ A native macOS menu bar app that automatically keeps Homebrew and all installed 
 
 Starting with version 2.0.0, AutoBrew ships a full Homebrew GUI and an AppSnapshot engine.
 
-### Browse
-Full Homebrew cask catalog (`formulae.brew.sh`) with search, Top-100 list based on install statistics, and a direct-install button.
+### Discover & Browse
+Full Homebrew cask catalog (`formulae.brew.sh`) organised as App-Store-style Discover sections plus hand-curated categories (Browsers, Developer Tools, Productivity, …), each ranked by 365-day install popularity. Every row has a hover tooltip with the full description and the brew token for `@variant` casks. Variants (`alfred`, `alfred@4`, `alfred@prerelease`) are decorated in the title — "Alfred", "Alfred 4", "Alfred (Prerelease)" — so they're never visually identical.
+
+### Global Search
+The sidebar search field walks the entire cask catalog (token, name, description) regardless of which section is selected. Clearing the field returns the user to whatever they were looking at before.
 
 ### Installed
-List of all third-party apps in the `/Applications` folder with cask-token mapping. Per app: create snapshot, upgrade via Brew, or uninstall.
+Scans `/Applications` and `~/Applications`, reconciles each `.app` bundle against `brew info --cask --json=v2 --installed` so:
+- Apps installed manually (DMG, drag-to-Applications) show up without a cask token — no Upgrade/Uninstall buttons that would fail.
+- Apps installed via a **custom Homebrew tap** are still tracked correctly (uses `full_token` instead of the public catalog).
+- When several casks share the same `.app` (`alfred` vs `alfred@4`), the row reflects which cask brew is actually managing — not whichever the public catalog happened to list first.
+
+Per app: create snapshot, upgrade via Brew, or uninstall.
 
 ### Snapshots
-Capture complete app state: `Library/Preferences`, `Library/Application Support`, `Library/Containers`, `Library/Saved Application State`, `Library/Group Containers`, `Library/Caches`. Stored under `~/Library/Application Support/AutoBrew/Snapshots/`. Restore with optional app quit.
 
-### Cross-Mac Migration
-- **Export a single snapshot** as an `.autobrewsnapshot` file (ZIP bundle with JSON manifest containing SHA-256 component hashes).
-- **Bulk export** all snapshots as an `.autobrewbundle` directory with `restore_list.json`.
-- **Restore wizard**: open a file or bundle, pick the apps to restore, automatically install missing casks via Homebrew (with search fallback for renamed casks), and replay the data.
+A snapshot is a point-in-time copy of **everything an application owns outside its `.app` bundle** — its preferences, its sandbox data, its caches, its login items. Combined, those folders are what makes an app "yours" after a fresh install. Without them, reinstalling Slack means re-signing in, reinstalling Visual Studio Code means losing every extension and setting, etc.
+
+#### What gets captured
+
+For each app, AutoBrew copies the contents of these standard macOS user-data locations (where they exist):
+
+| Path | Purpose |
+|---|---|
+| `~/Library/Preferences/<bundleID>.plist` | UserDefaults — settings, recent items, window positions |
+| `~/Library/Application Support/<bundleID>/` | App-managed data — databases, projects, extensions |
+| `~/Library/Containers/<bundleID>/` | App-Sandbox data (sandboxed apps store everything here) |
+| `~/Library/Saved Application State/<bundleID>.savedState/` | Window restoration on next launch |
+| `~/Library/Group Containers/<groupID>/` | Shared data between an app and its extensions |
+| `~/Library/Caches/<bundleID>/` | Caches — included for completeness, opt out in Settings if you'd rather not |
+
+Each file plus every directory tree gets a **SHA-256 hash** in the manifest. On restore the hash is recomputed and compared — if the archive was tampered with, the restore aborts before touching your disk.
+
+#### Storage on the source Mac
+
+Snapshots live under `~/Library/Application Support/AutoBrew/Snapshots/`, one folder per snapshot. Folder name is `<bundleID>_<timestamp>` so they sort chronologically. Each folder contains the raw component copies plus a `manifest.json` with:
+
+- App's bundle ID, display name, version at snapshot time
+- Cask token (when AutoBrew can resolve it)
+- Component list with paths, sizes, and hashes
+- Snapshot creation timestamp
+
+#### Restore flow
+
+1. AutoBrew offers to **terminate the running app** (you can opt out — restore over a running app risks data corruption).
+2. The current state of every component path is **rolled into a transactional backup** next to the original — if anything fails midway, the original state is restored.
+3. Components are copied from the snapshot into their target paths.
+4. Hashes are recomputed and compared against the manifest. Mismatch → roll back.
+5. On success, the temporary backup is removed and the user can relaunch the app.
+
+#### Cross-Mac migration
+
+- **Single-snapshot export** — `.autobrewsnapshot` file: a ZIP bundle (created with `ditto -c -k --sequesterRsrc` so extended attributes and symlinks survive) containing the raw components plus `manifest.json`. Double-clickable from Finder, or attach to a message.
+- **Bulk export** — `.autobrewbundle` directory containing one `.autobrewsnapshot` per app plus a `restore_list.json` index. Use this when migrating a whole Mac.
+- **Restore wizard** — point AutoBrew at an `.autobrewsnapshot` or an `.autobrewbundle`:
+  1. The manifests are validated (bundle IDs non-empty, components ≥ 1, hashes well-formed).
+  2. You pick which apps to restore.
+  3. If a target app isn't installed yet, AutoBrew runs `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` is used to find the replacement (so a snapshot taken under `vscode` still restores after Homebrew renamed the cask to `visual-studio-code`).
+  4. Each picked app is restored via the same transactional flow as a local restore.
+
+#### What snapshots don't capture
+
+- Files outside the standard user-data locations (e.g. data dumped under `/Library/...` system-wide, or in custom-configured paths)
+- App Store receipts (StoreKit re-verifies on first launch, so this normally just means signing in again)
+- License keys stored in the macOS Keychain (Keychain isn't snapshotted — restore the app and re-enter the licence)
+- Files actively being written by the app at the moment of snapshot (that's why AutoBrew offers to terminate it first)
+
+#### How it works under the hood
+
+The snapshot subsystem is three Swift services collaborating with a small amount of disk state:
+
+- **`SnapshotPathResolver`** — given a bundle ID, returns every candidate user-data path that exists on disk (the table above). Lookups are cheap (file-existence checks only); paths that don't exist are skipped, so the manifest only carries real components.
+- **`Sha256Hasher`** — streams a file or directory tree through `CryptoKit.SHA256` in chunks, so even multi-gigabyte caches don't blow up memory. Directory trees are hashed deterministically: each entry is fed in with a length-prefixed binary encoding (relative path → file mode → file content hash → entry-terminator byte) so the hash is stable across runs as long as the contents and structure didn't change.
+- **`SnapshotArchiver`** — wraps Apple's `ditto -c -k --sequesterRsrc` to ZIP/UNZIP. Using `ditto` instead of `zip` matters: it preserves macOS extended attributes (`com.apple.metadata:*`), the resource fork on legacy files, and symlinks pointing inside the bundle. Archives created with `zip` would silently lose all of that and produce subtly broken restores.
+
+**Create flow** (`SnapshotService.createSnapshot`):
+
+1. Resolve all candidate paths via the resolver. If the set is empty after filtering, the snapshot is **rejected** — an empty snapshot is more dangerous than no snapshot (it would "restore" a wiped state).
+2. Stream-copy each path into a fresh `<bundleID>_<timestamp>/` folder under `~/Library/Application Support/AutoBrew/Snapshots/`.
+3. Compute the SHA-256 for each component (file → file hash, directory → tree hash).
+4. Write `manifest.json` last, atomically. If the process is killed before this step, the folder is partial and ignored by the snapshot list — no half-state.
+
+**Restore flow** (`SnapshotService.restoreSnapshot`):
+
+1. Re-verify every component hash against the manifest. Mismatch → abort with `BrewError.snapshotCorrupted`.
+2. Offer to quit the app via `AppQuitter` — polite `terminate()` first, then `forceTerminate()` after `timeout` seconds; cancellable.
+3. For every component path, the current state is renamed in place to `<path>.autobrew-rollback-<uuid>` (zero-copy, atomic on the same filesystem). At this point the original is staged for cleanup but still recoverable.
+4. The snapshot version is copied into the target path.
+5. Hashes are recomputed on the **written** files and compared against the manifest. Any mismatch triggers the rollback step.
+6. On success, the `.autobrew-rollback-*` siblings are deleted. On failure, they are renamed back over the failed restore and the leftover write attempt is removed.
+
+**Auto-cleanup** (Settings → Snapshots → "Auto-clean up old snapshots"): after every successful Brew run, `SnapshotService.cleanup(olderThanDays:)` walks the snapshot folder and removes any folder whose `manifest.json` creation timestamp is older than the configured retention window (default 90 days). Snapshots without a parseable manifest are left alone — we'd rather keep orphans than delete by guess.
+
+**Export** (`SnapshotService.exportSnapshot`) zips the folder with `ditto`, names it `<DisplayName>_<timestamp>.autobrewsnapshot`, and writes the same manifest at the archive root so the file is self-describing.
+
+**Import** (`SnapshotService.importSnapshot`) takes any `.autobrewsnapshot` URL, runs hardening checks against zip-slip and absolute-path symlinks before extracting, validates the manifest, re-verifies the hashes, and only then publishes the snapshot into the local store. Imported snapshots get a fresh UUID so they don't collide with one another after a cross-Mac migration.
 
 ### URL Scheme
 - `autobrew://open` — open the main window.
@@ -116,6 +199,20 @@ xcodebuild build -scheme AutoBrew -destination 'platform=macOS'
 # Run tests
 xcodebuild test -scheme AutoBrew -destination 'platform=macOS'
 ```
+
+## CI / Release Pipeline
+
+Four GitHub Actions workflows, one per channel. Branch strategy:
+`development → test → beta → main`.
+
+| # | Workflow | Trigger | What it does |
+|---|---|---|---|
+| 01 | Set new Version | manual | Bumps `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml`. |
+| 02 | Dev Build Check | push to `development`, PRs to any channel | Debug build + unit tests, no signing, no artefacts. The fast quality gate. |
+| 03 | Beta / Test Build | push to `test` or `beta` | Signed + notarized DMG named `AutoBrew-test.dmg` / `AutoBrew-beta.dmg`, uploaded as a GitHub Pre-Release tagged `vX.Y.Z-<channel>`. The pre-release is replaced on each push so the latest channel build is always the canonical download. |
+| 04 | Release Build (Main) | manual only (`workflow_dispatch`) | Signed + notarized `AutoBrew.dmg` + `AutoBrew.zip`. Creates the GitHub Release, signs the ZIP for Sparkle (EdDSA), and updates `appcast.xml` so existing users get the in-app update prompt. |
+
+The release workflow is intentionally **not** auto-triggered on push to `main` — that previously produced a release per commit (including doc-only pushes). Releases are kicked off from the Actions tab when an actual release is ready.
 
 ## Architecture
 
