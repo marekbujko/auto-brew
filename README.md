@@ -2,6 +2,45 @@
 
 A native macOS menu bar app that automatically keeps Homebrew and all installed packages up to date — silently, in the background.
 
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [User Guide](#user-guide)
+  - [First Launch](#first-launch)
+  - [Choosing an Update Trigger](#choosing-an-update-trigger)
+  - [Configuring the Update Policy](#configuring-the-update-policy)
+  - [Pending Approvals](#pending-approvals-workflow)
+  - [Browsing & Installing Casks](#browsing--installing-casks)
+  - [Searching the Catalog](#searching-the-catalog)
+  - [Managing Installed Apps](#managing-installed-apps)
+  - [Creating an App Snapshot](#creating-an-app-snapshot)
+  - [Restoring a Snapshot](#restoring-a-snapshot)
+  - [Migrating to Another Mac](#migrating-to-another-mac)
+  - [URL Scheme & Deep Links](#url-scheme--deep-links)
+  - [Notifications](#notifications)
+  - [Languages](#languages)
+- [BrewStore](#brewstore)
+  - [Discover & Browse](#discover--browse)
+  - [Global Search](#global-search)
+  - [Installed](#installed)
+  - [Snapshots](#snapshots)
+- [Selective Update Policy](#selective-update-policy)
+  - [Defaults](#defaults)
+  - [Per-Package Overrides](#per-package-overrides)
+  - [Pending Approvals](#pending-approvals)
+  - [Cool-off Tracking](#cool-off-tracking)
+- [Install](#install)
+- [Requirements](#requirements)
+- [Setup (Developers)](#setup-developers)
+- [CI / Release Pipeline](#ci--release-pipeline)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Tests](#tests)
+- [Security & Data Integrity](#security--data-integrity)
+- [Support](#support)
+- [License](#license)
+
 ## Features
 
 - **Automatic Updates** — Runs `brew update → policy gate → selective brew upgrade → brew cleanup` once daily
@@ -16,6 +55,148 @@ A native macOS menu bar app that automatically keeps Homebrew and all installed 
 - **Login Item** — Starts automatically with the system via SMAppService
 - **Auto-Updates** — Keeps itself up to date via Sparkle
 - **8 Languages** — English, German, French, Italian, Dutch, Polish, Portuguese (Brazil), Spanish
+
+## Quick Start
+
+1. Install AutoBrew via Homebrew: `brew tap marcelrgberger/tap && brew install --cask autobrew`
+2. Launch AutoBrew once from `/Applications`. The mug icon appears in the menu bar.
+3. If Homebrew isn't on your Mac yet, the onboarding screen installs it for you.
+4. Grant the notification permission when prompted — it's how AutoBrew tells you when an update needs approval.
+5. Click the menu-bar mug → **Settings…** to pick a trigger mode (Idle or Scheduled) and review the default update policy.
+6. That's it — AutoBrew runs in the background. Open it any time from the menu bar to inspect outdated packages, browse the BrewStore, or review pending approvals.
+
+## User Guide
+
+A walkthrough of every feature, in the order you'd typically encounter them.
+
+### First Launch
+
+When AutoBrew starts for the first time it runs an onboarding flow:
+
+1. **Notification permission** — AutoBrew uses local notifications for missed-run reminders and pending-approval alerts. Allow them; they're never sent over a network.
+2. **Homebrew detection** — if `brew` is missing, the onboarding offers to run the official installer (`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`). Install requires admin password (sudo) — same as a manual Homebrew install.
+3. **Launch at login** — opt-in checkbox. Wires up `SMAppService` so AutoBrew restarts automatically with macOS.
+
+Onboarding only runs once. To re-trigger it manually, remove `~/Library/Preferences/za.co.digitalfreedom.AutoBrew.plist` and relaunch.
+
+### Choosing an Update Trigger
+
+Settings → **Update Trigger** picks how AutoBrew decides to run:
+
+- **Idle mode** (default) — polls system idle time every 60 s and starts a Brew run after the user has been idle for at least `N` minutes (configurable, default 30). Runs at most once per calendar day. Idle detection reads `HIDIdleTime` from `IOHIDSystem` via IOKit, so it works even while the screen is locked.
+- **Scheduled mode** — runs at a fixed time of day (configurable). If the Mac was asleep at the scheduled time, AutoBrew triggers a missed-run notification on wake instead of silently skipping.
+
+Switch between modes at any time. The scheduler restarts cleanly when you do.
+
+### Configuring the Update Policy
+
+Settings → **Update Policy** has six pickers (patch / minor / major × Casks / Formulae) plus per-package overrides. Each picker accepts one of four policies:
+
+| Policy | Behaviour |
+|---|---|
+| **Auto** | Install on the next scheduled run. |
+| **Wait N days** | Install only after the new version has been visible for at least `N` days. Cool-off resets when a newer version supersedes the pending one. |
+| **Ask me** | Don't install — surface the update in the Pending Approvals section instead. |
+| **Skip** | Never install for this bump type. |
+
+The default profile is conservative: patches roll out quickly, minors get a cool-off window, majors always wait for the user. Defaults differ between Casks and Formulae because Formulae carry security patches more often.
+
+For one specific package, open it in the BrewStore detail view and click **Update Policy**. The override sheet lets you set patch/minor/major independently; leaving a row on **Default** inherits the global setting.
+
+### Pending Approvals Workflow
+
+Major updates (and anything where the version string isn't parseable enough to classify) land in the **Pending Approvals** queue:
+
+1. AutoBrew detects the update during a Brew run.
+2. The menu-bar icon grows a small orange dot.
+3. A notification fires once per new entry (`X updates need approval (Package A, B, …)`).
+4. Click **Review** on the notification, or open BrewStore → **Pending Approvals**.
+5. Per row: **Approve** (queues for the next run), **Reject** (sticky — won't ask again until a newer version arrives), or use the toolbar **Approve All** / **Reject All**.
+
+Once approved entries actually install during the next scheduler run, they are removed from the queue automatically.
+
+### Browsing & Installing Casks
+
+BrewStore → **Discover** shows App-Store-style sections (Top Ranked, plus categories like Browsers, Developer Tools, Productivity, …) sorted by 365-day install popularity from the public Homebrew analytics.
+
+- Click any tile to see the cask's description, version, homepage, and the per-package Update Policy button.
+- Click **Install** to run `brew install --cask <token>` directly. The button label flips to **Open** once the app is on disk.
+- Hover any row to see the full description (and the brew token for `@variant` casks).
+
+### Searching the Catalog
+
+The search field in the sidebar searches the **entire** cask catalog as soon as you type — across name, description, token, and the variant-decorated presentation name. The detail pane switches to a global Search Results view; clearing the field returns you to whichever section you were on. Results are sorted by install popularity so the most likely match floats to the top.
+
+### Managing Installed Apps
+
+BrewStore → **Installed** lists every `.app` in `/Applications` and `~/Applications` (Apple system apps filtered out). Each row shows the bundle ID, version, and — when applicable — the brew token managing the app.
+
+How AutoBrew decides whether to show brew actions:
+
+- It runs `brew info --cask --json=v2 --installed` once per refresh to learn what brew is **actually** tracking, including custom-tap installs.
+- An app is marked as brew-managed only when the resolved token appears in that authoritative set. Manually installed apps stay unmanaged — no broken Upgrade/Uninstall buttons.
+
+Per row (`⋯` menu):
+
+- **Take Snapshot** — always available.
+- **Upgrade via Brew** / **Uninstall via Brew** — only when brew is tracking the cask.
+
+### Creating an App Snapshot
+
+A snapshot is a point-in-time copy of everything an application owns outside its `.app` bundle. Use one before a risky upgrade, before migrating to a new Mac, or before deleting an app you might miss.
+
+1. BrewStore → **Snapshots** → **New Snapshot** (or use the `⋯` menu of an Installed app).
+2. Pick the app to snapshot. AutoBrew offers to quit it first — answer **Yes** unless you're sure the app isn't writing to disk.
+3. AutoBrew copies every existing user-data folder for the app (preferences, application support, containers, group containers, saved state, caches), hashes each component with SHA-256, and writes a `manifest.json` next to the components.
+4. The snapshot appears in the Snapshots list with the timestamp and size.
+
+To free disk space later, either delete individual snapshots in the Snapshots view or enable Settings → **Auto-clean up old snapshots** with a retention window (default 90 days).
+
+### Restoring a Snapshot
+
+1. Open the snapshot in the Snapshots view.
+2. Click **Restore**.
+3. AutoBrew re-verifies every component hash before touching disk; mismatch → restore aborts.
+4. The currently installed user-data is renamed to `.autobrew-rollback-<uuid>` (atomic on the same volume). If anything goes wrong after, that rollback copy is moved back into place.
+5. The snapshot content is copied into the target paths.
+6. Hashes are recomputed on the written files. A second mismatch triggers the rollback path.
+7. On success the temporary rollback siblings are removed.
+
+The whole restore is transactional — there is no partial state. You can opt out of the "quit the app first" step, but that risks data corruption if the app is mid-write.
+
+### Migrating to Another Mac
+
+Two flavours:
+
+- **Single-app**: Snapshot detail → **Export…** writes a self-contained `.autobrewsnapshot` file (ZIP archive built with `ditto -c -k --sequesterRsrc` to preserve macOS extended attributes). Drop it onto the target Mac and double-click to import.
+- **Bulk**: Snapshots view → **Export All…** produces an `.autobrewbundle` directory with one `.autobrewsnapshot` per app plus a `restore_list.json` index. Copy the whole directory.
+
+On the new Mac open the **Restore Wizard** (Snapshots → Import…), point it at the `.autobrewsnapshot` or `.autobrewbundle`, pick which apps to restore, and AutoBrew:
+
+1. Validates the manifest (non-empty bundle IDs, ≥ 1 component, hashes well-formed, no zip-slip in the archive).
+2. Installs missing casks via `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` finds the new token automatically.
+3. Restores each app via the same transactional flow as a local restore.
+
+### URL Scheme & Deep Links
+
+AutoBrew registers the `autobrew://` URL scheme:
+
+- `autobrew://open` — bring the BrewStore window forward (works from Terminal, a browser link, or another app's automation).
+- `autobrew://install/<cask-token>` — install a cask in the background. Tokens are validated against `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` and a confirmation dialog appears before the install runs, so a malicious link can't silently install software.
+
+### Notifications
+
+AutoBrew uses three notification types:
+
+- **Completion** — fires after every successful or failed Brew run. Body shows success / error detail.
+- **Missed-run** — fires after wake-from-sleep if the Mac was asleep during a scheduled run. Actions: **Update Now** (runs immediately) or **Skip** (waits for the next cycle).
+- **Pending approvals** — fires when one or more new major updates were detected. **Review** opens BrewStore → Pending Approvals.
+
+All notifications can be turned off globally in Settings → **Show Notifications**.
+
+### Languages
+
+AutoBrew ships in 8 languages: English, German, French, Italian, Dutch, Polish, Portuguese (Brazil), and Spanish. The active locale follows the macOS system language. The Legal documents (Imprint, Privacy, Terms, EULA, Trademark, Open-Source Licenses) are translated too — open them from Settings → **Legal** → \<document\>.
 
 ## BrewStore
 
@@ -187,7 +368,7 @@ The app is signed and notarized by Apple — no Gatekeeper warnings.
 - Swift 6.0
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
-## Setup
+## Setup (Developers)
 
 ```bash
 # Generate Xcode project
