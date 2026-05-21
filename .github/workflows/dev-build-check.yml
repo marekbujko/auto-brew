@@ -22,7 +22,7 @@ env:
 jobs:
   build-check:
     name: Build & Test
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - name: Set up Xcode ^26

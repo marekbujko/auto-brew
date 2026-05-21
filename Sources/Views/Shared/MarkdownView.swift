@@ -30,6 +30,10 @@ struct MarkdownView: View {
             Text(inline(text))
                 .font(.headline)
                 .padding(.top, 4)
+        case .heading4(let text):
+            Text(inline(text))
+                .font(.subheadline.weight(.semibold))
+                .padding(.top, 2)
         case .paragraph(let text):
             Text(inline(text))
                 .font(.body)
@@ -41,10 +45,12 @@ struct MarkdownView: View {
                         Text("•")
                             .font(.body)
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                         Text(inline(item))
                             .font(.body)
                             .fixedSize(horizontal: false, vertical: true)
                     }
+                    .accessibilityElement(children: .combine)
                 }
             }
         case .numberedList(let items):
@@ -55,11 +61,53 @@ struct MarkdownView: View {
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .frame(minWidth: 20, alignment: .trailing)
+                            .accessibilityHidden(true)
                         Text(inline(item))
                             .font(.body)
                             .fixedSize(horizontal: false, vertical: true)
                     }
+                    .accessibilityElement(children: .combine)
                 }
+            }
+        case .codeBlock(let text):
+            // Monospaced, slightly tinted background. Preserves whitespace so
+            // license headers and component metadata blocks stay aligned.
+            Text(text)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.primary)
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 6))
+                .fixedSize(horizontal: false, vertical: true)
+        case .table(let headers, let rows):
+            // Simple equal-width grid. Legal docs use short narrative tables
+            // (3-4 columns), so even-column allocation reads fine and avoids
+            // the headache of measuring intrinsic content widths in SwiftUI.
+            VStack(alignment: .leading, spacing: 0) {
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 6) {
+                    if !headers.isEmpty {
+                        GridRow {
+                            ForEach(Array(headers.enumerated()), id: \.offset) { _, header in
+                                Text(inline(header))
+                                    .font(.caption.weight(.semibold))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        Divider()
+                    }
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        GridRow {
+                            ForEach(Array(row.enumerated()), id: \.offset) { _, cell in
+                                Text(inline(cell))
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                }
+                .padding(8)
+                .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
             }
         case .horizontalRule:
             Divider()
@@ -80,9 +128,12 @@ enum MarkdownBlock: Equatable, Sendable {
     case heading1(String)
     case heading2(String)
     case heading3(String)
+    case heading4(String)
     case paragraph(String)
     case bulletList([String])
     case numberedList([String])
+    case codeBlock(String)
+    case table(headers: [String], rows: [[String]])
     case horizontalRule
 }
 
@@ -98,6 +149,7 @@ enum MarkdownParser {
         var paragraphBuffer: [String] = []
         var bulletBuffer: [String] = []
         var numberedBuffer: [String] = []
+        var tableBuffer: [[String]] = []
 
         func flushParagraph() {
             guard !paragraphBuffer.isEmpty else { return }
@@ -117,60 +169,128 @@ enum MarkdownParser {
             numberedBuffer.removeAll()
         }
 
+        func flushTable() {
+            guard !tableBuffer.isEmpty else { return }
+            // First row is headers; second is the separator (|---|---|); the
+            // rest are body rows. If the second row is missing or non-separator
+            // we still render — degraded but readable.
+            let headers = tableBuffer.first ?? []
+            let body: [[String]]
+            if tableBuffer.count >= 2, isTableSeparator(tableBuffer[1]) {
+                body = Array(tableBuffer.dropFirst(2))
+            } else {
+                body = Array(tableBuffer.dropFirst())
+            }
+            blocks.append(.table(headers: headers, rows: body))
+            tableBuffer.removeAll()
+        }
+
         func flushAll() {
             flushParagraph()
             flushBullets()
             flushNumbered()
+            flushTable()
         }
 
-        for rawLine in normalized.components(separatedBy: "\n") {
+        let rawLines = normalized.components(separatedBy: "\n")
+        var index = 0
+
+        while index < rawLines.count {
+            let rawLine = rawLines[index]
             let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Fenced code block — preserve interior whitespace verbatim, do
+            // not trim. Opening fence may carry a language tag we discard.
+            if line.hasPrefix("```") {
+                flushAll()
+                var codeLines: [String] = []
+                index += 1
+                while index < rawLines.count {
+                    let next = rawLines[index]
+                    if next.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("```") {
+                        index += 1
+                        break
+                    }
+                    codeLines.append(next)
+                    index += 1
+                }
+                blocks.append(.codeBlock(codeLines.joined(separator: "\n")))
+                continue
+            }
 
             if line.isEmpty {
                 flushAll()
+                index += 1
                 continue
             }
 
             if line == "---" || line == "***" {
                 flushAll()
                 blocks.append(.horizontalRule)
+                index += 1
                 continue
             }
 
+            if line.hasPrefix("#### ") {
+                flushAll()
+                blocks.append(.heading4(String(line.dropFirst(5))))
+                index += 1
+                continue
+            }
             if line.hasPrefix("### ") {
                 flushAll()
                 blocks.append(.heading3(String(line.dropFirst(4))))
+                index += 1
                 continue
             }
             if line.hasPrefix("## ") {
                 flushAll()
                 blocks.append(.heading2(String(line.dropFirst(3))))
+                index += 1
                 continue
             }
             if line.hasPrefix("# ") {
                 flushAll()
                 blocks.append(.heading1(String(line.dropFirst(2))))
+                index += 1
+                continue
+            }
+
+            // Markdown table row — starts with `|`. The separator row
+            // (`|---|---|`) is captured so flushTable can detect headers.
+            if line.hasPrefix("|") {
+                flushParagraph()
+                flushBullets()
+                flushNumbered()
+                tableBuffer.append(parseTableRow(line))
+                index += 1
                 continue
             }
 
             if line.hasPrefix("- ") || line.hasPrefix("* ") {
                 flushParagraph()
                 flushNumbered()
+                flushTable()
                 bulletBuffer.append(String(line.dropFirst(2)))
+                index += 1
                 continue
             }
 
             if let numberedItem = parseNumberedItem(line) {
                 flushParagraph()
                 flushBullets()
+                flushTable()
                 numberedBuffer.append(numberedItem)
+                index += 1
                 continue
             }
 
             // Paragraph line — soft-wrap by appending to the current buffer.
             flushBullets()
             flushNumbered()
+            flushTable()
             paragraphBuffer.append(line)
+            index += 1
         }
 
         flushAll()
@@ -192,5 +312,26 @@ enum MarkdownParser {
             return nil
         }
         return String(line[line.index(index, offsetBy: 2)...])
+    }
+
+    /// Splits `| a | b | c |` into `["a", "b", "c"]`. Tolerant of missing
+    /// leading or trailing pipe and of extra whitespace around cells.
+    private static func parseTableRow(_ line: String) -> [String] {
+        var trimmed = line
+        if trimmed.hasPrefix("|") { trimmed.removeFirst() }
+        if trimmed.hasSuffix("|") { trimmed.removeLast() }
+        return trimmed
+            .components(separatedBy: "|")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+    }
+
+    /// `|---|:---:|---|` style separator row. Cells contain only `-`, `:`
+    /// and spaces — used to decide whether the first row is a header row.
+    private static func isTableSeparator(_ cells: [String]) -> Bool {
+        guard !cells.isEmpty else { return false }
+        let allowed = CharacterSet(charactersIn: "-: ")
+        return cells.allSatisfy { cell in
+            !cell.isEmpty && cell.unicodeScalars.allSatisfy(allowed.contains)
+        }
     }
 }

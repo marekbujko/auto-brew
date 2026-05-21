@@ -18,28 +18,34 @@ struct LegalView: View {
         )
 
         VStack(spacing: 0) {
-            Picker("", selection: selection) {
+            // VoiceOver needs the real label even though we hide it visually,
+            // otherwise the segmented picker is announced as "Picker" with no
+            // context about what's being selected.
+            Picker("Legal document", selection: selection) {
                 ForEach(LegalDocument.allCases) { doc in
                     Text(LocalizedStringKey(doc.titleKey)).tag(doc)
                 }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+            .accessibilityLabel(Text("Legal document"))
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
 
             Divider()
 
+            // `.id(...)` on the ScrollView forces SwiftUI to rebuild the
+            // scrollable container when the selected document changes, which
+            // resets the scroll offset to the top — otherwise switching from
+            // a long Privacy Policy to a short EULA would leave the user
+            // scrolled into empty space at the bottom.
             ScrollView {
-                // First visit shows an empty stack for one tick while the
-                // `.task` below loads + parses; for documents this size the
-                // gap is imperceptible. Subsequent visits hit the cache.
                 MarkdownView(blocks: blocksCache[navigation.requestedDocument] ?? [])
                     .padding(24)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .id(navigation.requestedDocument)
             }
+            .id(navigation.requestedDocument)
         }
         .frame(minWidth: 640, idealWidth: 760, minHeight: 480, idealHeight: 640)
         .navigationTitle("Legal")
