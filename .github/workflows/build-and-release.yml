@@ -36,6 +36,7 @@ jobs:
 
   build:
     name: Build, Sign & Notarize
+    if: github.ref == 'refs/heads/main'
     runs-on: macos-26
     timeout-minutes: 30
     needs: determine-environment
