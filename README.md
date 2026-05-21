@@ -4,6 +4,15 @@ A native macOS menu bar app that automatically keeps Homebrew and all installed 
 
 > **Safe by design.** When you install AutoBrew via the official channels — the DMG from [GitHub Releases](https://github.com/marcelrgberger/auto-brew/releases) or `brew install --cask autobrew` from the Homebrew tap — every release is built with Apple's Developer ID certificate, notarized by Apple, and stapled before it ships. macOS Gatekeeper accepts AutoBrew without warnings. The auto-update channel is signed with an EdDSA Ed25519 key — AutoBrew refuses to install an update whose signature doesn't verify. Source is open under the MIT License, no telemetry, no AutoBrew backend, no account — everything runs locally on your Mac.
 
+## Install — Homebrew (recommended)
+
+```bash
+brew tap marcelrgberger/tap
+brew install --cask autobrew
+```
+
+Other ways to install (manual DMG, requirements) are covered in the [Install](#install) section below.
+
 ## Table of Contents
 
 - [Features](#features)
