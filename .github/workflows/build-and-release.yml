@@ -47,7 +47,7 @@ jobs:
           xcode-version: '^26'
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -180,7 +180,7 @@ jobs:
           xcrun stapler staple "build/$APP_NAME.dmg"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: AutoBrew-${{ steps.version.outputs.version }}
           path: |
