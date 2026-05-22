@@ -381,7 +381,19 @@ final class SnapshotService {
             var isDir: ObjCBool = false
             fm.fileExists(atPath: src.path, isDirectory: &isDir)
             if isDir.boolValue {
-                try fm.copyItem(at: src, to: dest)
+                // Walk the tree manually so a single unreadable sibling (e.g.
+                // `.com.apple.containermanagerd.metadata.plist` inside
+                // `~/Library/Containers/<bundleID>`) does not abort the entire
+                // directory copy. Anything we cannot read is silently skipped
+                // and never appears in the snapshot.
+                try robustCopyDirectory(from: src, to: dest)
+                guard fm.fileExists(atPath: dest.path),
+                      directoryHasContent(at: dest) else {
+                    // Everything inside was unreadable or filtered out — there
+                    // is nothing useful to record for this component.
+                    try? fm.removeItem(at: dest)
+                    continue
+                }
                 let size = try directorySize(at: dest)
                 let treeHash = try directoryTreeHash(at: dest)
                 totalBytes += size
@@ -393,7 +405,12 @@ final class SnapshotService {
                     byteSize: size
                 ))
             } else {
-                try fm.copyItem(at: src, to: dest)
+                do {
+                    try fm.copyItem(at: src, to: dest)
+                } catch let error as NSError where isPermissionError(error) {
+                    // Skip top-level files we don't have permission to read.
+                    continue
+                }
                 let attrs = try fm.attributesOfItem(atPath: dest.path)
                 let size = (attrs[.size] as? Int64) ?? 0
                 let hash = try Sha256Hasher.hash(file: dest)
@@ -408,6 +425,137 @@ final class SnapshotService {
             }
         }
         return (components, totalBytes)
+    }
+
+    /// Filenames inside `~/Library/Containers/<bundleID>` that the container
+    /// management subsystem owns. They are protected by SIP/TCC even with Full
+    /// Disk Access granted, and they carry no user data. We only exclude them
+    /// when we are walking a Containers subtree — applying the basename match
+    /// globally would silently drop a same-named (legitimate) file an app might
+    /// have stored elsewhere.
+    private nonisolated static let containerManagerMetadataFilenames: Set<String> = [
+        ".com.apple.containermanagerd.metadata.plist",
+        ".com.apple.mobile_container_manager.metadata.plist"
+    ]
+
+    private nonisolated static func isPermissionError(_ error: NSError) -> Bool {
+        switch (error.domain, error.code) {
+        case (NSCocoaErrorDomain, NSFileReadNoPermissionError),
+             (NSCocoaErrorDomain, NSFileWriteNoPermissionError):
+            return true
+        case (NSPOSIXErrorDomain, 1), // EPERM
+             (NSPOSIXErrorDomain, 13): // EACCES
+            return true
+        default:
+            if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError {
+                return isPermissionError(underlying)
+            }
+            return false
+        }
+    }
+
+    /// Class-bound box so the enumerator's `errorHandler` closure can record a
+    /// fatal traversal error and surface it to the caller after enumeration
+    /// completes. Anything other than a permission error (or a vanished entry,
+    /// which is expected during a live snapshot) aborts the copy — accepting
+    /// silent omissions would let the manifest claim a complete component when
+    /// in fact we lost a subtree to an I/O or filesystem error.
+    private final class EnumerationErrorBox: @unchecked Sendable {
+        var fatal: NSError?
+    }
+
+    private nonisolated static func isTolerableEnumerationError(_ error: NSError) -> Bool {
+        if isPermissionError(error) { return true }
+        // ENOENT — a file vanished between enumeration and our visit, which is
+        // expected when an app writes to its own data while we snapshot it.
+        if error.domain == NSPOSIXErrorDomain && error.code == 2 { return true }
+        if (error.domain == NSCocoaErrorDomain) &&
+            (error.code == NSFileReadNoSuchFileError || error.code == NSFileNoSuchFileError) {
+            return true
+        }
+        if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError {
+            return isTolerableEnumerationError(underlying)
+        }
+        return false
+    }
+
+    /// Recursive copy that tolerates unreadable entries inside one source root.
+    /// Permission errors and vanished entries are skipped so user data we *can*
+    /// read is still captured; every other enumeration failure aborts and
+    /// propagates up so the manifest does not silently hide an I/O failure as
+    /// a "successful" partial snapshot. Symlinks are skipped because the
+    /// restore-side tree-hash rejects them (a snapshot containing them could
+    /// never restore cleanly).
+    private nonisolated static func robustCopyDirectory(from src: URL, to dest: URL) throws {
+        let fm = FileManager.default
+        try fm.createDirectory(at: dest, withIntermediateDirectories: true)
+
+        let srcStandardized = (src.path as NSString).standardizingPath
+        let srcWithSlash = srcStandardized.hasSuffix("/") ? srcStandardized : srcStandardized + "/"
+        // Containermanagerd metadata only ever lives at the root of a
+        // `Library/Containers/<bundleID>` tree, so we only consult the
+        // blocklist when we are inside such a subtree.
+        let inContainersTree = srcStandardized.contains("/Library/Containers/")
+
+        let errorBox = EnumerationErrorBox()
+        guard let enumerator = fm.enumerator(
+            at: src,
+            includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey],
+            options: [],
+            errorHandler: { _, error in
+                let ns = error as NSError
+                if isTolerableEnumerationError(ns) { return true }
+                // Capture the first fatal error and abort enumeration. We do
+                // not throw from the handler — the enumerator API expects a
+                // Bool — but we surface the captured error after the loop.
+                if errorBox.fatal == nil { errorBox.fatal = ns }
+                return false
+            }
+        ) else { return }
+
+        for case let item as URL in enumerator {
+            if inContainersTree && containerManagerMetadataFilenames.contains(item.lastPathComponent) {
+                continue
+            }
+
+            let itemStandardized = (item.path as NSString).standardizingPath
+            let rel = itemStandardized.hasPrefix(srcWithSlash)
+                ? String(itemStandardized.dropFirst(srcWithSlash.count))
+                : item.lastPathComponent
+            let target = dest.appendingPathComponent(rel)
+
+            let values = try? item.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+            if values?.isSymbolicLink == true { continue }
+
+            do {
+                if values?.isDirectory == true {
+                    try fm.createDirectory(at: target, withIntermediateDirectories: true)
+                } else {
+                    try fm.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try fm.copyItem(at: item, to: target)
+                }
+            } catch let error as NSError where isPermissionError(error) {
+                continue
+            }
+        }
+
+        if let fatal = errorBox.fatal {
+            throw fatal
+        }
+    }
+
+    private nonisolated static func directoryHasContent(at url: URL) -> Bool {
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey]) else {
+            return false
+        }
+        for case let item as URL in enumerator {
+            if let values = try? item.resourceValues(forKeys: [.isRegularFileKey]),
+               values.isRegularFile == true {
+                return true
+            }
+        }
+        return false
     }
 
     private nonisolated static func restoreComponents(
