@@ -158,7 +158,7 @@ A snapshot is a point-in-time copy of everything an application owns outside its
 
 1. BrewStore → **Snapshots** → **New Snapshot** (or use the `⋯` menu of an Installed app).
 2. Pick the app to snapshot. AutoBrew offers to quit it first — answer **Yes** unless you're sure the app isn't writing to disk.
-3. AutoBrew copies every existing user-data folder for the app (preferences, application support, containers, group containers, saved state, caches), hashes each component with SHA-256, and writes a `manifest.json` next to the components.
+3. AutoBrew copies every readable user-data folder for the app (preferences, application support, containers, group containers, saved state, caches), hashes each component with SHA-256, and writes a `manifest.json` next to the components. Files macOS refuses to hand over (e.g. `.com.apple.containermanagerd.metadata.plist` inside `Library/Containers/`) are silently skipped so a single locked-down sibling can't kill the whole snapshot; non-permission I/O errors still abort.
 4. The snapshot appears in the Snapshots list with the timestamp and size.
 
 To free disk space later, either delete individual snapshots in the Snapshots view or enable Settings → **Auto-clean up old snapshots** with a retention window (default 90 days).
@@ -284,14 +284,14 @@ Snapshots live under `~/Library/Application Support/AutoBrew/Snapshots/`, one fo
 
 The snapshot subsystem is three Swift services collaborating with a small amount of disk state:
 
-- **`SnapshotPathResolver`** — given a bundle ID, returns every candidate user-data path that exists on disk (the table above). Lookups are cheap (file-existence checks only); paths that don't exist are skipped, so the manifest only carries real components.
+- **`SnapshotPathResolver`** — given a bundle ID, returns every candidate user-data path that exists on disk (the table above). Lookups are cheap (file-existence checks only); paths that don't exist are skipped, so the manifest only carries real components. Group containers are matched by an identifying reverse-domain prefix plus a distinctive last segment (≥6 chars, not in the generic blocklist `.app/.mac/.ios/…`) — a previous "match anything containing the last segment" heuristic pulled in Apple's own group containers (e.g. `group.com.apple.stocks-news` matched `com.usebruno.app` because "apple" contains "app") and the tightened matcher closes that class of false positive.
 - **`Sha256Hasher`** — streams a file or directory tree through `CryptoKit.SHA256` in chunks, so even multi-gigabyte caches don't blow up memory. Directory trees are hashed deterministically: each entry is fed in with a length-prefixed binary encoding (relative path → file mode → file content hash → entry-terminator byte) so the hash is stable across runs as long as the contents and structure didn't change.
 - **`SnapshotArchiver`** — wraps Apple's `ditto -c -k --sequesterRsrc` to ZIP/UNZIP. Using `ditto` instead of `zip` matters: it preserves macOS extended attributes (`com.apple.metadata:*`), the resource fork on legacy files, and symlinks pointing inside the bundle. Archives created with `zip` would silently lose all of that and produce subtly broken restores.
 
 **Create flow** (`SnapshotService.createSnapshot`):
 
 1. Resolve all candidate paths via the resolver. If the set is empty after filtering, the snapshot is **rejected** — an empty snapshot is more dangerous than no snapshot (it would "restore" a wiped state).
-2. Stream-copy each path into a fresh `<bundleID>_<timestamp>/` folder under `~/Library/Application Support/AutoBrew/Snapshots/`.
+2. Stream-copy each path into a fresh `<bundleID>_<timestamp>/` folder under `~/Library/Application Support/AutoBrew/Snapshots/`. Directories are walked entry-by-entry; permission-denied files and vanished entries are skipped (so a single unreadable sibling doesn't abort the whole copy), every other enumeration error rethrows so a partial component can never claim to be complete.
 3. Compute the SHA-256 for each component (file → file hash, directory → tree hash).
 4. Write `manifest.json` last, atomically. If the process is killed before this step, the folder is partial and ignored by the snapshot list — no half-state.
 
