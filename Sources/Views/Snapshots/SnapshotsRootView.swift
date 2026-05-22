@@ -5,6 +5,11 @@ import AppKit
 /// detail on the right. The Restore wizard is reachable from here (not the
 /// Installed tab) because importing a bundle from another Mac conceptually
 /// belongs to the snapshot library, even though no snapshot is selected yet.
+///
+/// Uses `HSplitView` rather than a nested `NavigationSplitView` — the parent
+/// `BrewStoreWindow` already supplies one, and nesting them silently breaks
+/// sidebar styling on the inner list so the rows render invisible against
+/// the dark background.
 struct SnapshotsRootView: View {
     @State private var store = SnapshotsStore.shared
     @State private var selected: AppSnapshot?
@@ -12,19 +17,22 @@ struct SnapshotsRootView: View {
     @State private var exportError: String?
 
     var body: some View {
-        NavigationSplitView {
+        HSplitView {
             SnapshotListView(selection: $selected, store: store)
-                .frame(minWidth: 280)
-        } detail: {
-            if let snap = selected {
-                SnapshotDetailView(snapshot: snap)
-            } else {
-                ContentUnavailableView(
-                    String(localized: "No snapshot selected"),
-                    systemImage: "camera",
-                    description: Text(String(localized: "Create a snapshot from the Installed tab."))
-                )
+                .frame(minWidth: 260, idealWidth: 300)
+            Group {
+                if let snap = selected {
+                    SnapshotDetailView(snapshot: snap)
+                } else {
+                    ContentUnavailableView(
+                        String(localized: "No snapshot selected"),
+                        systemImage: "camera",
+                        description: Text(String(localized: "Create a snapshot from the Installed tab."))
+                    )
+                }
             }
+            .frame(minWidth: 360)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .task { store.refresh() }
         .toolbar {

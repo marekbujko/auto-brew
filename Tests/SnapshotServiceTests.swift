@@ -346,6 +346,35 @@ final class SnapshotServiceTests: XCTestCase {
         }
     }
 
+    /// Regression — `~/Library/Containers/<bundleID>/.com.apple.containermanagerd.metadata.plist`
+    /// is owned by containermanagerd and is frequently unreadable from user
+    /// space, even with Full Disk Access. A single unreadable sibling used to
+    /// abort the entire `fm.copyItem` for the Containers tree, which made
+    /// snapshots fail for almost every sandboxed app. The copy must skip such
+    /// files and continue with the rest of the user's data.
+    @MainActor
+    func testCreateSnapshotSkipsContainerManagerMetadataFile() async throws {
+        let home = tmp.appendingPathComponent("home")
+        let bundleID = "com.chabomakers.Antinote"
+        let container = home.appendingPathComponent("Library/Containers/\(bundleID)")
+        let data = container.appendingPathComponent("Data/Documents")
+        try FileManager.default.createDirectory(at: data, withIntermediateDirectories: true)
+        try "user note".write(to: data.appendingPathComponent("note.txt"), atomically: true, encoding: .utf8)
+        // Sibling that should be silently skipped — its name matches the
+        // containermanagerd metadata file we cannot read in production.
+        try Data().write(to: container.appendingPathComponent(".com.apple.containermanagerd.metadata.plist"))
+
+        let svc = SnapshotService(storageRoot: tmp.appendingPathComponent("snap"), home: home)
+        let snap = try await svc.createSnapshot(bundleID: bundleID, displayName: "Antinote", caskToken: nil, sourceAppVersion: nil)
+
+        let archivedNote = snap.dataDir.appendingPathComponent("Library/Containers/\(bundleID)/Data/Documents/note.txt")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: archivedNote.path),
+                      "User data must be captured even when sibling metadata is unreadable")
+        let archivedMetadata = snap.dataDir.appendingPathComponent("Library/Containers/\(bundleID)/.com.apple.containermanagerd.metadata.plist")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: archivedMetadata.path),
+                       "containermanagerd metadata must be skipped, not archived")
+    }
+
     @MainActor
     func testImportRejectsBundleIDPathTraversal() async throws {
         let home = tmp.appendingPathComponent("home")
