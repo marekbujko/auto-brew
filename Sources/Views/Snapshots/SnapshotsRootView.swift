@@ -1,10 +1,15 @@
 import SwiftUI
 import AppKit
 
-/// Snapshots tab: split view with the snapshot list on the left and the
-/// detail on the right. The Restore wizard is reachable from here (not the
-/// Installed tab) because importing a bundle from another Mac conceptually
-/// belongs to the snapshot library, even though no snapshot is selected yet.
+/// Snapshots tab: list on the left, detail on the right. A nested
+/// `NavigationSplitView` was tried first but the parent `BrewStoreWindow`
+/// already supplies one, and nesting two of them strips sidebar styling.
+/// `HSplitView` was tried next but it ignores `idealWidth` hints and lands
+/// on a 50/50 split that wastes space and renders two side-by-side empty
+/// states. A plain `HStack` with a fixed-width list and a flexible detail
+/// is the cleanest fit — and when no snapshots exist at all, we collapse
+/// the split entirely and show a single centered empty state across the
+/// whole pane.
 struct SnapshotsRootView: View {
     @State private var store = SnapshotsStore.shared
     @State private var selected: AppSnapshot?
@@ -12,18 +17,32 @@ struct SnapshotsRootView: View {
     @State private var exportError: String?
 
     var body: some View {
-        NavigationSplitView {
-            SnapshotListView(selection: $selected, store: store)
-                .frame(minWidth: 280)
-        } detail: {
-            if let snap = selected {
-                SnapshotDetailView(snapshot: snap)
-            } else {
+        Group {
+            if store.snapshots.isEmpty {
                 ContentUnavailableView(
-                    String(localized: "No snapshot selected"),
+                    String(localized: "No snapshots yet"),
                     systemImage: "camera",
                     description: Text(String(localized: "Create a snapshot from the Installed tab."))
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                HStack(spacing: 0) {
+                    SnapshotListView(selection: $selected, store: store)
+                        .frame(width: 280)
+                    Divider()
+                    Group {
+                        if let snap = selected {
+                            SnapshotDetailView(snapshot: snap)
+                        } else {
+                            ContentUnavailableView(
+                                String(localized: "No snapshot selected"),
+                                systemImage: "camera",
+                                description: Text(String(localized: "Pick a snapshot from the list to see its details."))
+                            )
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
         }
         .task { store.refresh() }
