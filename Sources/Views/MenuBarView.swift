@@ -148,13 +148,13 @@ struct MenuBarView: View {
                         systemImage: "arrow.triangle.2.circlepath"
                     )
                     .font(.system(.body, weight: .semibold))
-                    .symbolEffect(.rotate, isActive: brewManager.isRunning)
+                    .rotatingSymbolEffect(isActive: brewManager.isRunning)
                     Spacer()
                 }
                 .padding(.vertical, 6)
                 .animation(.easeInOut(duration: 0.2), value: brewManager.isRunning)
             }
-            .buttonStyle(.borderedProminent)
+            .adaptiveProminentButtonStyle()
             .tint(brewManager.isRunning ? .orange : .accentColor)
             .disabled(brewManager.isRunning)
             .animation(.easeInOut(duration: 0.3), value: brewManager.isRunning)
@@ -290,7 +290,7 @@ struct MenuBarView: View {
         case .running(let stage):
             Label(stage.displayName, systemImage: "arrow.triangle.2.circlepath")
                 .foregroundStyle(.orange)
-                .symbolEffect(.rotate, isActive: true)
+                .rotatingSymbolEffect(isActive: true)
         case .completed(let date):
             Label("Completed \(date.formatted(date: .omitted, time: .shortened))", systemImage: "checkmark.circle")
                 .foregroundStyle(.green)

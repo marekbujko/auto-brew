@@ -2,7 +2,7 @@ name: AutoBrew
 options:
   bundleIdPrefix: za.co.digitalfreedom
   deploymentTarget:
-    macOS: "26.0"
+    macOS: "14.0"
   xcodeVersion: "26"
   minimumXcodeGenVersion: "2.42.0"
   generateEmptyDirectories: true
@@ -26,11 +26,11 @@ packages:
 
 settings:
   base:
-    MARKETING_VERSION: "2.2.2"
-    CURRENT_PROJECT_VERSION: "12"
+    MARKETING_VERSION: "2.3.0"
+    CURRENT_PROJECT_VERSION: "13"
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: 7TSZJCJY88
     PRODUCT_BUNDLE_IDENTIFIER: za.co.digitalfreedom.AutoBrew

@@ -96,9 +96,9 @@ struct RankedCaskRow: View {
                     .padding(.vertical, 5)
             }
         }
-        .buttonStyle(.borderedProminent)
+        .adaptiveProminentButtonStyle()
         .controlSize(.regular)
-        .clipShape(Capsule())
+        .buttonBorderShape(.capsule)
         .disabled(isInstalling)
     }
 
