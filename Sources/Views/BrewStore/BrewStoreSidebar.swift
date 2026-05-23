@@ -25,7 +25,7 @@ struct BrewStoreSidebar: View {
                     .textFieldStyle(.plain)
             }
             .padding(8)
-            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+            .adaptiveGlassCard(cornerRadius: 8)
             .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 12)

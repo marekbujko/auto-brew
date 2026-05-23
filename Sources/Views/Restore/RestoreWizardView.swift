@@ -43,7 +43,7 @@ struct RestoreWizardView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
                 Button(String(localized: "Choose…")) { Task { await pick() } }
-                    .buttonStyle(.borderedProminent)
+                    .adaptiveProminentButtonStyle()
                 if let err = store.loadError {
                     Text(err)
                         .foregroundStyle(.red)
@@ -111,10 +111,10 @@ struct RestoreWizardView: View {
             Button(String(localized: "Restore")) {
                 Task { await store.performRestore() }
             }
-            .buttonStyle(.borderedProminent)
+            .adaptiveProminentButtonStyle()
             .disabled(store.selected.isEmpty)
         case .done:
-            Button(String(localized: "Done"), action: onClose).buttonStyle(.borderedProminent)
+            Button(String(localized: "Done"), action: onClose).adaptiveProminentButtonStyle()
         default: EmptyView()
         }
     }

@@ -41,7 +41,7 @@ struct NewSnapshotView: View {
                     if store.isWorking { ProgressView().controlSize(.small) }
                     else { Label(String(localized: "Create Snapshot"), systemImage: "camera.fill") }
                 }
-                .buttonStyle(.borderedProminent)
+                .adaptiveProminentButtonStyle()
                 .disabled(store.isWorking)
             }
         }

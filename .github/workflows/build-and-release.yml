@@ -62,8 +62,10 @@ jobs:
         run: |
           VERSION=$(grep MARKETING_VERSION project.yml | head -1 | awk '{print $2}' | tr -d '"')
           BUILD=$(grep CURRENT_PROJECT_VERSION project.yml | head -1 | awk '{print $2}' | tr -d '"')
+          MIN_OS=$(grep MACOSX_DEPLOYMENT_TARGET project.yml | head -1 | awk '{print $2}' | tr -d '"')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "min_os=$MIN_OS" >> "$GITHUB_OUTPUT"
 
       - name: Install Developer ID Certificate
         env:
@@ -216,6 +218,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
           BUILD: ${{ steps.version.outputs.build }}
+          MIN_OS: ${{ steps.version.outputs.min_os }}
         run: |
           set -e
           cat > appcast.xml << EOF
@@ -231,7 +234,7 @@ jobs:
                       <pubDate>$(date -R)</pubDate>
                       <sparkle:version>$BUILD</sparkle:version>
                       <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
-                      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+                      <sparkle:minimumSystemVersion>$MIN_OS</sparkle:minimumSystemVersion>
                       <enclosure
                           url="https://github.com/marcelrgberger/auto-brew/releases/download/v$VERSION/AutoBrew.zip"
                           length="$ZIP_LENGTH"

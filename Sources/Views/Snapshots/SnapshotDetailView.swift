@@ -34,7 +34,7 @@ struct SnapshotDetailView: View {
                     Button {
                         showRestoreConfirm = true
                     } label: { Label(String(localized: "Restore"), systemImage: "arrow.uturn.backward.circle.fill") }
-                        .buttonStyle(.borderedProminent)
+                        .adaptiveProminentButtonStyle()
                     Button {
                         Task { await exportToFile() }
                     } label: { Label(String(localized: "Export…"), systemImage: "square.and.arrow.up") }
