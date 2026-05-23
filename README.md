@@ -374,8 +374,19 @@ The app is signed and notarized by Apple — no Gatekeeper warnings.
 
 ## Requirements
 
-- macOS 26.0+
-- Xcode 26+
+AutoBrew runs on every macOS release from Sonoma onward:
+
+| macOS | Version | Year | Status |
+|---|---|---|---|
+| Sonoma | 14 | 2023 | Supported |
+| Sequoia | 15 | 2024 | Supported |
+| Tahoe | 26 | 2025 | Supported |
+
+Older releases (macOS 13 Ventura and earlier) are not supported — AutoBrew relies on SwiftUI APIs (`@Observable`, `ContentUnavailableView`, `.symbolEffect`) introduced in macOS 14.
+
+### Build requirements (developers only)
+
+- Xcode 26+ (the macOS 26 SDK is required because the UI references Liquid Glass APIs behind `if #available(macOS 26, *)` gates — older SDKs cannot resolve the symbols even though the binary still deploys to macOS 14+)
 - Swift 6.0
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
