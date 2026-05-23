@@ -83,6 +83,6 @@ struct CaskIconView: View {
             .padding(size * 0.2)
             .foregroundStyle(.secondary)
             .frame(width: size, height: size)
-            .background(.quaternary, in: RoundedRectangle(cornerRadius: size * 0.18))
+            .adaptiveGlassCard(cornerRadius: size * 0.18)
     }
 }

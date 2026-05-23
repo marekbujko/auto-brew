@@ -85,7 +85,7 @@ struct OnboardingView: View {
                 }
                 .padding(.vertical, 6)
             }
-            .buttonStyle(.borderedProminent)
+            .adaptiveProminentButtonStyle()
         }
         .transition(.push(from: .trailing))
     }
@@ -119,7 +119,7 @@ struct OnboardingView: View {
                     }
                     .padding(.vertical, 6)
                 }
-                .buttonStyle(.borderedProminent)
+                .adaptiveProminentButtonStyle()
 
             } else if isInstalling {
                 ProgressView()
@@ -175,7 +175,7 @@ struct OnboardingView: View {
                     }
                     .padding(.vertical, 6)
                 }
-                .buttonStyle(.borderedProminent)
+                .adaptiveProminentButtonStyle()
                 .tint(.orange)
 
                 Link(destination: URL(string: "https://brew.sh")!) {
@@ -220,7 +220,7 @@ struct OnboardingView: View {
                 }
                 .padding(.vertical, 6)
             }
-            .buttonStyle(.borderedProminent)
+            .adaptiveProminentButtonStyle()
         }
         .transition(.push(from: .trailing))
     }

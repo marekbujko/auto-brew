@@ -83,7 +83,7 @@ struct BrowseDetailView: View {
                 Label(String(localized: "Install"), systemImage: "arrow.down.circle.fill")
             }
         }
-        .buttonStyle(.borderedProminent)
+        .adaptiveProminentButtonStyle()
         .disabled(isInstalling)
     }
 

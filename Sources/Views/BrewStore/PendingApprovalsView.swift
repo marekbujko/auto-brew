@@ -83,12 +83,12 @@ private struct PendingApprovalRow: View {
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(.tertiary, in: Capsule())
+                        .adaptiveGlassCapsule()
                     Text(bumpLabel)
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(bumpColor.opacity(0.2), in: Capsule())
+                        .adaptiveGlassCapsule(tint: bumpColor)
                         .foregroundStyle(bumpColor)
                 }
                 statusLine
@@ -137,13 +137,13 @@ private struct PendingApprovalRow: View {
         case .pending:
             HStack(spacing: 6) {
                 Button(String(localized: "Approve")) { store.approve(update.id) }
-                    .buttonStyle(.borderedProminent)
+                    .adaptiveProminentButtonStyle()
                 Button(String(localized: "Reject"), role: .destructive) { store.reject(update.id) }
-                    .buttonStyle(.bordered)
+                    .adaptiveBorderedButtonStyle()
             }
         case .approved, .rejected:
             Button(String(localized: "Undo")) { store.resetDecision(update.id) }
-                .buttonStyle(.bordered)
+                .adaptiveBorderedButtonStyle()
         }
     }
 

@@ -34,14 +34,14 @@ struct SupportPromptView: View {
                     Label("Stern auf GitHub geben", systemImage: "star.fill")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .adaptiveProminentButtonStyle()
                 .controlSize(.large)
 
                 Button(action: onSponsor) {
                     Label("Auf GitHub Sponsors unterstützen", systemImage: "heart.fill")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
+                .adaptiveBorderedButtonStyle()
                 .controlSize(.large)
                 .tint(.pink)
 

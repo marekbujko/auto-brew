@@ -374,8 +374,19 @@ The app is signed and notarized by Apple — no Gatekeeper warnings.
 
 ## Requirements
 
-- macOS 26.0+
-- Xcode 26+
+AutoBrew runs on every macOS release from Sonoma onward:
+
+| macOS | Version | Year | Status |
+|---|---|---|---|
+| Sonoma | 14 | 2023 | Supported |
+| Sequoia | 15 | 2024 | Supported |
+| Tahoe | 26 | 2025 | Supported |
+
+Older releases (macOS 13 Ventura and earlier) are not supported — AutoBrew relies on SwiftUI APIs (`@Observable`, `ContentUnavailableView`, `.symbolEffect`) introduced in macOS 14.
+
+### Build requirements (developers only)
+
+- Xcode 26+ (the macOS 26 SDK is required because the UI references Liquid Glass APIs behind `if #available(macOS 26, *)` gates — older SDKs cannot resolve the symbols even though the binary still deploys to macOS 14+)
 - Swift 6.0
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
@@ -827,6 +838,20 @@ stateDiagram-v2
     Failed --> WaitingForSchedule: Retry Next Cycle
 ```
 
+### Platform-Adaptive UI
+
+AutoBrew ships a single binary that targets macOS 14 (Sonoma) and up, but picks the most native surface treatment for whichever release the user is running. The choice happens at runtime through `if #available` gates collected in `Sources/Utilities/PlatformAdaptive.swift`:
+
+| Helper | macOS 26+ (Tahoe / Liquid Glass) | macOS 14 / 15 (classic) |
+|---|---|---|
+| `rotatingSymbolEffect(isActive:)` | `.symbolEffect(.rotate)` | `.symbolEffect(.pulse)` |
+| `adaptiveGlassCard(cornerRadius:)` | `glassEffect(.regular, in: .rect(...))` | `.background(.quaternary, in: RoundedRectangle(...))` |
+| `adaptiveGlassCapsule(tint:)` | `glassEffect(.regular.tint(...), in: .capsule)` | `.background(.tertiary` / `tint.opacity(0.2), in: Capsule())` |
+| `adaptiveProminentButtonStyle()` | `.buttonStyle(.glassProminent)` | `.buttonStyle(.borderedProminent)` |
+| `adaptiveBorderedButtonStyle()` | `.buttonStyle(.glass)` | `.buttonStyle(.bordered)` |
+
+Every call-site in the app uses these helpers instead of the underlying style, so adding a new platform tier or tightening a fallback only happens in one place. Building the project still requires Xcode 26+ because the Liquid Glass symbols (`glassEffect`, `.glass`, `.glassProminent`) come from the macOS 26 SDK — but the produced binary deploys cleanly to macOS 14.
+
 ## Project Structure
 
 ```
@@ -892,27 +917,30 @@ auto-brew/
 │       ├── AppleAppFilter.swift         # Drop Apple-bundled apps from discovery
 │       ├── Sha256Hasher.swift           # File + length-prefixed tree hashes
 │       ├── ByteFormatter.swift          # Human-readable sizes
-│       └── NSPanelAsync.swift           # async/await wrapper around NSOpenPanel
-└── Tests/                               # XCTest (54 tests)
-    ├── Models:   CaskCatalogEntryTests, RestoreListTests, BrowseCategoryTests
+│       ├── NSPanelAsync.swift           # async/await wrapper around NSOpenPanel
+│       └── PlatformAdaptive.swift       # `if #available` View modifiers — Liquid Glass on macOS 26+, classic materials on macOS 14/15
+└── Tests/                               # XCTest (121 tests across 22 files)
+    ├── Models:   CaskCatalogEntryTests, RestoreListTests, BrowseCategoryTests,
+    │             LegalDocumentTests, PendingUpdatesStoreTests, SemVerTests
     ├── Services: BrewCatalogServiceTests, AppDiscoveryServiceTests,
     │             CaskNameResolverTests, SnapshotServiceTests,
     │             SnapshotArchiverTests, SnapshotPathResolverTests,
-    │             BrewManagerTests, IdleDetectorTests
-    ├── ViewModels: CatalogStoreTests, SettingsStoreTests
-    └── Utilities: AppleAppFilterTests, Sha256HasherTests
+    │             BrewManagerTests, IdleDetectorTests,
+    │             UpdateEvaluatorTests, UpdateLedgerTests
+    ├── ViewModels: CatalogStoreTests, SettingsStoreTests, SupportPromptStoreTests
+    └── Utilities: AppleAppFilterTests, Sha256HasherTests, MarkdownParserTests
 ```
 
 ## Tests
 
-XCTest covers the model layer, services, view-models, and utilities — currently **54 tests** across 15 files:
+XCTest covers the model layer, services, view-models, and utilities — currently **121 tests** across 22 files:
 
 | Layer | Suites |
 |---|---|
-| Models | `CaskCatalogEntryTests`, `RestoreListTests`, `BrowseCategoryTests` |
-| Services | `BrewCatalogServiceTests`, `AppDiscoveryServiceTests`, `CaskNameResolverTests`, `SnapshotServiceTests`, `SnapshotArchiverTests`, `SnapshotPathResolverTests`, `BrewManagerTests`, `IdleDetectorTests` |
-| ViewModels | `CatalogStoreTests`, `SettingsStoreTests` |
-| Utilities | `AppleAppFilterTests`, `Sha256HasherTests` |
+| Models | `CaskCatalogEntryTests`, `RestoreListTests`, `BrowseCategoryTests`, `LegalDocumentTests`, `PendingUpdatesStoreTests`, `SemVerTests` |
+| Services | `BrewCatalogServiceTests`, `AppDiscoveryServiceTests`, `CaskNameResolverTests`, `SnapshotServiceTests`, `SnapshotArchiverTests`, `SnapshotPathResolverTests`, `BrewManagerTests`, `IdleDetectorTests`, `UpdateEvaluatorTests`, `UpdateLedgerTests` |
+| ViewModels | `CatalogStoreTests`, `SettingsStoreTests`, `SupportPromptStoreTests` |
+| Utilities | `AppleAppFilterTests`, `Sha256HasherTests`, `MarkdownParserTests` |
 
 Run with:
 
