@@ -47,6 +47,15 @@ final class SettingsStore {
         didSet { defaults.set(autoCleanupSnapshots, forKey: "autoCleanupSnapshots") }
     }
 
+    /// When true, `SchedulerService` takes a SnapshotService snapshot of each
+    /// cask's user data right before its auto-upgrade runs. The snapshot ID is
+    /// recorded on the `UpgradeHistoryStore` row so the user can roll back in
+    /// one click if the upgrade breaks their setup. Default is on — the whole
+    /// point of the feature is to make automatic updates feel safe.
+    var autoSnapshotBeforeUpgrade: Bool {
+        didSet { defaults.set(autoSnapshotBeforeUpgrade, forKey: "autoSnapshotBeforeUpgrade") }
+    }
+
     var onboardingCompleted: Bool {
         didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") }
     }
@@ -108,6 +117,12 @@ final class SettingsStore {
         let retention = d.integer(forKey: "snapshotRetentionDays")
         snapshotRetentionDays = retention > 0 ? retention : 90
         autoCleanupSnapshots = d.bool(forKey: "autoCleanupSnapshots")
+
+        if d.object(forKey: "autoSnapshotBeforeUpgrade") != nil {
+            autoSnapshotBeforeUpgrade = d.bool(forKey: "autoSnapshotBeforeUpgrade")
+        } else {
+            autoSnapshotBeforeUpgrade = true
+        }
 
         onboardingCompleted = d.bool(forKey: "onboardingCompleted")
 
