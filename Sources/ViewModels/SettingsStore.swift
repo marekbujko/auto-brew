@@ -56,6 +56,15 @@ final class SettingsStore {
         didSet { defaults.set(autoSnapshotBeforeUpgrade, forKey: "autoSnapshotBeforeUpgrade") }
     }
 
+    /// Minimum free space (in GiB) on the home-directory volume below
+    /// which the pre-upgrade snapshot step is skipped — the upgrade
+    /// itself still runs, the user just loses the rollback affordance
+    /// for that one cask. Better than filling the disk and breaking
+    /// unrelated apps.
+    var minFreeGBForSnapshot: Int {
+        didSet { defaults.set(minFreeGBForSnapshot, forKey: "minFreeGBForSnapshot") }
+    }
+
     var onboardingCompleted: Bool {
         didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") }
     }
@@ -123,6 +132,9 @@ final class SettingsStore {
         } else {
             autoSnapshotBeforeUpgrade = true
         }
+
+        let minGB = d.integer(forKey: "minFreeGBForSnapshot")
+        minFreeGBForSnapshot = minGB > 0 ? minGB : 10
 
         onboardingCompleted = d.bool(forKey: "onboardingCompleted")
 

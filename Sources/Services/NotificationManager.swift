@@ -133,6 +133,25 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
         }
     }
 
+    /// Heads-up notification when the pre-upgrade snapshot was skipped
+    /// because the home-directory volume is below the configured
+    /// threshold. The upgrade still runs; this only informs the user
+    /// that the rollback affordance for `token` is unavailable for
+    /// this run.
+    func showLowDiskSpace(forToken token: String, availableGB: Int64, thresholdGB: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "AutoBrew"
+        content.body = String(localized: "Pre-upgrade snapshot for \(token) skipped — only \(availableGB) GiB free, threshold is \(thresholdGB) GiB. The upgrade still ran but you can't roll it back from History.")
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: "low-disk-\(token)-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: nil
+        )
+        center.add(request)
+    }
+
     func showCompletionNotification(success: Bool, detail: String? = nil,
                                     rollbackEntryID: UUID? = nil,
                                     rollbackTargetName: String? = nil) {

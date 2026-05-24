@@ -13,6 +13,9 @@ user-facing, and free of internal jargon.
 
 ## [Unreleased]
 
+### Added
+- Pre-upgrade snapshots are now disk-pressure-aware: when the home-directory volume has less than the configured threshold (default 10 GiB) free, the snapshot is skipped for that cask and a notification surfaces the reason. The upgrade itself still runs — only the History row's rollback button is unavailable for that single run.
+
 ## [2.4.0] — 2026-05-24
 
 ### Added

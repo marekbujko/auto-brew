@@ -200,6 +200,8 @@ Per cask in the auto-install bucket:
 
 Failures never block the upgrade. CLI-only casks, apps that don't live in `/Applications`/`~/Applications`, or permission-denied components all produce a History row **without** a snapshot ID — the audit trail stays complete, just without a rollback button on that row. The snapshot itself follows the normal storage and retention rules, so the auto-cleanup window prunes it like any other snapshot.
 
+**Disk-pressure awareness.** When the home-directory volume has less than the configured threshold (default 10 GiB) free, AutoBrew skips the pre-upgrade snapshot for that cask and surfaces a notification telling you which cask and why. The upgrade still runs — better than risking a near-full disk and breaking unrelated apps. Tune the threshold in Settings → Snapshots.
+
 ### Update History & One-Click Rollback
 
 BrewStore → **History** lists every cask AutoBrew has auto-upgraded, newest first, with the from/to versions, when it ran, and a per-cask status icon — green check for casks brew confirmed upgraded, red cross for casks that emitted an explicit `Error:` line during their upgrade, and an orange question mark when brew completed but did not emit either marker for that particular cask (the snapshot and rollback are still valid in that case). The per-cask attribution comes from a dedicated parser of `brew upgrade --cask`'s output so an aggregate brew exit status no longer paints every cask in a batch with the same brush.

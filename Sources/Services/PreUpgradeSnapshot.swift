@@ -40,6 +40,17 @@ enum PreUpgradeSnapshot {
             preUpgradeLogger.info("Pre-upgrade snapshot skipped for \(token, privacy: .public) — no bundle ID")
             return nil
         }
+        // Defensive: a near-full disk is a worse outcome than no snapshot
+        // — we would only be filling the home-directory volume and
+        // breaking unrelated apps. The upgrade still runs; the user
+        // just loses the rollback affordance for this one cask.
+        let minGB = SettingsStore.shared.minFreeGBForSnapshot
+        if !DiskSpaceMonitor.hasAtLeast(minGB) {
+            let availableGB = (DiskSpaceMonitor.availableBytes() ?? 0) / 1_073_741_824
+            preUpgradeLogger.warning("Pre-upgrade snapshot skipped for \(token, privacy: .public) — only \(availableGB) GiB free, threshold is \(minGB) GiB")
+            NotificationManager.shared.showLowDiskSpace(forToken: token, availableGB: availableGB, thresholdGB: minGB)
+            return nil
+        }
         do {
             let snapshot = try await SnapshotService.shared.createSnapshot(
                 bundleID: bundleID,
