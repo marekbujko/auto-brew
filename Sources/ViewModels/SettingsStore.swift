@@ -65,6 +65,21 @@ final class SettingsStore {
         didSet { defaults.set(minFreeGBForSnapshot, forKey: "minFreeGBForSnapshot") }
     }
 
+    /// Optional user-picked storage location for snapshots — typically
+    /// an external drive or NAS mount. Persisted as a security-scoped
+    /// bookmark blob so the same path survives unplug/replug of an
+    /// external drive. nil → default `~/Library/Application
+    /// Support/AutoBrew/Snapshots/` is used.
+    var snapshotStorageBookmark: Data? {
+        didSet {
+            if let snapshotStorageBookmark {
+                defaults.set(snapshotStorageBookmark, forKey: "snapshotStorageBookmark")
+            } else {
+                defaults.removeObject(forKey: "snapshotStorageBookmark")
+            }
+        }
+    }
+
     var onboardingCompleted: Bool {
         didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") }
     }
@@ -135,6 +150,8 @@ final class SettingsStore {
 
         let minGB = d.integer(forKey: "minFreeGBForSnapshot")
         minFreeGBForSnapshot = minGB > 0 ? minGB : 10
+
+        snapshotStorageBookmark = d.data(forKey: "snapshotStorageBookmark")
 
         onboardingCompleted = d.bool(forKey: "onboardingCompleted")
 

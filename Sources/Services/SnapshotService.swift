@@ -50,11 +50,37 @@ final class SnapshotService {
         if let storageRoot {
             self.storageRoot = storageRoot
         } else {
-            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            self.storageRoot = support.appendingPathComponent("AutoBrew/Snapshots", isDirectory: true)
+            self.storageRoot = Self.resolvedDefaultStorageRoot()
         }
         self.home = home ?? FileManager.default.homeDirectoryForCurrentUser
         try? fm.createDirectory(at: self.storageRoot, withIntermediateDirectories: true)
+    }
+
+    /// Picks the snapshot storage root for the shared instance. If the
+    /// user pointed AutoBrew at an external drive via Settings and the
+    /// drive is reachable, that path wins; otherwise we fall back to
+    /// the default Application-Support location. Bookmark resolution
+    /// failure logs and falls through — never crashes on a missing
+    /// drive.
+    @MainActor
+    private static func resolvedDefaultStorageRoot() -> URL {
+        let fallback = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first!
+            .appendingPathComponent("AutoBrew/Snapshots", isDirectory: true)
+        guard let bookmark = SettingsStore.shared.snapshotStorageBookmark,
+              let resolved = SecurityScopedBookmark.resolve(bookmark) else {
+            return fallback
+        }
+        if resolved.stale {
+            // Re-encode + persist so the next launch starts from a
+            // fresh blob. Silent on failure — the path still works
+            // for this session.
+            if let fresh = SecurityScopedBookmark.encode(resolved.url) {
+                SettingsStore.shared.snapshotStorageBookmark = fresh
+            }
+        }
+        return resolved.url.appendingPathComponent("AutoBrew/Snapshots", isDirectory: true)
     }
 
     /// Creates a new snapshot. Fails if no components were found — empty
