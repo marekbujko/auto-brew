@@ -14,9 +14,12 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
 
     nonisolated private static let missedRunCategory = "MISSED_RUN"
     nonisolated private static let pendingApprovalsCategory = "PENDING_APPROVALS"
+    nonisolated private static let upgradeRollbackCategory = "UPGRADE_ROLLBACK"
     nonisolated private static let runNowAction = "RUN_NOW"
     nonisolated private static let skipAction = "SKIP"
     nonisolated private static let reviewApprovalsAction = "REVIEW_APPROVALS"
+    nonisolated private static let rollBackAction = "ROLL_BACK_LAST"
+    nonisolated private static let historyEntryIDKey = "historyEntryID"
 
     /// Fires when the user taps "Update Now" on the missed-run notification —
     /// the bridge from notification action to scheduler.
@@ -24,6 +27,12 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
 
     /// Fires when the user taps "Review" on the pending-approvals notification.
     var onReviewApprovalsRequested: (@MainActor () -> Void)?
+
+    /// Fires when the user taps "Roll Back" on a failed-upgrade
+    /// notification. The argument is the `UpgradeHistoryEntry.id` we
+    /// stamped into the notification's `userInfo` — the scheduler resolves
+    /// it back to a live snapshot and runs the restore.
+    var onRollbackRequested: (@MainActor (UUID) -> Void)?
 
     override private init() {
         super.init()
@@ -56,7 +65,18 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
             intentIdentifiers: []
         )
 
-        center.setNotificationCategories([missedCategory, pendingCategory])
+        let rollBackAction = UNNotificationAction(
+            identifier: Self.rollBackAction,
+            title: String(localized: "Roll Back"),
+            options: [.destructive]
+        )
+        let rollbackCategory = UNNotificationCategory(
+            identifier: Self.upgradeRollbackCategory,
+            actions: [rollBackAction],
+            intentIdentifiers: []
+        )
+
+        center.setNotificationCategories([missedCategory, pendingCategory, rollbackCategory])
     }
 
     func requestAuthorization() async {
@@ -113,13 +133,26 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
         }
     }
 
-    func showCompletionNotification(success: Bool, detail: String? = nil) {
+    func showCompletionNotification(success: Bool, detail: String? = nil,
+                                    rollbackEntryID: UUID? = nil,
+                                    rollbackTargetName: String? = nil) {
         let content = UNMutableNotificationContent()
         content.title = "AutoBrew"
         content.body = success
             ? String(localized: "All Homebrew packages have been updated.")
             : String(localized: "Update failed: \(detail ?? "Unknown error")")
         content.sound = .default
+
+        // Only attach the Roll Back action when there's an actual rollback
+        // candidate (failed cask with a live snapshot). Otherwise the
+        // button would tap to a no-op, which is worse than not offering it.
+        if let entryID = rollbackEntryID {
+            if let name = rollbackTargetName {
+                content.body += " " + String(localized: "Roll back \(name) to its pre-upgrade snapshot?")
+            }
+            content.categoryIdentifier = Self.upgradeRollbackCategory
+            content.userInfo[Self.historyEntryIDKey] = entryID.uuidString
+        }
 
         let request = UNNotificationRequest(
             identifier: "completion-\(Date().timeIntervalSince1970)",
@@ -146,6 +179,12 @@ final class NotificationManager: NSObject, @unchecked Sendable, UNUserNotificati
             // the review view — most users tap the body, not the action.
             Task { @MainActor in
                 onReviewApprovalsRequested?()
+            }
+        } else if actionID == Self.rollBackAction,
+                  let raw = response.notification.request.content.userInfo[Self.historyEntryIDKey] as? String,
+                  let entryID = UUID(uuidString: raw) {
+            Task { @MainActor in
+                onRollbackRequested?(entryID)
             }
         }
         completionHandler()
