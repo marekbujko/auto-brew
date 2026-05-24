@@ -122,7 +122,7 @@ Settings → **Update Policy** has six pickers (patch / minor / major × Casks /
 
 The default profile is conservative: patches roll out quickly, minors get a cool-off window, majors always wait for the user. Defaults differ between Casks and Formulae because Formulae carry security patches more often.
 
-For one specific package, open it in the BrewStore detail view and click **Update Policy**. The override sheet lets you set patch/minor/major independently; leaving a row on **Default** inherits the global setting.
+For one specific package, open it in the BrewStore detail view and click **Update Policy**. The override sheet lets you set patch/minor/major independently; leaving a row on **Default** inherits the global setting. The same sheet also carries an optional **Pre-snapshot command** (`/bin/bash -c <command>`, 30 s timeout) that runs right before the pre-upgrade snapshot of this cask — handy for flushing in-memory app state (`osascript`-driven saves, daemon quits, etc.). The command runs with your user permissions; the UI carries a clear warning that you should only paste commands you can read end-to-end.
 
 ### Pending Approvals Workflow
 
