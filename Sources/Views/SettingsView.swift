@@ -102,6 +102,17 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                    if settings.autoSnapshotBeforeUpgrade {
+                        Stepper(
+                            String(localized: "Skip snapshot when free disk is below \(settings.minFreeGBForSnapshot) GiB"),
+                            value: Binding(
+                                get: { settings.minFreeGBForSnapshot },
+                                set: { settings.minFreeGBForSnapshot = $0 }
+                            ),
+                            in: 1...100, step: 1
+                        )
+                    }
+
                     Toggle(String(localized: "Auto-clean up old snapshots"),
                            isOn: Binding(
                                get: { settings.autoCleanupSnapshots },
