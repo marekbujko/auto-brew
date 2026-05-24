@@ -15,6 +15,7 @@ user-facing, and free of internal jargon.
 
 ### Added
 - Pre-upgrade snapshots are now disk-pressure-aware: when the home-directory volume has less than the configured threshold (default 10 GiB) free, the snapshot is skipped for that cask and a notification surfaces the reason. The upgrade itself still runs — only the History row's rollback button is unavailable for that single run.
+- Widget large family now carries a **Run Now** link that triggers an immediate `brew update → upgrade → cleanup` cycle through the host app, alongside the existing Roll Back link. Uses the new `autobrew://run-now` URL scheme.
 
 ## [2.4.0] — 2026-05-24
 

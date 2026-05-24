@@ -77,6 +77,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task {
                 await self.rollbackFromWidget()
             }
+        case "run-now":
+            // Fires from the widget's Run Now link. Same trust model
+            // as `rollback` — the widget is the user's own surface,
+            // clicking is the explicit consent. `triggerManualRun`
+            // is reentrancy-safe via SchedulerService.pipelineInProgress
+            // so a fast double-click doesn't queue parallel runs.
+            Task {
+                await SchedulerService.shared.triggerManualRun()
+            }
         default:
             requestOpenWindow()
         }
