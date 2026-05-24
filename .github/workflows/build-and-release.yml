@@ -268,6 +268,53 @@ jobs:
             "build/$APP_NAME.dmg" \
             "build/$APP_NAME.zip"
 
+      - name: Bump Homebrew tap
+        if: github.ref == 'refs/heads/main'
+        env:
+          DEPLOY_GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          MIN_OS: ${{ steps.version.outputs.min_os }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEPLOY_GITHUB_TOKEN:-}" ]; then
+            echo "::warning::DEPLOY_GITHUB_TOKEN not set - skipping Homebrew tap bump."
+            echo "Add a fine-grained PAT with contents:write on marcelrgberger/homebrew-tap to enable."
+            exit 0
+          fi
+
+          SHA256=$(shasum -a 256 "build/$APP_NAME.dmg" | awk '{print $1}')
+          case "${MIN_OS%%.*}" in
+            13) MACOS_SYM=ventura  ;;
+            14) MACOS_SYM=sonoma   ;;
+            15) MACOS_SYM=sequoia  ;;
+            26) MACOS_SYM=tahoe    ;;
+            *)  echo "::error::Unsupported macOS major version: ${MIN_OS}"; exit 1 ;;
+          esac
+
+          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
+          rm -rf "$TAP_DIR"
+          git clone --depth=1 \
+            "https://x-access-token:${DEPLOY_GITHUB_TOKEN}@github.com/marcelrgberger/homebrew-tap.git" \
+            "$TAP_DIR"
+
+          CASK="$TAP_DIR/Casks/autobrew.rb"
+          sed -i.bak -E "s#^( *version )\"[^\"]+\"#\1\"${VERSION}\"#"   "$CASK"
+          sed -i.bak -E "s#^( *sha256 )\"[^\"]+\"#\1\"${SHA256}\"#"     "$CASK"
+          sed -i.bak -E "s#^( *depends_on macos:).*#\1 :${MACOS_SYM}#"  "$CASK"
+          rm -f "$CASK.bak"
+
+          cd "$TAP_DIR"
+          if git diff --quiet -- Casks/autobrew.rb; then
+            echo "Cask already at v${VERSION} with current sha256 - nothing to push."
+            exit 0
+          fi
+
+          git config user.name  "Marcel R. G. Berger"
+          git config user.email "hello@marcelrgberger.com"
+          git add Casks/autobrew.rb
+          git commit -m "Bump AutoBrew to ${VERSION}"
+          git push origin HEAD:main
+
       - name: Job Summary
         if: always()
         run: |
