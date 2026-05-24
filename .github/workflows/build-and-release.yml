@@ -91,17 +91,20 @@ jobs:
         env:
           PROFILE_MAIN_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_MAIN }}
           PROFILE_WIDGET_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_WIDGET }}
+          PROFILE_CLI_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_CLI }}
         run: |
           set -e
           # Widget extensions are sandboxed and need a real provisioning
-          # profile. Both bundles have a MAC_APP_DIRECT profile generated
-          # via the ASC API and stored as base64 secrets — install them
-          # into the user-level profile store so xcodebuild picks them
-          # up during the archive step.
+          # profile. The embedded CLI helper has its own bundle id and
+          # therefore its own MAC_APP_DIRECT profile too. All three
+          # blobs are generated via the ASC API and stored as base64
+          # secrets — install them into the user-level profile store
+          # so xcodebuild picks them up during the archive step.
           PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES_DIR"
           echo -n "$PROFILE_MAIN_BASE64"   | base64 --decode -o "$PROFILES_DIR/AutoBrew_Main.mobileprovision"
           echo -n "$PROFILE_WIDGET_BASE64" | base64 --decode -o "$PROFILES_DIR/AutoBrew_Widget.mobileprovision"
+          echo -n "$PROFILE_CLI_BASE64"    | base64 --decode -o "$PROFILES_DIR/AutoBrew_CLI.mobileprovision"
           ls -la "$PROFILES_DIR"
 
       - name: Prepare App Store Connect API Key
@@ -165,6 +168,8 @@ jobs:
                   <string>AutoBrew Developer ID</string>
                   <key>za.co.digitalfreedom.AutoBrew.WidgetExtension</key>
                   <string>AutoBrew Widget Developer ID</string>
+                  <key>za.co.digitalfreedom.AutoBrew.cli</key>
+                  <string>AutoBrew CLI Developer ID</string>
               </dict>
           </dict>
           </plist>

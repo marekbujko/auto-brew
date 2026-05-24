@@ -71,6 +71,12 @@ targets:
       - target: AutoBrewWidget
         embed: true
         codeSign: true
+      - target: autobrew-cli
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
     settings:
       base:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
@@ -103,6 +109,21 @@ targets:
         CODE_SIGN_INJECT_BASE_ENTITLEMENTS: false
         SKIP_INSTALL: true
 
+  autobrew-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - CLI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: za.co.digitalfreedom.AutoBrew.cli
+        PRODUCT_NAME: autobrew
+        INFOPLIST_FILE: CLI/Info.plist
+        ENABLE_HARDENED_RUNTIME: true
+        SKIP_INSTALL: true
+        PRODUCT_MODULE_NAME: AutoBrewHelperCLI
+        PROVISIONING_PROFILE_SPECIFIER: "AutoBrew CLI Developer ID"
+
   AutoBrewTests:
     type: bundle.unit-test
     platform: macOS
@@ -113,3 +134,4 @@ targets:
     settings:
       base:
         PRODUCT_MODULE_NAME: AutoBrewTests
+        PRODUCT_NAME: AutoBrewTests
