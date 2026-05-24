@@ -106,14 +106,23 @@ struct UpgradeHistoryView: View {
 
     @ViewBuilder
     private func statusIcon(for entry: UpgradeHistoryEntry) -> some View {
-        if entry.succeeded {
+        switch entry.outcome {
+        case .succeeded:
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)
                 .imageScale(.large)
-        } else {
+        case .failed:
             Image(systemName: "xmark.circle.fill")
                 .foregroundStyle(.red)
                 .imageScale(.large)
+        case .attempted:
+            // Brew swallowed the per-cask outcome — we know the run
+            // completed but not whether *this* cask actually upgraded.
+            // Don't claim a green tick we cannot back up.
+            Image(systemName: "questionmark.circle.fill")
+                .foregroundStyle(.orange)
+                .imageScale(.large)
+                .help(String(localized: "Outcome unclear — brew did not emit a success or error marker for this cask. The pre-upgrade snapshot is still available for rollback."))
         }
     }
 

@@ -47,6 +47,12 @@ final class SchedulerService {
             }
         }
 
+        notificationManager.onRollbackRequested = { [weak self] entryID in
+            Task { @MainActor in
+                await self?.rollbackUpgrade(forEntryID: entryID)
+            }
+        }
+
         restartScheduling()
     }
 
@@ -211,7 +217,7 @@ final class SchedulerService {
             // swallowed — never block an upgrade because a snapshot didn't
             // take.
             var preSnapshots: [String: PreUpgradeContext] = [:]
-            if settings.autoSnapshotBeforeUpgrade && !casksToUpgrade.isEmpty {
+            if !casksToUpgrade.isEmpty {
                 preSnapshots = await capturePreUpgradeSnapshots(forCasks: casksToUpgrade)
             }
 
@@ -219,17 +225,17 @@ final class SchedulerService {
                 logger.info("Nothing to upgrade — \(bundle.waitingForCooldown.count) waiting, \(bundle.needsApproval.count) pending approval")
             } else {
                 do {
-                    try await brewManager.runUpgrade(formulae: formulaeToUpgrade, casks: casksToUpgradeNames)
+                    let outcomes = try await brewManager.runUpgrade(formulae: formulaeToUpgrade, casks: casksToUpgradeNames)
                     // Only drop approved entries from the pending list after
                     // the upgrade actually went through — a failure should
                     // leave them queued so the next run retries.
                     pendingStore.remove(tokens: approvedTokens)
-                    recordUpgradeHistory(for: casksToUpgrade, preSnapshots: preSnapshots, succeeded: true)
+                    recordUpgradeHistory(for: casksToUpgrade, preSnapshots: preSnapshots, outcomes: outcomes, runThrew: false)
                 } catch {
                     // Swallow here so cleanup still runs; rethrow shape is
                     // preserved via `upgradeError` below.
                     upgradeError = error
-                    recordUpgradeHistory(for: casksToUpgrade, preSnapshots: preSnapshots, succeeded: false)
+                    recordUpgradeHistory(for: casksToUpgrade, preSnapshots: preSnapshots, outcomes: [:], runThrew: true)
                 }
             }
 
@@ -280,9 +286,51 @@ final class SchedulerService {
         } catch {
             state = .failed(error.localizedDescription)
             if settings.showNotifications {
-                notificationManager.showCompletionNotification(success: false, detail: error.localizedDescription)
+                let rollbackTarget = findRollbackTarget()
+                notificationManager.showCompletionNotification(
+                    success: false,
+                    detail: error.localizedDescription,
+                    rollbackEntryID: rollbackTarget?.id,
+                    rollbackTargetName: rollbackTarget?.displayName
+                )
             }
             logger.error("Brew update failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// Newest failed history entry whose pre-upgrade snapshot is still on
+    /// disk — the candidate the Roll Back notification action would
+    /// restore. Nil when nothing to roll back to, in which case the
+    /// notification stays a plain completion banner.
+    private func findRollbackTarget() -> UpgradeHistoryEntry? {
+        let snapshots = (try? SnapshotService.shared.listSnapshots()) ?? []
+        let liveIDs = Set(snapshots.map(\.id))
+        return historyStore.entries.first { entry in
+            entry.outcome == .failed &&
+            entry.snapshotID.map(liveIDs.contains) == true
+        }
+    }
+
+    /// Run from the notification's `ROLL_BACK` action. Resolves the history
+    /// entry to a live snapshot and fires the same transactional restore
+    /// the History view would. Failures are logged; a second failure
+    /// notification would be more noise than signal.
+    private func rollbackUpgrade(forEntryID entryID: UUID) async {
+        guard let entry = historyStore.entries.first(where: { $0.id == entryID }),
+              let snapshotID = entry.snapshotID else {
+            logger.warning("Rollback skipped — history entry \(entryID) has no snapshot")
+            return
+        }
+        let snapshots = (try? SnapshotService.shared.listSnapshots()) ?? []
+        guard let snapshot = snapshots.first(where: { $0.id == snapshotID }) else {
+            logger.warning("Rollback skipped — snapshot \(snapshotID) no longer on disk")
+            return
+        }
+        do {
+            try await SnapshotService.shared.restoreSnapshot(snapshot, terminateApp: true)
+            logger.info("Rollback complete for \(entry.token, privacy: .public)")
+        } catch {
+            logger.error("Rollback failed for \(entry.token, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -310,14 +358,17 @@ final class SchedulerService {
 
     /// Best-effort snapshot of each cask's user data right before its
     /// upgrade. Looks up the bundle ID via `InstalledAppsStore` (refreshing
-    /// once if the store is empty). Every error path is logged and produces
-    /// a `nil`-snapshot context rather than throwing — a snapshot failure
-    /// must never block the upgrade itself.
+    /// once if the store is empty) and delegates the actual snapshot work
+    /// to `PreUpgradeSnapshot.capture` so manual upgrades from BrewStore
+    /// share the same code path. Every error path produces a `nil`-snapshot
+    /// context rather than throwing — a snapshot failure must never block
+    /// the upgrade itself.
     private func capturePreUpgradeSnapshots(forCasks casks: [OutdatedPackage]) async -> [String: PreUpgradeContext] {
         if InstalledAppsStore.shared.apps.isEmpty {
             await InstalledAppsStore.shared.refresh()
         }
         let apps = InstalledAppsStore.shared.apps
+        let policyEnabled = settings.autoSnapshotBeforeUpgrade
         var result: [String: PreUpgradeContext] = [:]
         for cask in casks {
             // Honour scheduler cancellation between snapshots — a 10-cask pass
@@ -325,58 +376,48 @@ final class SchedulerService {
             // the user to flip trigger mode or quit.
             if Task.isCancelled { return result }
             let app = apps.first(where: { ($0.caskToken ?? "").lowercased() == cask.name.lowercased() })
-            guard let bundleID = app?.bundleID else {
-                logger.info("Pre-upgrade snapshot skipped for \(cask.name, privacy: .public) — no installed .app under brew management")
-                result[cask.name] = PreUpgradeContext(snapshotID: nil, bundleID: nil,
-                                                     displayName: app?.displayName ?? cask.name)
-                continue
-            }
             let displayName = app?.displayName ?? cask.name
-            do {
-                let snapshot = try await SnapshotService.shared.createSnapshot(
-                    bundleID: bundleID,
-                    displayName: displayName,
-                    caskToken: cask.name,
-                    sourceAppVersion: cask.currentVersion
-                )
-                result[cask.name] = PreUpgradeContext(snapshotID: snapshot.id,
-                                                     bundleID: bundleID,
-                                                     displayName: displayName)
-                logger.info("Pre-upgrade snapshot \(cask.name, privacy: .public) → \(snapshot.id)")
-            } catch {
-                logger.warning("Pre-upgrade snapshot failed for \(cask.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                result[cask.name] = PreUpgradeContext(snapshotID: nil, bundleID: bundleID,
-                                                     displayName: displayName)
-            }
+            let snapshotID = await PreUpgradeSnapshot.capture(
+                token: cask.name,
+                bundleID: app?.bundleID,
+                displayName: displayName,
+                fromVersion: cask.currentVersion,
+                policyEnabled: policyEnabled
+            )
+            result[cask.name] = PreUpgradeContext(snapshotID: snapshotID,
+                                                  bundleID: app?.bundleID,
+                                                  displayName: displayName)
         }
         return result
     }
 
-    /// `succeeded` is per-batch, not per-cask: `BrewManager.runUpgrade` reports
-    /// aggregate exit status only, so a single cask warning that brew swallows
-    /// will show up here as `succeeded: true` even though that one upgrade did
-    /// not really apply. The pre-upgrade snapshot still exists either way, so
-    /// rollback stays correct; the only loss is a misleading green tick in the
-    /// history row. Per-cask outcome tracking would require teaching
-    /// `BrewManager` to parse `brew upgrade --cask`'s per-line output — out of
-    /// scope for the snapshot/history feature.
+    /// Writes one history row per requested cask. The outcome map comes
+    /// from `BrewUpgradeOutcomeParser`; tokens that brew never mentioned
+    /// (skipped no-ops, greedy mode side effects) are absent from the map
+    /// and default to `.attempted`. When `runUpgrade` itself threw, the
+    /// outcomes map is empty and every cask falls to `.failed` because we
+    /// only got there from the catch branch.
     private func recordUpgradeHistory(for casks: [OutdatedPackage],
                                       preSnapshots: [String: PreUpgradeContext],
-                                      succeeded: Bool) {
-        let now = Date()
+                                      outcomes: [String: CaskUpgradeOutcome],
+                                      runThrew: Bool) {
         for cask in casks {
             let ctx = preSnapshots[cask.name]
-            historyStore.append(UpgradeHistoryEntry(
-                id: UUID(),
-                timestamp: now,
+            let outcome: CaskUpgradeOutcome
+            if runThrew {
+                outcome = .failed
+            } else {
+                outcome = outcomes[cask.name] ?? .attempted
+            }
+            PreUpgradeSnapshot.record(
                 token: cask.name,
                 displayName: ctx?.displayName ?? cask.name,
+                bundleID: ctx?.bundleID,
                 fromVersion: cask.currentVersion,
                 toVersion: cask.newVersion,
-                bundleID: ctx?.bundleID,
                 snapshotID: ctx?.snapshotID,
-                succeeded: succeeded
-            ))
+                outcome: outcome
+            )
         }
     }
 
