@@ -71,6 +71,18 @@ jobs:
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           security find-identity -v
 
+      - name: Install Developer ID provisioning profiles
+        env:
+          PROFILE_MAIN_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_MAIN }}
+          PROFILE_WIDGET_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_WIDGET }}
+        run: |
+          set -e
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
+          echo -n "$PROFILE_MAIN_BASE64"   | base64 --decode -o "$PROFILES_DIR/AutoBrew_Main.mobileprovision"
+          echo -n "$PROFILE_WIDGET_BASE64" | base64 --decode -o "$PROFILES_DIR/AutoBrew_Widget.mobileprovision"
+          ls -la "$PROFILES_DIR"
+
       - name: Prepare App Store Connect API Key
         env:
           API_KEY_BASE64: ${{ secrets.MACOS_APPSTORE_API_KEY_BASE64 }}
@@ -91,27 +103,19 @@ jobs:
       - name: Archive
         env:
           TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
-          API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
-          API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
         run: |
-          # Automatic Code Signing + -allowProvisioningUpdates lets
-          # xcodebuild generate the Developer-ID provisioning profile
-          # for the new AutoBrewWidget extension on the fly through
-          # the ASC API credentials already on the runner. Manual
-          # signing failed here because the sandboxed widget always
-          # requires a profile, and its embedded-dependency drags the
-          # main app into the same profile requirement.
+          # Manual signing — per-target Developer-ID profile specifiers
+          # live in project.yml so the widget gets its own profile and
+          # the main app gets its own. xcodebuild picks them up from
+          # the user-level profile store the previous step populated.
           xcodebuild archive \
             -project "$APP_NAME.xcodeproj" \
             -scheme "$SCHEME" \
             -configuration Release \
             -destination 'platform=macOS' \
             -archivePath "build/$APP_NAME.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$API_KEY_PATH" \
-            -authenticationKeyID "$API_KEY_ID" \
-            -authenticationKeyIssuerID "$API_ISSUER_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="$TEAM_ID"
 
       - name: Export app
