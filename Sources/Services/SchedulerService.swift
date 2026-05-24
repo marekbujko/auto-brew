@@ -266,6 +266,9 @@ final class SchedulerService {
             }
             state = .completed(Date())
             sleepWakeObserver.clearMissedRun()
+            // Refresh even when nothing mutated this run — keeps the
+            // widget's "Updated <relative>" footer honest.
+            WidgetStateWriter.refresh()
 
             // Notification policy:
             //   - completion notification: always (when notifications are on)
@@ -296,6 +299,18 @@ final class SchedulerService {
             }
             logger.error("Brew update failed: \(error.localizedDescription)")
         }
+    }
+
+    /// Run from the widget's Roll Back link / external triggers that do
+    /// not carry a specific history entry. Falls back to the same
+    /// newest-failed-with-live-snapshot lookup the notification builder
+    /// uses, then delegates to the per-entry rollback path.
+    func rollbackMostRecentFailedUpgrade() async {
+        guard let entry = findRollbackTarget() else {
+            logger.warning("Widget/external rollback skipped — no candidate with live snapshot")
+            return
+        }
+        await rollbackUpgrade(forEntryID: entry.id)
     }
 
     /// Newest failed history entry whose pre-upgrade snapshot is still on

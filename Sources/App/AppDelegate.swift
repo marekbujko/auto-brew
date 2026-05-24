@@ -67,6 +67,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } else {
                 logger.warning("Rejected install URL with invalid token")
             }
+        case "rollback":
+            // Fires from the widget's Roll Back button. No additional
+            // confirmation prompt: the widget is the user's own surface
+            // and clicking the button is the explicit consent. The
+            // scheduler's `rollbackUpgrade(forEntryID:)` does the work
+            // through the same code path the failed-upgrade
+            // notification uses.
+            Task {
+                await self.rollbackFromWidget()
+            }
         default:
             requestOpenWindow()
         }
@@ -107,6 +117,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func requestOpenWindow() {
         NSApp.activate(ignoringOtherApps: true)
         NotificationCenter.default.post(name: .openBrewStoreWindow, object: nil)
+    }
+
+    /// Bridges the widget's `autobrew://rollback` tap to the scheduler.
+    /// Activation brings AutoBrew to the foreground first so the
+    /// confirmation alerts the rollback path may surface from
+    /// `AppQuitter` are not lost behind the menu bar.
+    @MainActor
+    private func rollbackFromWidget() async {
+        NSApp.activate(ignoringOtherApps: true)
+        await SchedulerService.shared.rollbackMostRecentFailedUpgrade()
     }
 }
 
