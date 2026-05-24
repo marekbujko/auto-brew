@@ -13,6 +13,8 @@ struct PackagePolicyOverrideSheet: View {
     @State private var patch: UpdatePolicy?
     @State private var minor: UpdatePolicy?
     @State private var major: UpdatePolicy?
+    @State private var preSnapshotCommand: String = ""
+    @State private var showHookConfirmation = false
 
     init(token: String, displayName: String) {
         self.token = token
@@ -21,6 +23,7 @@ struct PackagePolicyOverrideSheet: View {
         _patch = State(initialValue: existing?.patch)
         _minor = State(initialValue: existing?.minor)
         _major = State(initialValue: existing?.major)
+        _preSnapshotCommand = State(initialValue: existing?.preSnapshotCommand ?? "")
     }
 
     var body: some View {
@@ -40,12 +43,31 @@ struct PackagePolicyOverrideSheet: View {
                     Text(displayName).font(.headline)
                 }
 
+                Section {
+                    TextField(String(localized: "e.g. osascript -e 'tell application \"Logic Pro\" to save'"),
+                              text: $preSnapshotCommand,
+                              axis: .vertical)
+                        .lineLimit(2...4)
+                        .font(.callout.monospaced())
+                    Label(String(localized: "Runs with your user permissions via /bin/bash -c, 30 s timeout. Don't paste commands you can't read end-to-end — they execute as you, on your data."),
+                          systemImage: "exclamationmark.shield")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                } header: {
+                    Text(String(localized: "Pre-snapshot command"))
+                } footer: {
+                    Text(String(localized: "Fires once per auto-upgrade right before the pre-upgrade snapshot. Use it to flush in-memory state (save unsaved docs, quit a daemon, …) so the snapshot captures a quiescent on-disk state."))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
                 if hasOverride {
                     Section {
                         Button(role: .destructive) {
                             patch = nil
                             minor = nil
                             major = nil
+                            preSnapshotCommand = ""
                         } label: {
                             Label(String(localized: "Reset to defaults"), systemImage: "arrow.uturn.backward")
                         }
@@ -70,7 +92,8 @@ struct PackagePolicyOverrideSheet: View {
     }
 
     private var hasOverride: Bool {
-        patch != nil || minor != nil || major != nil
+        patch != nil || minor != nil || major != nil ||
+        !preSnapshotCommand.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     private func optionalPicker(_ label: String, selection: Binding<UpdatePolicy?>) -> some View {
@@ -85,7 +108,14 @@ struct PackagePolicyOverrideSheet: View {
     private func save() {
         var overrides = settings.packageOverrides
         overrides.removeAll { $0.token == token }
-        let override = PackagePolicyOverride(token: token, patch: patch, minor: minor, major: major)
+        let trimmedCommand = preSnapshotCommand.trimmingCharacters(in: .whitespaces)
+        let override = PackagePolicyOverride(
+            token: token,
+            patch: patch,
+            minor: minor,
+            major: major,
+            preSnapshotCommand: trimmedCommand.isEmpty ? nil : trimmedCommand
+        )
         if !override.isEmpty {
             overrides.append(override)
         }
