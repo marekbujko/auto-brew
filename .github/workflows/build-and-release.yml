@@ -155,6 +155,17 @@ jobs:
               <string>developer-id</string>
               <key>teamID</key>
               <string>$TEAM_ID</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string>Developer ID Application</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>za.co.digitalfreedom.AutoBrew</key>
+                  <string>AutoBrew Developer ID</string>
+                  <key>za.co.digitalfreedom.AutoBrew.WidgetExtension</key>
+                  <string>AutoBrew Widget Developer ID</string>
+              </dict>
           </dict>
           </plist>
           EOF
