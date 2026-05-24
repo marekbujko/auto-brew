@@ -176,6 +176,8 @@ A snapshot is a point-in-time copy of everything an application owns outside its
 
 To free disk space later, either delete individual snapshots in the Snapshots view or enable Settings → **Auto-clean up old snapshots** with a retention window (default 90 days).
 
+**External storage.** Settings → Snapshots → **External storage** opens a folder picker that points the snapshot root at a user-chosen location — typically an external drive or NAS mount. AutoBrew stores the choice as a security-scoped bookmark so the same folder is found again after unplug/replug; if the volume isn't mounted at app launch, it silently falls back to the default `~/Library/Application Support/AutoBrew/Snapshots/`.
+
 ### Restoring a Snapshot
 
 1. Open the snapshot in the Snapshots view.
