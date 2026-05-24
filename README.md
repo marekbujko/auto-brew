@@ -31,6 +31,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Restoring a Snapshot](#restoring-a-snapshot)
   - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
+  - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
   - [Migrating to Another Mac](#migrating-to-another-mac)
   - [URL Scheme & Deep Links](#url-scheme--deep-links)
   - [Notifications](#notifications)
@@ -62,6 +63,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
 - **Automatic Updates** — Runs `brew update → policy gate → selective brew upgrade → brew cleanup` once daily
 - **Selective Update Policy** — Per-bump-type and per-package rules: patches roll out fast, minors wait a configurable cool-off, majors require explicit approval
 - **Pre-Upgrade Auto-Snapshots** — Before every auto-installed cask upgrade, AutoBrew snapshots the app's user data so a broken update can be rolled back with one click from the new History view
+- **Shortcuts, Siri and Spotlight** — Install Cask / Snapshot App / Roll Back Last Upgrade actions via the system AppIntents framework
 - **In-App Legal Section** — Privacy, Terms, EULA, Imprint, Trademark, Open-Source licenses — localized into all supported languages
 - **Idle-Based Trigger** — Waits for configurable idle time before running (default: 30 min)
 - **Scheduled Trigger** — Alternatively, run at a fixed time of day
@@ -197,13 +199,19 @@ Failures never block the upgrade. CLI-only casks, apps that don't live in `/Appl
 
 ### Update History & One-Click Rollback
 
-BrewStore → **History** lists every cask AutoBrew has auto-upgraded, newest first, with the from/to versions, when it ran, and a status icon. When the pre-upgrade snapshot still exists on disk, a **Roll Back** button appears next to the row:
+BrewStore → **History** lists every cask AutoBrew has auto-upgraded, newest first, with the from/to versions, when it ran, and a per-cask status icon — green check for casks brew confirmed upgraded, red cross for casks that emitted an explicit `Error:` line during their upgrade, and an orange question mark when brew completed but did not emit either marker for that particular cask (the snapshot and rollback are still valid in that case). The per-cask attribution comes from a dedicated parser of `brew upgrade --cask`'s output so an aggregate brew exit status no longer paints every cask in a batch with the same brush.
+
+When the pre-upgrade snapshot still exists on disk, a **Roll Back** button appears next to the row:
 
 1. Click **Roll Back**.
 2. Confirm in the dialog. AutoBrew quits the app, then restores its user data from the snapshot — the upgraded `.app` binary itself **stays in place**, only your settings and data revert.
 3. The restore runs through the same transactional path described in [Restoring a Snapshot](#restoring-a-snapshot), so a failure mid-way rolls every component back.
 
 If a row says **Snapshot pruned** instead, the snapshot was removed by retention (or by you in the Snapshots view) and the History row is now audit-only. The row itself never disappears just because the snapshot did — the history of what was auto-upgraded is kept indefinitely.
+
+**Rolling back straight from a failed-update notification.** When an auto-update run fails *and* the most recent failed cask still has a live pre-upgrade snapshot, the failure notification carries an extra **Roll Back** action. Tapping it runs the same restore the History view would, without needing to open AutoBrew first.
+
+**Manual upgrades from BrewStore.** The same snapshot-then-upgrade-then-record pipeline now runs when you press **Upgrade via Brew** on a row in Installed, so manually-initiated upgrades also produce a History entry with a rollback affordance. A per-token in-flight guard rejects double-clicks so two snapshot+upgrade tasks can never race for the Homebrew lock.
 
 ### Migrating to Another Mac
 
@@ -217,6 +225,20 @@ On the new Mac open the **Restore Wizard** (Snapshots → Import…), point it a
 1. Validates the manifest (non-empty bundle IDs, ≥ 1 component, hashes well-formed, no zip-slip in the archive).
 2. Installs missing casks via `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` finds the new token automatically.
 3. Restores each app via the same transactional flow as a local restore.
+
+### Shortcuts, Siri and Spotlight
+
+AutoBrew exposes three system AppIntents so the snapshot/upgrade/rollback pipeline shows up in **Shortcuts.app**, can be invoked from **Siri**, and surfaces in **Spotlight** alongside other system actions:
+
+| Intent | Phrase / Title | What it does |
+|---|---|---|
+| **Install Cask** | "Install a cask with AutoBrew" | Takes a cask token and runs `brew install --cask <token>` through `BrewInstaller`, same retry-with-`--force` and lock semantics as the BrewStore button. |
+| **Snapshot App Data** | "Snapshot an app with AutoBrew" | Takes a cask token, resolves it to a bundle ID via the Installed Apps reconciliation, and runs `SnapshotService.createSnapshot`. Returns the snapshot UUID so the user can chain it into another shortcut. |
+| **Roll Back Last Cask Upgrade** | "Roll back the last upgrade with AutoBrew" | Walks the History store newest-first for a failed cask with a live snapshot and runs the same transactional restore as the History view. Optional cask-token parameter scopes the search to one cask. |
+
+Tokens are validated against the same `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` grammar the `autobrew://install/` URL scheme uses — defense in depth even though the cask token is never interpreted through a shell. Intents run with `openAppWhenRun = false` so a Shortcut from another app does not steal focus.
+
+Known limitation: because AutoBrew sets `LSUIElement = true`, the system only discovers these intents after the menu-bar icon has been visible at least once. For users who already run AutoBrew that is automatic; brand-new installs need to launch the app once before the actions appear in Shortcuts.
 
 ### URL Scheme & Deep Links
 
@@ -932,6 +954,10 @@ auto-brew/
 │   │   ├── UpgradeHistoryStore.swift    # File-backed log of auto-upgrades + rollback IDs
 │   │   ├── UpdateLedger.swift           # First-sighting tracker for cool-off windows
 │   │   └── RemoteIconLoader.swift       # Cask icon fetch + on-disk cache
+│   ├── Intents/                         # AppIntents for Shortcuts/Siri/Spotlight
+│   │   ├── InstallCaskIntent.swift, SnapshotAppIntent.swift, RollBackLastUpgradeIntent.swift
+│   │   ├── AutoBrewShortcuts.swift      # AppShortcutsProvider — registers the three intents
+│   │   └── AutoBrewIntentError.swift    # User-facing LocalizedError surfaced to Shortcuts
 │   ├── ViewModels/                      # @Observable @MainActor stores
 │   │   ├── SettingsStore.swift          # UserDefaults bridge
 │   │   ├── CatalogStore.swift           # BrewStore browse/discover state
