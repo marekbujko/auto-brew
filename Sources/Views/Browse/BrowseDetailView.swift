@@ -10,6 +10,7 @@ struct BrowseDetailView: View {
     @State private var installError: String?
     @State private var showPolicySheet = false
     @State private var settings = SettingsStore.shared
+    @State private var sizes = CaskSizeService.shared
 
     private var hasOverride: Bool {
         settings.packageOverrides.contains { $0.token == entry.token && !$0.isEmpty }
@@ -47,6 +48,7 @@ struct BrowseDetailView: View {
                     }
                 }
                 Divider()
+                downloadSizeRow
                 if let desc = entry.description {
                     Text(desc).font(.body)
                 }
@@ -70,6 +72,33 @@ struct BrowseDetailView: View {
         .sheet(isPresented: $showPolicySheet) {
             PackagePolicyOverrideSheet(token: entry.token, displayName: entry.presentationName)
         }
+        .task(id: entry.token) {
+            guard let url = URL(string: entry.url) else { return }
+            await sizes.prefetch(token: entry.token, url: url)
+        }
+    }
+
+    /// Honest "we don't know" footer when the catalog URL is missing,
+    /// the HEAD fails, or the server hides Content-Length. Never gates
+    /// the Install button.
+    @ViewBuilder
+    private var downloadSizeRow: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "internaldrive")
+                .foregroundStyle(.secondary)
+            if let bytes = sizes.size(for: entry.token) {
+                Text(String(localized: "Download size: \(ByteFormatter.string(bytes))"))
+            } else if sizes.isFetching(entry.token) {
+                Text(String(localized: "Checking download size…"))
+                    .foregroundStyle(.secondary)
+                ProgressView().controlSize(.mini)
+            } else {
+                Text(String(localized: "Download size unknown"))
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer()
+        }
+        .font(.caption)
     }
 
     @ViewBuilder
