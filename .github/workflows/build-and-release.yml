@@ -162,6 +162,7 @@ jobs:
         env:
           API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
         run: |
           set -e
           mkdir -p build/dmg
@@ -172,6 +173,17 @@ jobs:
             -srcfolder build/dmg \
             -ov -format UDZO \
             "build/$APP_NAME.dmg"
+
+          # Sign the DMG container with the same Developer ID identity.
+          # Without this step, Gatekeeper accepts the notarised .app
+          # inside but rejects the .dmg double-click with "source=no
+          # usable signature" — and brew audit refuses to ship the cask
+          # to homebrew/cask. notarytool happily accepts an unsigned
+          # DMG, so missing this step is silently downstream-breaking.
+          codesign --sign "Developer ID Application: Berger & Rosenstock GbR ($TEAM_ID)" \
+                   --options runtime \
+                   --timestamp \
+                   "build/$APP_NAME.dmg"
 
           xcrun notarytool submit "build/$APP_NAME.dmg" \
             --key "$API_KEY_PATH" \

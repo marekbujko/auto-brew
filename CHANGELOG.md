@@ -20,6 +20,10 @@ user-facing, and free of internal jargon.
 - Shortcuts.app, Siri and Spotlight actions: **Install Cask**, **Snapshot App**, and **Roll Back Last Cask Upgrade** — all via the system AppIntents framework, no Bridge or helper app needed.
 - **AutoBrew Status widget** for the desktop and Notification Center — three sizes show pending approvals, recent auto-upgrade outcomes with per-cask icons, and a destructive Roll Back link on the large size that triggers the same restore path as the failed-update notification. Reads from an App Group container so the sandboxed widget extension stays decoupled from the main app.
 - **Download size shown before installing a cask** — BrewStore's detail view issues a single HTTP HEAD against the DMG URL on appear and renders the size (or "unknown" when the server hides Content-Length). Sizes are cached in memory for the rest of the session.
+- **Upstream `homebrew/cask` submission prepared** under `docs/homebrew-cask-submission/`. The cask file is linted clean against the upstream rules; the PR is queued for once the next release ships the DMG-signing fix and the project clears the notability threshold.
+
+### Fixed
+- Release workflow now `codesign`s the `.dmg` container itself with the Developer ID Application identity. Previously only the embedded `.app` was signed + notarised; the `.dmg` carried no usable signature, which made Gatekeeper warn on direct double-click of the downloaded DMG and blocked the upstream homebrew/cask audit. Visible from the next release on.
 - Release notes for every version are now driven by `CHANGELOG.md`. The same body shows up on the GitHub release page and inside Sparkle's update dialog.
 - Sparkle delta updates: each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
 

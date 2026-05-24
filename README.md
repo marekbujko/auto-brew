@@ -11,7 +11,7 @@ brew tap marcelrgberger/tap
 brew install --cask autobrew
 ```
 
-Other ways to install (manual DMG, requirements) are covered in the [Install](#install) section below.
+Other ways to install (manual DMG, requirements) are covered in the [Install](#install) section below. The cask submission to the official [`Homebrew/homebrew-cask`](https://github.com/Homebrew/homebrew-cask) catalog is prepared under [`docs/homebrew-cask-submission/`](docs/homebrew-cask-submission/SUBMISSION.md) — once merged upstream, the recommended install reduces to `brew install --cask autobrew` without the `brew tap …` line.
 
 Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the same body is shown in Sparkle's update dialog and on the GitHub release page.
 
