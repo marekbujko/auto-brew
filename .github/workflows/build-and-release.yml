@@ -212,6 +212,81 @@ jobs:
           echo "SPARKLE_SIGNATURE=$SIGNATURE" >> "$GITHUB_ENV"
           echo "ZIP_LENGTH=$LENGTH" >> "$GITHUB_ENV"
 
+      - name: Generate Sparkle binary delta
+        if: github.ref == 'refs/heads/main'
+        id: delta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          VERSION: ${{ steps.version.outputs.version }}
+          BUILD: ${{ steps.version.outputs.build }}
+        run: |
+          set -e
+          # Find the most recent stable release (skipping the one we are
+          # about to create — gh release create runs further below — and
+          # any prereleases like v2.3.0-test / -beta).
+          PREVIOUS_TAG=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 20 \
+            --json tagName,isPrerelease \
+            --jq "[.[] | select(.isPrerelease == false) | .tagName] | map(select(. != \"v$VERSION\")) | first" \
+            2>/dev/null || true)
+          if [ -z "${PREVIOUS_TAG:-}" ] || [ "$PREVIOUS_TAG" = "null" ]; then
+            echo "No prior stable release found — skipping Sparkle delta."
+            echo "have_delta=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Generating delta from $PREVIOUS_TAG"
+
+          mkdir -p build/prev
+          if ! gh release download "$PREVIOUS_TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern "AutoBrew.zip" --dir build/prev 2>/dev/null; then
+            echo "Previous release has no AutoBrew.zip asset — skipping delta."
+            echo "have_delta=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          ditto -xk "build/prev/AutoBrew.zip" "build/prev/extract"
+          PREV_APP="build/prev/extract/AutoBrew.app"
+          if [ ! -d "$PREV_APP" ]; then
+            echo "Previous ZIP did not contain AutoBrew.app — skipping delta."
+            echo "have_delta=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PREV_BUILD=$(defaults read "$PWD/$PREV_APP/Contents/Info" CFBundleVersion)
+          if [ "$PREV_BUILD" = "$BUILD" ]; then
+            echo "Previous build $PREV_BUILD matches current — skipping delta."
+            echo "have_delta=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BINARY_DELTA=$(find "$HOME/Library/Developer/Xcode/DerivedData" -name "BinaryDelta" -path "*/Sparkle/bin/*" 2>/dev/null | head -1)
+          if [ -z "$BINARY_DELTA" ]; then
+            BINARY_DELTA="/tmp/bin/BinaryDelta"
+          fi
+          if [ ! -x "$BINARY_DELTA" ]; then
+            echo "BinaryDelta tool not found — skipping delta generation."
+            echo "have_delta=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          DELTA_FILE="AutoBrew-${PREV_BUILD}-${BUILD}.delta"
+          DELTA_PATH="build/$DELTA_FILE"
+          "$BINARY_DELTA" create "$PREV_APP" "build/export/AutoBrew.app" "$DELTA_PATH"
+
+          SPARKLE_BIN=$(find "$HOME/Library/Developer/Xcode/DerivedData" -name "sign_update" -path "*/Sparkle/bin/*" 2>/dev/null | head -1)
+          SPARKLE_BIN="${SPARKLE_BIN:-/tmp/bin/sign_update}"
+          echo "$SPARKLE_KEY" > /tmp/sparkle_key
+          DELTA_SIG=$("$SPARKLE_BIN" "$DELTA_PATH" --ed-key-file /tmp/sparkle_key 2>&1 | grep "sparkle:edSignature" | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+          rm -f /tmp/sparkle_key
+          DELTA_LEN=$(stat -f%z "$DELTA_PATH")
+
+          echo "have_delta=true"      >> "$GITHUB_OUTPUT"
+          echo "delta_file=$DELTA_FILE" >> "$GITHUB_OUTPUT"
+          echo "delta_path=$DELTA_PATH" >> "$GITHUB_OUTPUT"
+          echo "delta_from=$PREV_BUILD" >> "$GITHUB_OUTPUT"
+          echo "delta_length=$DELTA_LEN" >> "$GITHUB_OUTPUT"
+          echo "DELTA_SIGNATURE=$DELTA_SIG" >> "$GITHUB_ENV"
+          echo "Delta from build $PREV_BUILD to $BUILD: $DELTA_LEN bytes"
+
       - name: Update appcast.xml
         if: github.ref == 'refs/heads/main'
         env:
@@ -219,8 +294,37 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           BUILD: ${{ steps.version.outputs.build }}
           MIN_OS: ${{ steps.version.outputs.min_os }}
+          HAVE_DELTA: ${{ steps.delta.outputs.have_delta }}
+          DELTA_FILE: ${{ steps.delta.outputs.delta_file }}
+          DELTA_FROM: ${{ steps.delta.outputs.delta_from }}
+          DELTA_LENGTH: ${{ steps.delta.outputs.delta_length }}
         run: |
           set -e
+
+          # Pull the release-notes section out of CHANGELOG.md and CDATA-
+          # escape it so a stray `]]>` inside the body cannot close the
+          # block early. We embed it via $(cat ...) substitution so any
+          # `$`/backtick inside the markdown is not re-interpreted by
+          # the surrounding heredoc.
+          RELEASE_NOTES=$(bash scripts/extract-changelog-section.sh CHANGELOG.md "$VERSION")
+          if [ -z "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES="No release notes recorded for v$VERSION."
+          fi
+          echo "$RELEASE_NOTES" | sed 's/]]>/]]]]><![CDATA[>/g' > /tmp/release-notes.md
+
+          DELTAS_XML=""
+          if [ "$HAVE_DELTA" = "true" ]; then
+            DELTAS_XML="<sparkle:deltas>
+                          <enclosure
+                              url=\"https://github.com/marcelrgberger/auto-brew/releases/download/v$VERSION/$DELTA_FILE\"
+                              length=\"$DELTA_LENGTH\"
+                              type=\"application/octet-stream\"
+                              sparkle:edSignature=\"$DELTA_SIGNATURE\"
+                              sparkle:deltaFrom=\"$DELTA_FROM\"
+                          />
+                      </sparkle:deltas>"
+          fi
+
           cat > appcast.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -235,16 +339,21 @@ jobs:
                       <sparkle:version>$BUILD</sparkle:version>
                       <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
                       <sparkle:minimumSystemVersion>$MIN_OS</sparkle:minimumSystemVersion>
+                      <description><![CDATA[
+          $(cat /tmp/release-notes.md)
+          ]]></description>
                       <enclosure
                           url="https://github.com/marcelrgberger/auto-brew/releases/download/v$VERSION/AutoBrew.zip"
                           length="$ZIP_LENGTH"
                           type="application/octet-stream"
                           sparkle:edSignature="$SPARKLE_SIGNATURE"
                       />
+                      $DELTAS_XML
                   </item>
               </channel>
           </rss>
           EOF
+          rm -f /tmp/release-notes.md
 
           git config user.name "Marcel R. G. Berger"
           git config user.email "hello@marcelrgberger.com"
@@ -257,16 +366,36 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
+          HAVE_DELTA: ${{ steps.delta.outputs.have_delta }}
+          DELTA_PATH: ${{ steps.delta.outputs.delta_path }}
         run: |
+          set -e
+          # Compose the release body from the CHANGELOG section so the
+          # GitHub Release page mirrors what Sparkle shows in-app. Falls
+          # back to the old "see commits" line when the version is not in
+          # CHANGELOG.md (an unreleased build, a hand-tagged hotfix, etc.).
+          RELEASE_NOTES=$(bash scripts/extract-changelog-section.sh CHANGELOG.md "$VERSION")
+          {
+            echo "## AutoBrew v$VERSION"
+            echo
+            echo "Download \`AutoBrew.dmg\`, open it, and drag AutoBrew to Applications."
+            echo
+            if [ -n "$RELEASE_NOTES" ]; then
+              echo "$RELEASE_NOTES"
+            else
+              echo "See [commits](https://github.com/marcelrgberger/auto-brew/commits/main) for details."
+            fi
+          } > build/release-notes.md
+
+          RELEASE_ARGS=("build/$APP_NAME.dmg" "build/$APP_NAME.zip")
+          if [ "$HAVE_DELTA" = "true" ] && [ -f "$DELTA_PATH" ]; then
+            RELEASE_ARGS+=("$DELTA_PATH")
+          fi
+
           gh release create "v$VERSION" \
             --title "AutoBrew v$VERSION" \
-            --notes "## AutoBrew v$VERSION
-
-          Download \`AutoBrew.dmg\`, open it, and drag AutoBrew to Applications.
-
-          See [commits](https://github.com/marcelrgberger/auto-brew/commits/main) for details." \
-            "build/$APP_NAME.dmg" \
-            "build/$APP_NAME.zip"
+            --notes-file build/release-notes.md \
+            "${RELEASE_ARGS[@]}"
 
       - name: Bump Homebrew tap
         if: github.ref == 'refs/heads/main'
