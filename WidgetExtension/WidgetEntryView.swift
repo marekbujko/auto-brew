@@ -110,8 +110,12 @@ struct AutoBrewWidgetEntryView: View {
 
             Spacer(minLength: 4)
 
-            if entry.state.rollbackCandidateID != nil {
-                rollBackButton
+            HStack(spacing: 8) {
+                runNowLink
+                if entry.state.rollbackCandidateID != nil {
+                    rollBackButton
+                }
+                Spacer(minLength: 0)
             }
 
             updatedFooter
@@ -154,6 +158,18 @@ struct AutoBrewWidgetEntryView: View {
         case .attempted:
             Image(systemName: "questionmark.circle.fill")
                 .foregroundStyle(.orange)
+        }
+    }
+
+    @ViewBuilder
+    private var runNowLink: some View {
+        // Triggers an immediate `brew update → upgrade → cleanup` run
+        // in the host app process. AppDelegate's autobrew://run-now
+        // handler relays to SchedulerService.triggerManualRun, which
+        // is reentrancy-safe via SchedulerService.pipelineInProgress.
+        Link(destination: URL(string: "autobrew://run-now")!) {
+            Label(String(localized: "Run Now"), systemImage: "arrow.triangle.2.circlepath")
+                .font(.caption)
         }
     }
 
