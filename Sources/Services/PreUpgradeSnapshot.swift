@@ -51,6 +51,19 @@ enum PreUpgradeSnapshot {
             NotificationManager.shared.showLowDiskSpace(forToken: token, availableGB: availableGB, thresholdGB: minGB)
             return nil
         }
+
+        // Per-cask pre-snapshot hook: lets the user flush in-memory
+        // state through `osascript`/`pmset`/whatever before we copy
+        // their files. Failure is logged but never blocks the
+        // snapshot — the user explicitly opts in and chose what to
+        // run.
+        if let command = SettingsStore.shared.packageOverrides
+            .first(where: { $0.token == token })?
+            .preSnapshotCommand,
+           !command.trimmingCharacters(in: .whitespaces).isEmpty {
+            await runPreSnapshotHook(token: token, command: command)
+        }
+
         do {
             let snapshot = try await SnapshotService.shared.createSnapshot(
                 bundleID: bundleID,
@@ -71,6 +84,42 @@ enum PreUpgradeSnapshot {
     /// `attempted`), not an aggregate flag. The snapshot ID may be nil
     /// when capture was disabled, skipped, or failed — the row is still
     /// useful as an audit entry, it just won't show a Roll Back button.
+    /// Runs the per-cask pre-snapshot hook with a 30 s wall clock.
+    /// Anything beyond that suggests the command itself is hung, and
+    /// blocking the snapshot+upgrade pipeline behind a stuck script
+    /// is worse than dropping the hook for that one run.
+    private static func runPreSnapshotHook(token: String, command: String) async {
+        preUpgradeLogger.info("Running pre-snapshot hook for \(token, privacy: .public)")
+        do {
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    let process = Process()
+                    process.executableURL = URL(fileURLWithPath: "/bin/bash")
+                    process.arguments = ["-c", command]
+                    let outPipe = Pipe()
+                    let errPipe = Pipe()
+                    process.standardOutput = outPipe
+                    process.standardError = errPipe
+                    try process.run()
+                    process.waitUntilExit()
+                    if process.terminationStatus != 0 {
+                        let err = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(),
+                                         encoding: .utf8) ?? ""
+                        preUpgradeLogger.warning("Pre-snapshot hook for \(token, privacy: .public) exited \(process.terminationStatus): \(err, privacy: .public)")
+                    }
+                }
+                group.addTask {
+                    try await Task.sleep(for: .seconds(30))
+                    throw CancellationError()
+                }
+                try await group.next()
+                group.cancelAll()
+            }
+        } catch {
+            preUpgradeLogger.warning("Pre-snapshot hook for \(token, privacy: .public) timed out or failed — proceeding with snapshot anyway")
+        }
+    }
+
     static func record(
         token: String,
         displayName: String,

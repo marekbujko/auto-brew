@@ -94,15 +94,26 @@ struct UpdatePolicyDefaults: Codable, Sendable, Equatable {
 
 /// Per-package opt-out from the defaults. Any field left `nil` falls back to
 /// the matching value in `UpdatePolicyDefaults`.
+///
+/// `preSnapshotCommand` is the optional shell command AutoBrew runs
+/// (via `/bin/bash -c`, 30 s timeout) right before
+/// `SnapshotService.createSnapshot` for this cask's auto-upgrade. Use
+/// it to flush in-memory state from the live app — e.g.,
+/// `osascript -e 'tell application "Logic Pro" to save'` — so the
+/// snapshot captures a quiescent on-disk state. Empty/nil → no hook.
 struct PackagePolicyOverride: Codable, Sendable, Equatable, Identifiable {
     var token: String
     var patch: UpdatePolicy?
     var minor: UpdatePolicy?
     var major: UpdatePolicy?
+    var preSnapshotCommand: String?
 
     var id: String { token }
 
-    var isEmpty: Bool { patch == nil && minor == nil && major == nil }
+    var isEmpty: Bool {
+        patch == nil && minor == nil && major == nil &&
+        (preSnapshotCommand?.isEmpty ?? true)
+    }
 
     func policy(for bump: VersionBumpType) -> UpdatePolicy? {
         switch bump {
@@ -110,5 +121,32 @@ struct PackagePolicyOverride: Codable, Sendable, Equatable, Identifiable {
         case .minor: return minor
         case .major, .unknown: return major
         }
+    }
+
+    // Backward-compat decode: existing override files do not carry the
+    // new field; decodeIfPresent handles their absence cleanly.
+    enum CodingKeys: String, CodingKey {
+        case token, patch, minor, major, preSnapshotCommand
+    }
+
+    init(token: String,
+         patch: UpdatePolicy? = nil,
+         minor: UpdatePolicy? = nil,
+         major: UpdatePolicy? = nil,
+         preSnapshotCommand: String? = nil) {
+        self.token = token
+        self.patch = patch
+        self.minor = minor
+        self.major = major
+        self.preSnapshotCommand = preSnapshotCommand
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        token = try c.decode(String.self, forKey: .token)
+        patch = try c.decodeIfPresent(UpdatePolicy.self, forKey: .patch)
+        minor = try c.decodeIfPresent(UpdatePolicy.self, forKey: .minor)
+        major = try c.decodeIfPresent(UpdatePolicy.self, forKey: .major)
+        preSnapshotCommand = try c.decodeIfPresent(String.self, forKey: .preSnapshotCommand)
     }
 }
