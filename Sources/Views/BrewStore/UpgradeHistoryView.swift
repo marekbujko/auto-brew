@@ -11,6 +11,7 @@ struct UpgradeHistoryView: View {
     @State private var pendingConfirmation: UpgradeHistoryEntry?
     @State private var restoreInProgress: UUID?
     @State private var restoreResult: RestoreResult?
+    @State private var componentSelection: Set<String> = []
 
     private struct RestoreResult: Identifiable {
         let id = UUID()
@@ -29,19 +30,8 @@ struct UpgradeHistoryView: View {
         }
         .task { reloadAvailableSnapshots() }
         .onChange(of: historyStore.entries.count) { _, _ in reloadAvailableSnapshots() }
-        .confirmationDialog(
-            String(localized: "Roll back to the snapshot taken before this upgrade?"),
-            isPresented: confirmationBinding,
-            presenting: pendingConfirmation
-        ) { entry in
-            Button(String(localized: "Roll Back"), role: .destructive) {
-                Task { await performRollback(for: entry) }
-            }
-            Button(String(localized: "Cancel"), role: .cancel) {
-                pendingConfirmation = nil
-            }
-        } message: { entry in
-            Text(String(localized: "AutoBrew will quit \(entry.displayName) and restore its user data from the snapshot taken right before the \(entry.fromVersion) → \(entry.toVersion) upgrade. The upgraded \(entry.displayName) binary itself stays in place — only your settings and data are reverted."))
+        .sheet(item: $pendingConfirmation) { entry in
+            rollbackSheet(for: entry)
         }
         .alert(item: $restoreResult) { result in
             Alert(
@@ -155,14 +145,82 @@ struct UpgradeHistoryView: View {
         }
     }
 
-    // MARK: - Actions
+    // MARK: - Rollback sheet
 
-    private var confirmationBinding: Binding<Bool> {
-        Binding(
-            get: { pendingConfirmation != nil },
-            set: { if !$0 { pendingConfirmation = nil } }
-        )
+    @ViewBuilder
+    private func rollbackSheet(for entry: UpgradeHistoryEntry) -> some View {
+        let snapshot = entry.snapshotID.flatMap { availableSnapshots[$0] }
+        let manifest = snapshot.flatMap(loadManifest(for:))
+        let components = manifest?.components ?? []
+
+        VStack(alignment: .leading, spacing: 16) {
+            Text(String(localized: "Roll back \(entry.displayName)?"))
+                .font(.headline)
+            Text(String(localized: "AutoBrew will quit \(entry.displayName) and restore the selected user-data folders from the snapshot taken right before the \(entry.fromVersion) → \(entry.toVersion) upgrade. The upgraded \(entry.displayName) binary itself stays in place — only your settings and data are reverted."))
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+            if components.isEmpty {
+                Text(String(localized: "Snapshot manifest could not be read — rollback unavailable."))
+                    .foregroundStyle(.red)
+                    .font(.callout)
+            } else {
+                Text(String(localized: "Choose which components to restore"))
+                    .font(.callout.weight(.medium))
+                    .padding(.top, 4)
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 4) {
+                        ForEach(components, id: \.relativeArchivePath) { component in
+                            Toggle(isOn: Binding(
+                                get: { componentSelection.contains(component.relativeArchivePath) },
+                                set: { isOn in
+                                    if isOn { componentSelection.insert(component.relativeArchivePath) }
+                                    else { componentSelection.remove(component.relativeArchivePath) }
+                                }
+                            )) {
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(component.originalPath)
+                                        .font(.callout.monospaced())
+                                        .lineLimit(1)
+                                    Text(ByteFormatter.string(component.byteSize))
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .frame(maxHeight: 240)
+            }
+
+            HStack {
+                Button(String(localized: "Cancel"), role: .cancel) {
+                    pendingConfirmation = nil
+                }
+                Spacer()
+                Button(String(localized: "Roll Back"), role: .destructive) {
+                    Task { await performRollback(for: entry) }
+                }
+                .disabled(componentSelection.isEmpty || components.isEmpty)
+            }
+        }
+        .padding(20)
+        .frame(minWidth: 460)
+        .task {
+            // Default to "everything selected" — matches old all-or-
+            // nothing semantics so a user who doesn't care just hits
+            // Roll Back without ticking every box.
+            componentSelection = Set(components.map(\.relativeArchivePath))
+        }
     }
+
+    private func loadManifest(for snapshot: AppSnapshot) -> SnapshotManifest? {
+        guard let data = try? Data(contentsOf: snapshot.manifestURL) else { return nil }
+        return try? JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: data)
+    }
+
+    // MARK: - Actions
 
     private func reloadAvailableSnapshots() {
         let snapshots = (try? SnapshotService.shared.listSnapshots()) ?? []
@@ -176,6 +234,7 @@ struct UpgradeHistoryView: View {
     }
 
     private func performRollback(for entry: UpgradeHistoryEntry) async {
+        let selectedComponents = componentSelection
         pendingConfirmation = nil
         guard let snapshotID = entry.snapshotID,
               let snapshot = availableSnapshots[snapshotID] else {
@@ -189,10 +248,14 @@ struct UpgradeHistoryView: View {
         restoreInProgress = entry.id
         defer { restoreInProgress = nil }
         do {
-            try await SnapshotService.shared.restoreSnapshot(snapshot, terminateApp: true)
+            try await SnapshotService.shared.restoreSnapshot(
+                snapshot,
+                terminateApp: true,
+                components: selectedComponents.isEmpty ? nil : selectedComponents
+            )
             restoreResult = RestoreResult(
                 title: String(localized: "Rolled back"),
-                message: String(localized: "\(entry.displayName) is back on the user data from before the \(entry.fromVersion) → \(entry.toVersion) upgrade."),
+                message: String(localized: "\(entry.displayName) is back on the user data from before the \(entry.fromVersion) → \(entry.toVersion) upgrade (\(selectedComponents.count) components restored)."),
                 isError: false
             )
         } catch {
