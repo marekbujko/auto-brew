@@ -68,6 +68,9 @@ targets:
         buildPhase: resources
     dependencies:
       - package: Sparkle
+      - target: AutoBrewWidget
+        embed: true
+        codeSign: true
     settings:
       base:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
@@ -78,6 +81,25 @@ targets:
         - variable: AUTOBREW_DEBUG
           value: "1"
           isEnabled: true
+
+  AutoBrewWidget:
+    type: app-extension
+    platform: macOS
+    sources:
+      - WidgetExtension
+      - path: Sources/Models/WidgetState.swift
+      - path: Sources/Models/CaskUpgradeOutcome.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: za.co.digitalfreedom.AutoBrew.WidgetExtension
+        PRODUCT_NAME: AutoBrewWidget
+        INFOPLIST_FILE: WidgetExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: WidgetExtension/AutoBrewWidget.entitlements
+        ENABLE_HARDENED_RUNTIME: true
+        # Extensions are always sandboxed on macOS even when the host app
+        # is not — the App Group is what bridges the two.
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS: false
+        SKIP_INSTALL: true
 
   AutoBrewTests:
     type: bundle.unit-test
