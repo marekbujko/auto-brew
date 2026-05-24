@@ -93,6 +93,15 @@ struct SettingsView: View {
                 }
 
                 Section(String(localized: "Snapshots")) {
+                    Toggle(String(localized: "Snapshot apps before auto-upgrade"),
+                           isOn: Binding(
+                               get: { settings.autoSnapshotBeforeUpgrade },
+                               set: { settings.autoSnapshotBeforeUpgrade = $0 }
+                           ))
+                    Text(String(localized: "Captures each cask's user data right before its automatic upgrade so the History view can roll back with one click if the upgrade breaks the app."))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     Toggle(String(localized: "Auto-clean up old snapshots"),
                            isOn: Binding(
                                get: { settings.autoCleanupSnapshots },
