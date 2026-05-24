@@ -27,6 +27,8 @@ Other ways to install (manual DMG, requirements) are covered in the [Install](#i
   - [Managing Installed Apps](#managing-installed-apps)
   - [Creating an App Snapshot](#creating-an-app-snapshot)
   - [Restoring a Snapshot](#restoring-a-snapshot)
+  - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
+  - [Update History & One-Click Rollback](#update-history--one-click-rollback)
   - [Migrating to Another Mac](#migrating-to-another-mac)
   - [URL Scheme & Deep Links](#url-scheme--deep-links)
   - [Notifications](#notifications)
@@ -36,6 +38,7 @@ Other ways to install (manual DMG, requirements) are covered in the [Install](#i
   - [Global Search](#global-search)
   - [Installed](#installed)
   - [Snapshots](#snapshots)
+  - [Update History](#update-history)
 - [Selective Update Policy](#selective-update-policy)
   - [Defaults](#defaults)
   - [Per-Package Overrides](#per-package-overrides)
@@ -56,6 +59,7 @@ Other ways to install (manual DMG, requirements) are covered in the [Install](#i
 
 - **Automatic Updates** — Runs `brew update → policy gate → selective brew upgrade → brew cleanup` once daily
 - **Selective Update Policy** — Per-bump-type and per-package rules: patches roll out fast, minors wait a configurable cool-off, majors require explicit approval
+- **Pre-Upgrade Auto-Snapshots** — Before every auto-installed cask upgrade, AutoBrew snapshots the app's user data so a broken update can be rolled back with one click from the new History view
 - **In-App Legal Section** — Privacy, Terms, EULA, Imprint, Trademark, Open-Source licenses — localized into all supported languages
 - **Idle-Based Trigger** — Waits for configurable idle time before running (default: 30 min)
 - **Scheduled Trigger** — Alternatively, run at a fixed time of day
@@ -175,6 +179,30 @@ To free disk space later, either delete individual snapshots in the Snapshots vi
 
 The whole restore is transactional — there is no partial state. You can opt out of the "quit the app first" step, but that risks data corruption if the app is mid-write.
 
+### Automatic Pre-Upgrade Snapshots
+
+Whenever AutoBrew auto-installs a cask upgrade (the **Auto** policy bucket — patches by default, anything else once its cool-off elapses), it can snapshot the cask's user data right before `brew` rewrites the `.app`. If the upgrade breaks your settings, you roll back in one click from the History view.
+
+The toggle is in Settings → Snapshots → **Snapshot apps before auto-upgrade** and is on by default. Turn it off if you'd rather spare the disk space than keep the rollback affordance.
+
+Per cask in the auto-install bucket:
+
+1. AutoBrew resolves the cask token to a bundle ID via the same Installed Apps reconciliation BrewStore uses (catalog appName lookup, cross-checked against `brew info --cask --json=v2 --installed`).
+2. `SnapshotService.createSnapshot` runs against that bundle's user-data folders before `brew upgrade` is invoked.
+3. A new row is appended to `~/Library/Application Support/AutoBrew/UpgradeHistory.json` with the cask, the from/to versions, and the snapshot's UUID.
+
+Failures never block the upgrade. CLI-only casks, apps that don't live in `/Applications`/`~/Applications`, or permission-denied components all produce a History row **without** a snapshot ID — the audit trail stays complete, just without a rollback button on that row. The snapshot itself follows the normal storage and retention rules, so the auto-cleanup window prunes it like any other snapshot.
+
+### Update History & One-Click Rollback
+
+BrewStore → **History** lists every cask AutoBrew has auto-upgraded, newest first, with the from/to versions, when it ran, and a status icon. When the pre-upgrade snapshot still exists on disk, a **Roll Back** button appears next to the row:
+
+1. Click **Roll Back**.
+2. Confirm in the dialog. AutoBrew quits the app, then restores its user data from the snapshot — the upgraded `.app` binary itself **stays in place**, only your settings and data revert.
+3. The restore runs through the same transactional path described in [Restoring a Snapshot](#restoring-a-snapshot), so a failure mid-way rolls every component back.
+
+If a row says **Snapshot pruned** instead, the snapshot was removed by retention (or by you in the Snapshots view) and the History row is now audit-only. The row itself never disappears just because the snapshot did — the history of what was auto-upgraded is kept indefinitely.
+
 ### Migrating to Another Mac
 
 Two flavours:
@@ -215,6 +243,8 @@ Starting with version 2.0.0, AutoBrew ships a full Homebrew GUI and an AppSnapsh
 
 ### Discover & Browse
 Full Homebrew cask catalog (`formulae.brew.sh`) organised as App-Store-style Discover sections plus hand-curated categories (Browsers, Developer Tools, Productivity, …), each ranked by 365-day install popularity. Every row has a hover tooltip with the full description and the brew token for `@variant` casks. Variants (`alfred`, `alfred@4`, `alfred@prerelease`) are decorated in the title — "Alfred", "Alfred 4", "Alfred (Prerelease)" — so they're never visually identical.
+
+The catalog (~30 MB cask payload + ~17 MB analytics) is cached to disk on first fetch under `~/Library/Application Support/AutoBrew/Catalog/`. Subsequent refreshes are **conditional**: AutoBrew persists the server's `ETag` per endpoint and sends `If-None-Match` on the next fetch, so the daily background refresh that BrewStore runs after 24h almost always comes back as `304 Not Modified` and the in-memory catalog stays untouched — only `lastRefresh` advances. ETags are saved only after the cache writes succeed, so a failed write forces a full re-download next time instead of trusting a 304 against a payload that never made it to disk.
 
 ### Global Search
 The sidebar search field walks the entire cask catalog (token, name, description) regardless of which section is selected. Clearing the field returns the user to whatever they were looking at before.
@@ -306,9 +336,16 @@ The snapshot subsystem is three Swift services collaborating with a small amount
 
 **Auto-cleanup** (Settings → Snapshots → "Auto-clean up old snapshots"): after every successful Brew run, `SnapshotService.cleanup(olderThanDays:)` walks the snapshot folder and removes any folder whose `manifest.json` creation timestamp is older than the configured retention window (default 90 days). Snapshots without a parseable manifest are left alone — we'd rather keep orphans than delete by guess.
 
+**Pre-upgrade snapshots** (`SchedulerService.capturePreUpgradeSnapshots`): immediately before `BrewManager.runUpgrade`, for every cask in the auto-install bucket, the scheduler resolves the cask token to a bundle ID via `InstalledAppsStore` (the same lookup BrewStore uses for the Installed view; the store is lazy-refreshed if it's empty), calls `createSnapshot`, and records the snapshot's UUID alongside the upgrade in `UpgradeHistoryStore` (file-backed in `~/Library/Application Support/AutoBrew/UpgradeHistory.json`, newest first, pruned by the same retention window as the snapshots themselves). Failure modes are deliberately non-blocking: a cask without an installed `.app`, a permission-denied component, or any other snapshot error is logged and the upgrade still runs; the History row is still written so the audit trail stays complete, just without a snapshot ID. The pass honours `Task.isCancelled` between casks so a scheduler restart (mode change, app quit) doesn't keep snapshotting after the user has moved on.
+
+`recordUpgradeHistory` writes one row per cask after `runUpgrade` returns. The `succeeded` flag reflects the **aggregate** brew exit status, not per-cask state — `BrewManager.runUpgrade` reports a single status for the whole batch, so a cask whose warning brew swallowed will appear as `succeeded: true` here even though that particular upgrade did not really apply. The snapshot and the rollback button stay correct in that case; only the green-tick affordance can mislead. Promoting `succeeded` to per-cask granularity would require parsing `brew upgrade --cask`'s per-line stdout, which is a separate change against `BrewManager`.
+
 **Export** (`SnapshotService.exportSnapshot`) zips the folder with `ditto`, names it `<DisplayName>_<timestamp>.autobrewsnapshot`, and writes the same manifest at the archive root so the file is self-describing.
 
 **Import** (`SnapshotService.importSnapshot`) takes any `.autobrewsnapshot` URL, runs hardening checks against zip-slip and absolute-path symlinks before extracting, validates the manifest, re-verifies the hashes, and only then publishes the snapshot into the local store. Imported snapshots get a fresh UUID so they don't collide with one another after a cross-Mac migration.
+
+### Update History
+Audit log of every cask AutoBrew auto-upgraded — token, display name, from/to versions, timestamp, and the pre-upgrade snapshot ID when one was taken. Each row that still has its snapshot on disk shows a **Roll Back** button that restores the cask's user data via the same transactional path as a manual restore, without touching the upgraded `.app` itself. Rows whose snapshot has aged out of the retention window flip to a **Snapshot pruned** label and become audit-only. The full workflow is described in the [Update History & One-Click Rollback](#update-history--one-click-rollback) section of the User Guide.
 
 ### URL Scheme
 - `autobrew://open` — open the main window.
@@ -876,7 +913,8 @@ auto-brew/
 │   │   ├── InstalledApp.swift           # /Applications scan result
 │   │   ├── BrowseCategory.swift         # Discover-section taxonomy
 │   │   ├── AppSnapshot.swift, SnapshotComponent.swift, SnapshotManifest.swift
-│   │   └── RestoreList.swift            # Cross-Mac bundle index
+│   │   ├── RestoreList.swift            # Cross-Mac bundle index
+│   │   └── UpgradeHistoryEntry.swift    # One row per auto-installed cask upgrade
 │   ├── Services/                        # Stateful logic (@MainActor or Sendable)
 │   │   ├── BrewProcess.swift, BrewManager.swift, SchedulerService.swift
 │   │   ├── IdleDetector.swift, SleepWakeObserver.swift,
@@ -889,6 +927,8 @@ auto-brew/
 │   │   ├── SnapshotArchiver.swift       # ZIP bundle + manifest validation
 │   │   ├── SnapshotPathResolver.swift   # Per-bundle-id Library paths
 │   │   ├── AppQuitter.swift             # Quit before restore
+│   │   ├── UpgradeHistoryStore.swift    # File-backed log of auto-upgrades + rollback IDs
+│   │   ├── UpdateLedger.swift           # First-sighting tracker for cool-off windows
 │   │   └── RemoteIconLoader.swift       # Cask icon fetch + on-disk cache
 │   ├── ViewModels/                      # @Observable @MainActor stores
 │   │   ├── SettingsStore.swift          # UserDefaults bridge
@@ -903,6 +943,7 @@ auto-brew/
 │   │   ├── BrewStore/                   # Sidebar + sections
 │   │   │   ├── BrewStoreSidebar.swift, DiscoverView.swift, DiscoverSection.swift
 │   │   │   ├── RankedCaskRow.swift, CategoryListView.swift, UpdatesView.swift
+│   │   │   ├── UpgradeHistoryView.swift # One-click rollback per auto-upgrade row
 │   │   ├── Browse/                      # Cask detail
 │   │   │   ├── BrowseDetailView.swift, CaskIconView.swift
 │   │   ├── Installed/
