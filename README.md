@@ -32,6 +32,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
   - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
+  - [Desktop & Notification-Center Widget](#desktop--notification-center-widget)
   - [Migrating to Another Mac](#migrating-to-another-mac)
   - [URL Scheme & Deep Links](#url-scheme--deep-links)
   - [Notifications](#notifications)
@@ -64,6 +65,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
 - **Selective Update Policy** — Per-bump-type and per-package rules: patches roll out fast, minors wait a configurable cool-off, majors require explicit approval
 - **Pre-Upgrade Auto-Snapshots** — Before every auto-installed cask upgrade, AutoBrew snapshots the app's user data so a broken update can be rolled back with one click from the new History view
 - **Shortcuts, Siri and Spotlight** — Install Cask / Snapshot App / Roll Back Last Upgrade actions via the system AppIntents framework
+- **Desktop & Notification-Center Widget** — Status widget in three sizes (Small / Medium / Large) with pending-approval count, recent upgrade outcomes and a one-tap roll back for the latest failed cask
 - **In-App Legal Section** — Privacy, Terms, EULA, Imprint, Trademark, Open-Source licenses — localized into all supported languages
 - **Idle-Based Trigger** — Waits for configurable idle time before running (default: 30 min)
 - **Scheduled Trigger** — Alternatively, run at a fixed time of day
@@ -240,12 +242,29 @@ Tokens are validated against the same `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` grammar the
 
 Known limitation: because AutoBrew sets `LSUIElement = true`, the system only discovers these intents after the menu-bar icon has been visible at least once. For users who already run AutoBrew that is automatic; brand-new installs need to launch the app once before the actions appear in Shortcuts.
 
+### Desktop & Notification-Center Widget
+
+AutoBrew ships a WidgetKit-based status widget. Add it from **System Settings → Desktop & Dock → Widgets**, or right-click the desktop and choose **Edit Widgets**, then drag the AutoBrew widget onto your desktop or into Notification Center.
+
+| Size | What it shows | Tap behaviour |
+|---|---|---|
+| **Small** | Pending-approval count (or "Up to date"), updated-at footer. | Opens AutoBrew → Pending Approvals. |
+| **Medium** | Pending count left + the three most recent auto-upgrade rows on the right (cask name, from→to, per-cask outcome icon). | Opens AutoBrew. |
+| **Large** | Pending headline + the five most recent upgrades + a destructive **Roll Back Last Failed** link when a rollback candidate exists. | The link triggers the same restore path the failed-upgrade notification uses. Surface tap opens AutoBrew. |
+
+**Per-cask icons** match the History view: green check (brew confirmed the upgrade), red cross (brew emitted an error inside that cask's section), orange question mark ("outcome unclear — brew swallowed the per-cask signal but the snapshot and rollback are still valid").
+
+**Where the data lives.** The widget reads from `~/Library/Group Containers/group.za.co.digitalfreedom.AutoBrew/WidgetState.json`, written by the main app whenever pending approvals or upgrade history mutate (plus once at the end of every scheduler run so the "Updated <relative>" footer stays honest even on a no-op day). The widget extension is sandboxed; the App Group container is its only window into the main app's data.
+
+**First-launch caveat.** Because AutoBrew sets `LSUIElement = true`, the widget only appears in the Add Widget picker after the menu-bar icon has been visible at least once.
+
 ### URL Scheme & Deep Links
 
 AutoBrew registers the `autobrew://` URL scheme:
 
 - `autobrew://open` — bring the BrewStore window forward (works from Terminal, a browser link, or another app's automation).
 - `autobrew://install/<cask-token>` — install a cask in the background. Tokens are validated against `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` and a confirmation dialog appears before the install runs, so a malicious link can't silently install software.
+- `autobrew://rollback` — trigger from the widget's Roll Back link. Runs the same newest-failed-with-live-snapshot rollback the failed-upgrade notification action uses.
 
 ### Notifications
 
@@ -938,7 +957,9 @@ auto-brew/
 │   │   ├── BrowseCategory.swift         # Discover-section taxonomy
 │   │   ├── AppSnapshot.swift, SnapshotComponent.swift, SnapshotManifest.swift
 │   │   ├── RestoreList.swift            # Cross-Mac bundle index
-│   │   └── UpgradeHistoryEntry.swift    # One row per auto-installed cask upgrade
+│   │   ├── UpgradeHistoryEntry.swift    # One row per auto-installed cask upgrade
+│   │   ├── CaskUpgradeOutcome.swift     # succeeded / failed / attempted enum
+│   │   └── WidgetState.swift            # Snapshot shared with WidgetExtension via App Group
 │   ├── Services/                        # Stateful logic (@MainActor or Sendable)
 │   │   ├── BrewProcess.swift, BrewManager.swift, SchedulerService.swift
 │   │   ├── IdleDetector.swift, SleepWakeObserver.swift,
@@ -953,7 +974,10 @@ auto-brew/
 │   │   ├── AppQuitter.swift             # Quit before restore
 │   │   ├── UpgradeHistoryStore.swift    # File-backed log of auto-upgrades + rollback IDs
 │   │   ├── UpdateLedger.swift           # First-sighting tracker for cool-off windows
-│   │   └── RemoteIconLoader.swift       # Cask icon fetch + on-disk cache
+│   │   ├── RemoteIconLoader.swift       # Cask icon fetch + on-disk cache
+│   │   ├── BrewUpgradeOutcomeParser.swift # Per-cask attribution from brew upgrade --cask output
+│   │   ├── PreUpgradeSnapshot.swift     # Shared snapshot-then-record helper for auto + manual upgrades
+│   │   └── WidgetStateWriter.swift      # Serialises WidgetState.json into the App Group container
 │   ├── Intents/                         # AppIntents for Shortcuts/Siri/Spotlight
 │   │   ├── InstallCaskIntent.swift, SnapshotAppIntent.swift, RollBackLastUpgradeIntent.swift
 │   │   ├── AutoBrewShortcuts.swift      # AppShortcutsProvider — registers the three intents
@@ -988,7 +1012,13 @@ auto-brew/
 │       ├── ByteFormatter.swift          # Human-readable sizes
 │       ├── NSPanelAsync.swift           # async/await wrapper around NSOpenPanel
 │       └── PlatformAdaptive.swift       # `if #available` View modifiers — Liquid Glass on macOS 26+, classic materials on macOS 14/15
-└── Tests/                               # XCTest (121 tests across 22 files)
+├── WidgetExtension/                     # Sandboxed WidgetKit app-extension target
+│   ├── AutoBrewWidget.swift             # @main WidgetBundle + StaticConfiguration
+│   ├── StateProvider.swift              # TimelineProvider; decodes WidgetState.json from App Group
+│   ├── WidgetEntryView.swift            # Small / Medium / Large SwiftUI surfaces
+│   ├── Info.plist                       # NSExtensionPointIdentifier = com.apple.widgetkit-extension
+│   └── AutoBrewWidget.entitlements      # App Group + sandbox
+└── Tests/                               # XCTest (146 tests across 24 files)
     ├── Models:   CaskCatalogEntryTests, RestoreListTests, BrowseCategoryTests,
     │             LegalDocumentTests, PendingUpdatesStoreTests, SemVerTests
     ├── Services: BrewCatalogServiceTests, AppDiscoveryServiceTests,

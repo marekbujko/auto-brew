@@ -123,5 +123,10 @@ final class PendingUpdatesStore {
         } catch {
             pendingLogger.error("Failed to write pending updates: \(error.localizedDescription, privacy: .public)")
         }
+        // The widget's pending-count badge is bound to this store. A single
+        // call here covers every mutating path (replace / approve / reject /
+        // remove / resetDecision) without scattering refresh hooks through
+        // each public method.
+        WidgetStateWriter.refresh()
     }
 }
