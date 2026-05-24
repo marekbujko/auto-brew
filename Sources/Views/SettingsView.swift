@@ -136,6 +136,33 @@ struct SettingsView: View {
                             NSWorkspace.shared.open(url)
                         }
                     }
+
+                    // External backup storage — points the snapshot
+                    // root at a user-picked directory, typically on an
+                    // external drive or NAS mount. The security-scoped
+                    // bookmark survives unplug/replug.
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(localized: "External storage"))
+                            Text(externalStorageLabel)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        Spacer()
+                        Button(externalStorageButtonLabel) {
+                            chooseExternalStorage()
+                        }
+                        if settings.snapshotStorageBookmark != nil {
+                            Button(role: .destructive) {
+                                settings.snapshotStorageBookmark = nil
+                            } label: {
+                                Image(systemName: "xmark.circle")
+                            }
+                            .help(String(localized: "Reset to default storage location"))
+                        }
+                    }
                 }
 
                 Section(String(localized: "Icon Cache")) {
@@ -303,6 +330,34 @@ struct SettingsView: View {
             cacheLastUpdated = newest.formatted(.relative(presentation: .named))
         } else {
             cacheLastUpdated = String(localized: "Never")
+        }
+    }
+
+    private var externalStorageLabel: String {
+        guard let bookmark = settings.snapshotStorageBookmark,
+              let resolved = SecurityScopedBookmark.resolve(bookmark) else {
+            return String(localized: "Default — ~/Library/Application Support/AutoBrew/Snapshots")
+        }
+        return resolved.url.path
+    }
+
+    private var externalStorageButtonLabel: String {
+        settings.snapshotStorageBookmark == nil
+            ? String(localized: "Choose folder…")
+            : String(localized: "Change folder…")
+    }
+
+    private func chooseExternalStorage() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.message = String(localized: "Pick a folder for snapshot storage. External drives and network mounts are fine.")
+        panel.prompt = String(localized: "Use This Folder")
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        if let bookmark = SecurityScopedBookmark.encode(url) {
+            settings.snapshotStorageBookmark = bookmark
         }
     }
 
