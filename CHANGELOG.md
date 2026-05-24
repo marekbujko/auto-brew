@@ -17,6 +17,9 @@ user-facing, and free of internal jargon.
 - One-click rollback from the failed-update notification — picks the most recent failed cask that still has its pre-upgrade snapshot on disk and offers Roll Back as a destructive notification action.
 - Manual cask upgrades from BrewStore now take the same pre-upgrade snapshot and create a History row, just like the automatic auto-update path.
 - Update History view shows per-cask outcomes (succeeded / failed / unclear) instead of a single aggregate status, attributed via a dedicated parser of `brew upgrade --cask` output.
+- Shortcuts.app, Siri and Spotlight actions: **Install Cask**, **Snapshot App**, and **Roll Back Last Cask Upgrade** — all via the system AppIntents framework, no Bridge or helper app needed.
+- Release notes for every version are now driven by `CHANGELOG.md`. The same body shows up on the GitHub release page and inside Sparkle's update dialog.
+- Sparkle delta updates: each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
 
 ### Changed
 - `UpgradeHistory.json` schema now stores a three-state `outcome` field. Files written by an earlier build with `succeeded: Bool` are still readable — your history is not lost on upgrade.
