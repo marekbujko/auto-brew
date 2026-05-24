@@ -9,6 +9,12 @@ struct InstalledAppsView: View {
     @State private var store = InstalledAppsStore.shared
     @State private var snapshotTarget: InstalledApp?
     @State private var operationError: String?
+    /// Tokens whose snapshot-then-brew-upgrade pipeline is currently in
+    /// flight. A second tap on the same row must not kick off a parallel
+    /// run — two concurrent snapshots compete for disk, two concurrent
+    /// `brew upgrade` invocations fight Homebrew's lock, and either way
+    /// the History store would gain duplicate rows.
+    @State private var upgradingTokens: Set<String> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,14 +40,8 @@ struct InstalledAppsView: View {
                         app: app,
                         onUpgrade: {
                             guard let token = app.caskToken else { return }
-                            Task {
-                                do {
-                                    try await BrewInstaller().upgrade(token: token)
-                                    await store.refresh()
-                                } catch {
-                                    operationError = error.localizedDescription
-                                }
-                            }
+                            guard !upgradingTokens.contains(token) else { return }
+                            Task { await performUpgrade(app: app, token: token) }
                         },
                         onUninstall: {
                             guard let token = app.caskToken else { return }
@@ -69,5 +69,51 @@ struct InstalledAppsView: View {
                presenting: operationError) { _ in
             Button("OK") { operationError = nil }
         } message: { msg in Text(msg) }
+    }
+
+    /// Runs the same snapshot-then-upgrade-then-record flow the auto-update
+    /// scheduler uses, so a manual upgrade from this view also produces an
+    /// `UpgradeHistoryEntry` with a rollback affordance.
+    private func performUpgrade(app: InstalledApp, token: String) async {
+        upgradingTokens.insert(token)
+        defer { upgradingTokens.remove(token) }
+
+        let fromVersion = app.version ?? "?"
+        let toVersion = BrewCatalogService.shared.casks
+            .first(where: { $0.token == token })?
+            .version ?? "?"
+
+        let snapshotID = await PreUpgradeSnapshot.capture(
+            token: token,
+            bundleID: app.bundleID,
+            displayName: app.displayName,
+            fromVersion: fromVersion,
+            policyEnabled: SettingsStore.shared.autoSnapshotBeforeUpgrade
+        )
+
+        do {
+            try await BrewInstaller().upgrade(token: token)
+            PreUpgradeSnapshot.record(
+                token: token,
+                displayName: app.displayName,
+                bundleID: app.bundleID,
+                fromVersion: fromVersion,
+                toVersion: toVersion,
+                snapshotID: snapshotID,
+                outcome: .succeeded
+            )
+            await store.refresh()
+        } catch {
+            PreUpgradeSnapshot.record(
+                token: token,
+                displayName: app.displayName,
+                bundleID: app.bundleID,
+                fromVersion: fromVersion,
+                toVersion: toVersion,
+                snapshotID: snapshotID,
+                outcome: .failed
+            )
+            operationError = error.localizedDescription
+        }
     }
 }
