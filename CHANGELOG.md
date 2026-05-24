@@ -13,31 +13,32 @@ user-facing, and free of internal jargon.
 
 ## [Unreleased]
 
-### Added
-- One-click rollback from the failed-update notification — picks the most recent failed cask that still has its pre-upgrade snapshot on disk and offers Roll Back as a destructive notification action.
-- Manual cask upgrades from BrewStore now take the same pre-upgrade snapshot and create a History row, just like the automatic auto-update path.
-- Update History view shows per-cask outcomes (succeeded / failed / unclear) instead of a single aggregate status, attributed via a dedicated parser of `brew upgrade --cask` output.
-- Shortcuts.app, Siri and Spotlight actions: **Install Cask**, **Snapshot App**, and **Roll Back Last Cask Upgrade** — all via the system AppIntents framework, no Bridge or helper app needed.
-- **AutoBrew Status widget** for the desktop and Notification Center — three sizes show pending approvals, recent auto-upgrade outcomes with per-cask icons, and a destructive Roll Back link on the large size that triggers the same restore path as the failed-update notification. Reads from an App Group container so the sandboxed widget extension stays decoupled from the main app.
-- **Download size shown before installing a cask** — BrewStore's detail view issues a single HTTP HEAD against the DMG URL on appear and renders the size (or "unknown" when the server hides Content-Length). Sizes are cached in memory for the rest of the session.
-- **Upstream `homebrew/cask` submission prepared** under `docs/homebrew-cask-submission/`. The cask file is linted clean against the upstream rules; the PR is queued for once the next release ships the DMG-signing fix and the project clears the notability threshold.
+## [2.4.0] — 2026-05-24
 
-### Fixed
-- Release workflow now `codesign`s the `.dmg` container itself with the Developer ID Application identity. Previously only the embedded `.app` was signed + notarised; the `.dmg` carried no usable signature, which made Gatekeeper warn on direct double-click of the downloaded DMG and blocked the upstream homebrew/cask audit. Visible from the next release on.
-- Release notes for every version are now driven by `CHANGELOG.md`. The same body shows up on the GitHub release page and inside Sparkle's update dialog.
-- Sparkle delta updates: each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
+### Added
+- **Pre-upgrade auto-snapshots** — every automatic cask upgrade now captures a snapshot of the app's user data first, so a broken update can be rolled back in one click from the new Update History view.
+- **Update History** sidebar entry in BrewStore lists every auto-upgrade newest-first, with per-cask outcome icons (succeeded / failed / unclear) attributed by a dedicated parser of `brew upgrade --cask` output. Each row that still has its snapshot offers a one-click rollback.
+- **One-click rollback from the failed-update notification** — picks the most recent failed cask that still has its pre-upgrade snapshot on disk and offers Roll Back as a destructive notification action.
+- **Manual cask upgrades from BrewStore** now take the same pre-upgrade snapshot and create a History row, just like the automatic auto-update path. Per-token in-flight guard rejects double-clicks.
+- **Shortcuts.app, Siri and Spotlight** actions — **Install Cask**, **Snapshot App** and **Roll Back Last Cask Upgrade**, all via the system AppIntents framework. No helper app needed.
+- **AutoBrew Status widget** for the desktop and Notification Center — three sizes show pending approvals, recent auto-upgrade outcomes with per-cask icons, and a Roll Back link on the large size that triggers the same restore path as the failed-update notification. Reads from an App Group container so the sandboxed widget extension stays decoupled from the main app.
+- **Download size shown before installing a cask** — BrewStore's detail view issues a single HTTP HEAD against the DMG URL on appear and renders the size (or "unknown" when the server hides Content-Length).
+- **Sparkle delta updates** — each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
+- **Release notes driven by `CHANGELOG.md`** — the same body shows up on the GitHub release page and inside Sparkle's update dialog. No more "see commits for details".
+- **ETag-cached cask catalog** — BrewStore's daily background refresh now sends `If-None-Match` and returns 304 Not Modified when nothing changed, saving roughly 50 MB of redundant download per refresh.
+- **Automatic Homebrew-tap bump** from the release workflow — every release on `main` updates `marcelrgberger/homebrew-tap` with the new version, sha256 and macOS minimum, so the cask never drifts behind the binary.
+- **Upstream `homebrew/cask` submission material** prepared under `docs/homebrew-cask-submission/`. The cask file is linted clean against the upstream rules; the PR is queued for once the project clears the notability threshold.
 
 ### Changed
-- `UpgradeHistory.json` schema now stores a three-state `outcome` field. Files written by an earlier build with `succeeded: Bool` are still readable — your history is not lost on upgrade.
+- `UpgradeHistory.json` schema stores a three-state `outcome` field. Files written by an earlier build with `succeeded: Bool` are still readable — your history is not lost on upgrade.
+
+### Fixed
+- Release workflow now `codesign`s the `.dmg` container itself with the Developer ID Application identity. Previously only the embedded `.app` was signed + notarised; the `.dmg` carried no usable signature, so Gatekeeper warned on direct double-click of the downloaded DMG and homebrew/cask's audit refused the cask. From this release on, the DMG passes `spctl -a -t open --context context:primary-signature -v` cleanly.
 
 ## [2.3.0] — 2026-05-23
 
 ### Added
-- Pre-upgrade auto-snapshots: every automatic cask upgrade captures a snapshot of the app's user data first so a broken update can be rolled back from the new Update History view.
-- Update History sidebar entry in BrewStore lists every auto-upgrade with a one-click rollback button when the snapshot is still on disk.
-- ETag-cached cask catalog: BrewStore's daily background refresh almost always returns 304 Not Modified now, saving ~50 MB per refresh.
 - Platform-adaptive UI through a single `PlatformAdaptive.swift` helper — Liquid Glass on macOS 26, classic materials on macOS 14/15.
-- Homebrew tap is bumped automatically from the release workflow so the cask never drifts behind the binary.
 
 ### Changed
 - Minimum macOS version lowered to 14 (Sonoma); building still requires Xcode 26+.
@@ -69,7 +70,8 @@ user-facing, and free of internal jargon.
 ### Added
 - First public release. Menu-bar app that orchestrates `brew update → outdated → policy gate → upgrade → cleanup` with idle or scheduled triggers, sleep/wake recovery, and a selective per-bump-type update policy.
 
-[Unreleased]: https://github.com/marcelrgberger/auto-brew/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/marcelrgberger/auto-brew/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/marcelrgberger/auto-brew/releases/tag/v2.4.0
 [2.3.0]: https://github.com/marcelrgberger/auto-brew/releases/tag/v2.3.0
 [2.2.2]: https://github.com/marcelrgberger/auto-brew/releases/tag/v2.2.2
 [2.2.1]: https://github.com/marcelrgberger/auto-brew/releases/tag/v2.2.1
