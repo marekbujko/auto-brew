@@ -253,7 +253,7 @@ AutoBrew ships a WidgetKit-based status widget. Add it from **System Settings �
 |---|---|---|
 | **Small** | Pending-approval count (or "Up to date"), updated-at footer. | Opens AutoBrew → Pending Approvals. |
 | **Medium** | Pending count left + the three most recent auto-upgrade rows on the right (cask name, from→to, per-cask outcome icon). | Opens AutoBrew. |
-| **Large** | Pending headline + the five most recent upgrades + a destructive **Roll Back Last Failed** link when a rollback candidate exists. | The link triggers the same restore path the failed-upgrade notification uses. Surface tap opens AutoBrew. |
+| **Large** | Pending headline + the five most recent upgrades + a **Run Now** link plus a destructive **Roll Back Last Failed** link when a rollback candidate exists. | Run Now triggers an immediate `brew update → upgrade → cleanup` cycle in the host app (same reentrancy guard as the menu-bar manual-trigger). Roll Back uses the same restore path as the failed-upgrade notification. Surface tap opens AutoBrew. |
 
 **Per-cask icons** match the History view: green check (brew confirmed the upgrade), red cross (brew emitted an error inside that cask's section), orange question mark ("outcome unclear — brew swallowed the per-cask signal but the snapshot and rollback are still valid").
 
@@ -268,6 +268,7 @@ AutoBrew registers the `autobrew://` URL scheme:
 - `autobrew://open` — bring the BrewStore window forward (works from Terminal, a browser link, or another app's automation).
 - `autobrew://install/<cask-token>` — install a cask in the background. Tokens are validated against `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` and a confirmation dialog appears before the install runs, so a malicious link can't silently install software.
 - `autobrew://rollback` — trigger from the widget's Roll Back link. Runs the same newest-failed-with-live-snapshot rollback the failed-upgrade notification action uses.
+- `autobrew://run-now` — trigger from the widget's Run Now link. Equivalent to the menu-bar Run-Now action; the SchedulerService's `pipelineInProgress` guard keeps double-clicks from queuing parallel runs.
 
 ### Notifications
 
