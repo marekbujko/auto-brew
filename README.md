@@ -33,6 +33,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
   - [Collections](#collections)
   - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
+  - [`autobrew` CLI](#autobrew-cli)
   - [Desktop & Notification-Center Widget](#desktop--notification-center-widget)
   - [Migrating to Another Mac](#migrating-to-another-mac)
   - [URL Scheme & Deep Links](#url-scheme--deep-links)
@@ -277,6 +278,30 @@ AutoBrew ships a WidgetKit-based status widget. Add it from **System Settings �
 **Where the data lives.** The widget reads from `~/Library/Group Containers/group.za.co.digitalfreedom.AutoBrew/WidgetState.json`, written by the main app whenever pending approvals or upgrade history mutate (plus once at the end of every scheduler run so the "Updated <relative>" footer stays honest even on a no-op day). The widget extension is sandboxed; the App Group container is its only window into the main app's data.
 
 **First-launch caveat.** Because AutoBrew sets `LSUIElement = true`, the widget only appears in the Add Widget picker after the menu-bar icon has been visible at least once.
+
+### `autobrew` CLI
+
+A thin terminal helper ships inside the app bundle at
+`AutoBrew.app/Contents/Helpers/autobrew` and is symlinked into the
+user's `PATH` by the Homebrew cask. It routes every command through
+the existing `autobrew://` URL scheme — AutoBrew must be installed
+and running for the commands to take effect, and the security checks
+the URL handler enforces (cask-token grammar, NSAlert confirmation
+on install) apply unchanged.
+
+```bash
+autobrew open                    # bring BrewStore forward
+autobrew install firefox         # request an install, NSAlert confirms
+autobrew rollback                # roll back the most recent failed cask
+autobrew run-now                 # trigger an immediate update + upgrade
+autobrew version                 # print bundled version
+```
+
+Direct service reuse (running snapshot creation from the CLI without
+involving the GUI) is out of scope for this first iteration — it
+would need its own event loop and file locking against the GUI's
+`@MainActor` stores. The URL-relay design keeps the GUI as the
+single writer to all on-disk state.
 
 ### URL Scheme & Deep Links
 
@@ -1187,6 +1212,9 @@ auto-brew/
 │       ├── ByteFormatter.swift          # Human-readable sizes
 │       ├── NSPanelAsync.swift           # async/await wrapper around NSOpenPanel
 │       └── PlatformAdaptive.swift       # `if #available` View modifiers — Liquid Glass on macOS 26+, classic materials on macOS 14/15
+├── CLI/                                 # `autobrew` command-line helper
+│   ├── main.swift                       # URL-scheme relay (open / install / rollback / run-now)
+│   └── Info.plist                       # Bundle id za.co.digitalfreedom.AutoBrew.cli
 ├── WidgetExtension/                     # Sandboxed WidgetKit app-extension target
 │   ├── AutoBrewWidget.swift             # @main WidgetBundle + StaticConfiguration
 │   ├── StateProvider.swift              # TimelineProvider; decodes WidgetState.json from App Group
