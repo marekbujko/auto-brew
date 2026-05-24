@@ -109,8 +109,17 @@ final class BrewManager {
     /// `brew upgrade` and `brew upgrade --cask --greedy` behaviour). Pass an
     /// empty array to skip the category entirely. Pass a token list to upgrade
     /// only those packages.
-    func runUpgrade(formulae: [String]?, casks: [String]?) async throws {
-        guard !isRunning else { return }
+    ///
+    /// Returns per-cask outcomes attributed by `BrewUpgradeOutcomeParser`
+    /// against the cask portion of stdout — necessary because brew reports
+    /// only an aggregate exit status and the History view needs to know
+    /// which individual cask actually upgraded. Tokens that were requested
+    /// but never mentioned in the output (greedy mode, or brew skipping a
+    /// no-op) come back as `.attempted`. Empty/nil cask selection returns
+    /// an empty map.
+    @discardableResult
+    func runUpgrade(formulae: [String]?, casks: [String]?) async throws -> [String: CaskUpgradeOutcome] {
+        guard !isRunning else { return [:] }
         guard let brew = brewExecutable, let path = brewPath else {
             throw BrewError.notFound
         }
@@ -135,6 +144,7 @@ final class BrewManager {
             }
         }
 
+        var caskOutcomes: [String: CaskUpgradeOutcome] = [:]
         if shouldRun(selection: casks) {
             currentStage = .upgradingCasks
             var args = ["upgrade", "--cask"]
@@ -146,12 +156,23 @@ final class BrewManager {
             logger.info("brew \(args.joined(separator: " "))")
             let result = try await BrewProcess.run(executable: brew, arguments: args, brewPath: path)
             lastOutput += result.stdout
+
+            // Only the explicit-token call gives the parser a target set;
+            // `--greedy` makes per-cask attribution meaningless, so we
+            // leave the outcomes map empty in that case and the scheduler
+            // falls back to its aggregate-status logic.
+            if let casks, !casks.isEmpty {
+                let combined = result.stdout + (result.succeeded ? "" : "\n" + result.stderr)
+                caskOutcomes = BrewUpgradeOutcomeParser.parse(stdout: combined, tokens: casks)
+            }
+
             if !result.succeeded {
                 // One broken cask shouldn't take down the rest of the cycle.
                 logger.warning("Cask upgrade had issues: \(result.stderr)")
                 lastOutput += "\n[Cask warning] \(result.stderr)"
             }
         }
+        return caskOutcomes
     }
 
     /// Runs `brew cleanup --prune=7` to free disk space.
