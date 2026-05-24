@@ -136,6 +136,8 @@ Major updates (and anything where the version string isn't parseable enough to c
 
 Once approved entries actually install during the next scheduler run, they are removed from the queue automatically.
 
+**Release notes inline.** When the cask's homepage points at a `github.com/<owner>/<repo>` repository, AutoBrew fetches the GitHub release notes for the incoming version and shows them as an expandable section directly under the row. The fetch goes through a per-cask disk cache with a 7-day TTL plus a fallback to `/releases/latest` when no version-tagged release exists, so the 60-req/hour unauthenticated GitHub limit is never the bottleneck. Decisions stop being blind.
+
 ### Browsing & Installing Casks
 
 BrewStore → **Discover** shows App-Store-style sections (Top Ranked, plus categories like Browsers, Developer Tools, Productivity, …) sorted by 365-day install popularity from the public Homebrew analytics.

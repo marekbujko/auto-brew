@@ -60,43 +60,102 @@ struct PendingApprovalsView: View {
 private struct PendingApprovalRow: View {
     let update: PendingUpdate
     @State private var store = PendingUpdatesStore.shared
+    @State private var releaseNotes = CaskReleaseNotesService.shared
+    @State private var releaseNotesExpanded = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(update.displayName)
-                    .font(.headline)
-                HStack(spacing: 6) {
-                    Text(update.currentVersion)
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "arrow.right")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(update.availableVersion)
-                        .foregroundStyle(.primary)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(update.displayName)
+                        .font(.headline)
+                    HStack(spacing: 6) {
+                        Text(update.currentVersion)
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(update.availableVersion)
+                            .foregroundStyle(.primary)
+                    }
+                    .font(.subheadline)
+                    HStack(spacing: 6) {
+                        Text(update.kind == .cask
+                             ? String(localized: "Cask")
+                             : String(localized: "Formula"))
+                            .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .adaptiveGlassCapsule()
+                        Text(bumpLabel)
+                            .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .adaptiveGlassCapsule(tint: bumpColor)
+                            .foregroundStyle(bumpColor)
+                    }
+                    statusLine
                 }
-                .font(.subheadline)
-                HStack(spacing: 6) {
-                    Text(update.kind == .cask
-                         ? String(localized: "Cask")
-                         : String(localized: "Formula"))
-                        .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .adaptiveGlassCapsule()
-                    Text(bumpLabel)
-                        .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .adaptiveGlassCapsule(tint: bumpColor)
-                        .foregroundStyle(bumpColor)
-                }
-                statusLine
+                Spacer()
+                actionButtons
             }
-            Spacer()
-            actionButtons
+            releaseNotesDisclosure
         }
         .padding(.vertical, 6)
+        .task(id: update.token) {
+            guard let homepage = catalogHomepage else { return }
+            await releaseNotes.prefetch(token: update.token,
+                                        homepage: homepage,
+                                        newVersion: update.availableVersion)
+        }
+    }
+
+    /// Looks the cask up in the catalog to find its homepage URL.
+    /// Nil if the catalog hasn't loaded yet or the token isn't in it
+    /// (custom tap, formula); in both cases the disclosure stays
+    /// hidden.
+    private var catalogHomepage: String? {
+        let homepage = BrewCatalogService.shared.casks
+            .first(where: { $0.token == update.token })?
+            .homepage
+        return homepage?.isEmpty == false ? homepage : nil
+    }
+
+    @ViewBuilder
+    private var releaseNotesDisclosure: some View {
+        if let notes = releaseNotes.notes(for: update.token), !notes.bodyMarkdown.isEmpty {
+            DisclosureGroup(isExpanded: $releaseNotesExpanded) {
+                ScrollView {
+                    Text(MarkdownRenderer.render(notes.bodyMarkdown))
+                        .font(.callout)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 240)
+                .padding(.top, 4)
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "doc.text")
+                        .foregroundStyle(.secondary)
+                    Text(String(localized: "Release notes for \(notes.tag)"))
+                        .font(.caption.weight(.medium))
+                    if let publishedAt = notes.publishedAt {
+                        Text("·")
+                            .foregroundStyle(.tertiary)
+                        Text(publishedAt, format: .relative(presentation: .named))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } else if releaseNotes.isFetching(update.token) {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.mini)
+                Text(String(localized: "Loading release notes…"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 
     private var bumpLabel: String {
