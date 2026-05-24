@@ -523,8 +523,13 @@ classDiagram
         +start()
         +restartScheduling()
         +triggerManualRun()
+        +rollbackMostRecentFailedUpgrade()
         -runBrewUpdate()
         -handleMissedRun()
+        -capturePreUpgradeSnapshots(forCasks)
+        -recordUpgradeHistory(for, preSnapshots, outcomes, runThrew)
+        -findRollbackTarget() UpgradeHistoryEntry?
+        -rollbackUpgrade(forEntryID)
     }
 
     class BrewManager {
@@ -532,9 +537,29 @@ classDiagram
         +isHomebrewInstalled: Bool
         +installHomebrew()
         +runUpdate()
-        +runUpgrade(formulae, casks)
+        +runUpgrade(formulae, casks) [String: CaskUpgradeOutcome]
         +runCleanup()
         +fetchOutdated()
+    }
+
+    class BrewUpgradeOutcomeParser {
+        +parse(stdout, tokens) [String: CaskUpgradeOutcome]
+    }
+
+    class PreUpgradeSnapshot {
+        +capture(token, bundleID, displayName, fromVersion, policyEnabled) UUID?
+        +record(token, displayName, bundleID, fromVersion, toVersion, snapshotID, outcome)
+    }
+
+    class UpgradeHistoryStore {
+        +entries: [UpgradeHistoryEntry]
+        +append(entry)
+        +prune(olderThanDays)
+    }
+
+    class WidgetStateWriter {
+        +refresh()
+        +write(state, containerOverride)
     }
 
     class BrewProcess {
@@ -577,6 +602,8 @@ classDiagram
         +scheduledMinute: Int
         +lastRunDate: Date?
         +loginItemEnabled: Bool
+        +autoSnapshotBeforeUpgrade: Bool
+        +autoCleanupSnapshots: Bool
         +snapshotRetentionDays: Int
         +policyDefaults: UpdatePolicyDefaults
         +packageOverrides: [PackagePolicyOverride]
@@ -594,9 +621,12 @@ classDiagram
 
     class NotificationManager {
         +onRunNowRequested: Callback
+        +onReviewApprovalsRequested: Callback
+        +onRollbackRequested: Callback~UUID~
         +requestAuthorization()
         +showMissedRunNotification()
-        +showCompletionNotification()
+        +showPendingApprovals(count, sampleNames)
+        +showCompletionNotification(success, detail, rollbackEntryID, rollbackTargetName)
     }
 
     class LoginItemManager {
@@ -619,14 +649,22 @@ classDiagram
     SchedulerService --> SleepWakeObserver
     SchedulerService --> NotificationManager
     SchedulerService --> IdleDetector
-    SchedulerService --> SnapshotService : auto-cleanup
+    SchedulerService --> SnapshotService : auto-cleanup + rollback
     SchedulerService --> UpdateEvaluator
     SchedulerService --> UpdateLedgerStore
     SchedulerService --> PendingUpdatesStore
+    SchedulerService --> UpgradeHistoryStore : write history rows
+    SchedulerService --> PreUpgradeSnapshot : capture + record
     UpdateEvaluator --> UpdateDecisionBundle
     BrewManager --> BrewProcess
+    BrewManager --> BrewUpgradeOutcomeParser : per-cask outcome
     BrewManager --> OutdatedPackage
     BrewManager ..> BrewError
+    PreUpgradeSnapshot --> SnapshotService : createSnapshot
+    PreUpgradeSnapshot --> UpgradeHistoryStore : append entry
+    UpgradeHistoryStore --> WidgetStateWriter : refresh on mutation
+    PendingUpdatesStore --> WidgetStateWriter : refresh on mutation
+    NotificationManager ..> SchedulerService : onRollbackRequested
     MenuBarView --> SchedulerService
     MenuBarView --> BrewManager
     MenuBarView --> SettingsStore
@@ -652,6 +690,8 @@ classDiagram
     class RankedCaskRow
     class CategoryListView
     class UpdatesView
+    class UpgradeHistoryView
+    class PendingApprovalsView
     class BrowseDetailView
     class CaskIconView
     class InstalledAppsView
@@ -674,8 +714,17 @@ classDiagram
     }
 
     class BrewCatalogService {
+        +casks: [CaskCatalogEntry]
+        +analytics: CaskAnalytics?
+        +lastRefresh: Date?
         +refresh()
         +loadCache()
+    }
+
+    class CaskSizeService {
+        +size(forToken) Int64?
+        +isFetching(token) Bool
+        +prefetch(token, url)
     }
 
     class BrewInstaller {
@@ -710,6 +759,8 @@ classDiagram
     BrewStoreWindow --> DiscoverView
     BrewStoreWindow --> CategoryListView
     BrewStoreWindow --> UpdatesView
+    BrewStoreWindow --> UpgradeHistoryView
+    BrewStoreWindow --> PendingApprovalsView
     BrewStoreWindow --> InstalledAppsView
     DiscoverView --> DiscoverSection
     DiscoverSection --> RankedCaskRow
@@ -724,8 +775,13 @@ classDiagram
     UpdatesView --> CatalogStore
     UpdatesView --> InstalledAppsStore
     InstalledAppsView --> InstalledAppsStore
+    InstalledAppsView --> PreUpgradeSnapshot : manual upgrade
+    InstalledAppsView --> BrewInstaller : upgrade/uninstall
     BrowseDetailView --> CatalogStore
     BrowseDetailView --> BrewInstaller
+    BrowseDetailView --> CaskSizeService : HEAD on appear
+    UpgradeHistoryView --> UpgradeHistoryStore
+    UpgradeHistoryView --> SnapshotService : restore on Roll Back
     InstalledAppRowView --> BrewInstaller
 
     CatalogStore --> BrewCatalogService
@@ -826,6 +882,103 @@ classDiagram
     SnapshotService --> RestoreList
     SnapshotManifest --> SnapshotComponent
     AppSnapshot --> SnapshotManifest
+```
+
+### Diagram 4 — Widget Extension & Shortcuts Surface
+
+AutoBrew exposes itself outside the menu bar through two complementary
+system surfaces: a sandboxed WidgetKit extension that reads a shared
+state file, and three AppIntents registered with the system so they
+appear in Shortcuts, Spotlight and Siri. The widget never reaches into
+the main app's storage directly — its sandbox forbids that — so a
+small `WidgetStateWriter` snapshots the interesting bits into the App
+Group container after every relevant mutation.
+
+```mermaid
+classDiagram
+    class MainAppProcess
+    class WidgetExtensionProcess
+    class ShortcutsHost
+
+    class WidgetStateWriter {
+        +refresh()
+        +write(state, containerOverride)
+    }
+    class WidgetState {
+        +pendingApprovals: Int
+        +pendingSampleNames: [String]
+        +recentUpgrades: [UpgradeRow]
+        +rollbackCandidateID: UUID?
+        +updatedAt: Date
+    }
+    class AppGroupContainer {
+        +path: ~/Library/Group Containers/group.za.co.digitalfreedom.AutoBrew/
+        +WidgetState.json
+    }
+
+    class AutoBrewWidget {
+        +kind: AutoBrewStatus
+        +supportedFamilies: small medium large
+    }
+    class AutoBrewStateProvider {
+        +placeholder(in)
+        +getSnapshot(in)
+        +getTimeline(in)
+    }
+    class AutoBrewWidgetEntryView {
+        +smallBody
+        +mediumBody
+        +largeBody
+    }
+
+    class AutoBrewShortcuts
+    class InstallCaskIntent {
+        +perform()
+    }
+    class SnapshotAppIntent {
+        +perform()
+    }
+    class RollBackLastUpgradeIntent {
+        +perform()
+    }
+    class AutoBrewIntentError
+
+    class AppDelegate {
+        +handleURLEvent(event, reply)
+        -rollbackFromWidget()
+        -confirmAndInstall(token)
+    }
+    class SchedulerService
+    class SnapshotService
+    class InstalledAppsStore
+    class BrewInstaller
+
+    MainAppProcess --> WidgetStateWriter : after every store mutation
+    WidgetStateWriter --> WidgetState : snapshot
+    WidgetStateWriter --> AppGroupContainer : atomic write
+    WidgetStateWriter ..> WidgetExtensionProcess : reloadAllTimelines
+
+    WidgetExtensionProcess --> AutoBrewWidget
+    AutoBrewWidget --> AutoBrewStateProvider
+    AutoBrewWidget --> AutoBrewWidgetEntryView
+    AutoBrewStateProvider --> AppGroupContainer : read
+    AutoBrewStateProvider --> WidgetState : decode
+
+    AutoBrewWidgetEntryView ..> AppDelegate : autobrew://rollback
+    AppDelegate --> SchedulerService : rollbackMostRecentFailedUpgrade
+
+    ShortcutsHost --> AutoBrewShortcuts : AppShortcutsProvider
+    AutoBrewShortcuts --> InstallCaskIntent
+    AutoBrewShortcuts --> SnapshotAppIntent
+    AutoBrewShortcuts --> RollBackLastUpgradeIntent
+
+    InstallCaskIntent --> BrewInstaller
+    SnapshotAppIntent --> InstalledAppsStore
+    SnapshotAppIntent --> SnapshotService
+    RollBackLastUpgradeIntent --> SnapshotService
+    InstallCaskIntent ..> AutoBrewIntentError
+    SnapshotAppIntent ..> AutoBrewIntentError
+    RollBackLastUpgradeIntent ..> AutoBrewIntentError
 ```
 
 ### Application Flow
