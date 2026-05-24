@@ -108,15 +108,27 @@ jobs:
       - name: Archive
         env:
           TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
         run: |
+          # Automatic Code Signing + -allowProvisioningUpdates lets
+          # xcodebuild fetch the Developer-ID provisioning profile for
+          # AutoBrewWidget (sandboxed, profile-required) through the
+          # ASC API credentials already prepared on the runner. Manual
+          # signing without a profile fails the archive because the
+          # widget's embedded-dependency drags the main app into the
+          # same profile requirement.
           xcodebuild archive \
             -project "$APP_NAME.xcodeproj" \
             -scheme "$SCHEME" \
             -configuration Release \
             -destination 'platform=macOS' \
             -archivePath "build/$APP_NAME.xcarchive" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Developer ID Application" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID" \
+            CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM="$TEAM_ID"
 
       - name: Export app
