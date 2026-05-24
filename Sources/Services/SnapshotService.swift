@@ -165,7 +165,17 @@ final class SnapshotService {
         }
     }
 
-    func restoreSnapshot(_ snapshot: AppSnapshot, terminateApp: Bool = false) async throws {
+    /// Restores the snapshot. When `components` is nil (default) every
+    /// recorded component is restored — same all-or-nothing behaviour
+    /// as before. When non-nil, only the components whose
+    /// `relativeArchivePath` is in the set are touched; the rest of
+    /// the live filesystem state stays as-is. Useful when the user
+    /// wants to revert just Preferences without flattening their Cache
+    /// or Containers, surfaced through the History view's Roll Back
+    /// confirmation and the Restore Wizard.
+    func restoreSnapshot(_ snapshot: AppSnapshot,
+                         terminateApp: Bool = false,
+                         components selectedPaths: Set<String>? = nil) async throws {
         if terminateApp {
             try await AppQuitter.quit(bundleID: snapshot.bundleID)
         }
@@ -173,13 +183,22 @@ final class SnapshotService {
         let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: manifestData)
         let dataDir = snapshot.dataDir
         let homeURL = home
-        let components = manifest.components
+
+        let filtered: [SnapshotComponent]
+        if let selectedPaths {
+            filtered = manifest.components.filter { selectedPaths.contains($0.relativeArchivePath) }
+            guard !filtered.isEmpty else {
+                throw SnapshotError.invalidManifest("Selected component set is empty — nothing to restore")
+            }
+        } else {
+            filtered = manifest.components
+        }
 
         try await Task.detached(priority: .userInitiated) {
-            try Self.restoreComponents(components, dataDir: dataDir, home: homeURL)
+            try Self.restoreComponents(filtered, dataDir: dataDir, home: homeURL)
         }.value
 
-        logger.info("Restored snapshot \(snapshot.bundleID, privacy: .public)")
+        logger.info("Restored snapshot \(snapshot.bundleID, privacy: .public) — \(filtered.count) of \(manifest.components.count) components")
     }
 
     // MARK: - Export / Import
