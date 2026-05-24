@@ -13,6 +13,8 @@ brew install --cask autobrew
 
 Other ways to install (manual DMG, requirements) are covered in the [Install](#install) section below.
 
+Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the same body is shown in Sparkle's update dialog and on the GitHub release page.
+
 ## Table of Contents
 
 - [Features](#features)
