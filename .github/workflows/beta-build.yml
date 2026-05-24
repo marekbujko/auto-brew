@@ -172,6 +172,7 @@ jobs:
         env:
           API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
           CHANNEL: ${{ steps.version.outputs.channel }}
         run: |
           set -e
@@ -184,6 +185,15 @@ jobs:
             -srcfolder build/dmg \
             -ov -format UDZO \
             "build/$DMG_NAME"
+
+          # Same Developer-ID codesign on the .dmg container as in
+          # build-and-release.yml — Gatekeeper rejects the
+          # primary-signature otherwise and beta testers see a
+          # warning on first double-click.
+          codesign --sign "Developer ID Application: Berger & Rosenstock GbR ($TEAM_ID)" \
+                   --options runtime \
+                   --timestamp \
+                   "build/$DMG_NAME"
 
           xcrun notarytool submit "build/$DMG_NAME" \
             --key "$API_KEY_PATH" \
