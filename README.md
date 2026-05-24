@@ -31,6 +31,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Restoring a Snapshot](#restoring-a-snapshot)
   - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
+  - [Collections](#collections)
   - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
   - [Desktop & Notification-Center Widget](#desktop--notification-center-widget)
   - [Migrating to Another Mac](#migrating-to-another-mac)
@@ -235,6 +236,17 @@ On the new Mac open the **Restore Wizard** (Snapshots → Import…), point it a
 1. Validates the manifest (non-empty bundle IDs, ≥ 1 component, hashes well-formed, no zip-slip in the archive).
 2. Installs missing casks via `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` finds the new token automatically.
 3. Restores each app via the same transactional flow as a local restore.
+
+### Collections
+
+BrewStore → **Collections** lets you define named sets of cask tokens — *Dev Setup*, *Gaming Setup*, *New Laptop* — and act on the whole set with one click.
+
+- **Create** a collection from the sidebar's **+** button, give it a name, and add tokens individually in the detail view. Token grammar is validated against `^[a-zA-Z0-9][a-zA-Z0-9._-]*$` to keep typos out.
+- **Install All** runs `brew install --cask` for every token in sequence, with a progress banner that tracks `<done>/<total>` and the cask currently being processed. A failure inside the batch doesn't abort the rest — failed tokens get collected and shown in an error alert after the run completes.
+- **Uninstall All** does the same with `brew uninstall --cask`.
+- **Export…** writes the collection as a single `.autobrewcollection` JSON file (Save panel from the row's context menu). **Import…** from the sidebar's tray button reads one back and adds it with a fresh UUID so it can't clobber an existing collection.
+
+Collections live in `~/Library/Application Support/AutoBrew/Collections.json` alongside the other AutoBrew state.
 
 ### Shortcuts, Siri and Spotlight
 
