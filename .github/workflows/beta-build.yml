@@ -75,12 +75,14 @@ jobs:
         env:
           PROFILE_MAIN_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_MAIN }}
           PROFILE_WIDGET_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_WIDGET }}
+          PROFILE_CLI_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_CLI }}
         run: |
           set -e
           PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES_DIR"
           echo -n "$PROFILE_MAIN_BASE64"   | base64 --decode -o "$PROFILES_DIR/AutoBrew_Main.mobileprovision"
           echo -n "$PROFILE_WIDGET_BASE64" | base64 --decode -o "$PROFILES_DIR/AutoBrew_Widget.mobileprovision"
+          echo -n "$PROFILE_CLI_BASE64"    | base64 --decode -o "$PROFILES_DIR/AutoBrew_CLI.mobileprovision"
           ls -la "$PROFILES_DIR"
 
       - name: Prepare App Store Connect API Key
@@ -141,6 +143,8 @@ jobs:
                   <string>AutoBrew Developer ID</string>
                   <key>za.co.digitalfreedom.AutoBrew.WidgetExtension</key>
                   <string>AutoBrew Widget Developer ID</string>
+                  <key>za.co.digitalfreedom.AutoBrew.cli</key>
+                  <string>AutoBrew CLI Developer ID</string>
               </dict>
           </dict>
           </plist>
