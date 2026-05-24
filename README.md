@@ -209,8 +209,9 @@ BrewStore → **History** lists every cask AutoBrew has auto-upgraded, newest fi
 When the pre-upgrade snapshot still exists on disk, a **Roll Back** button appears next to the row:
 
 1. Click **Roll Back**.
-2. Confirm in the dialog. AutoBrew quits the app, then restores its user data from the snapshot — the upgraded `.app` binary itself **stays in place**, only your settings and data revert.
-3. The restore runs through the same transactional path described in [Restoring a Snapshot](#restoring-a-snapshot), so a failure mid-way rolls every component back.
+2. A sheet opens with the snapshot's components (Preferences, Containers, Application Support, Caches, Saved State, Group Containers) listed as checkboxes with their sizes. Untick anything you want to leave at its current live state — handy when you only want to revert Preferences without flattening the Cache. The default is "everything selected" so a hit on **Roll Back** without unticking matches the old all-or-nothing behaviour.
+3. AutoBrew quits the app, then restores the selected components from the snapshot — the upgraded `.app` binary itself **stays in place**, only the selected user-data folders revert.
+4. The restore runs through the same transactional path described in [Restoring a Snapshot](#restoring-a-snapshot), so a failure mid-way rolls every selected component back.
 
 If a row says **Snapshot pruned** instead, the snapshot was removed by retention (or by you in the Snapshots view) and the History row is now audit-only. The row itself never disappears just because the snapshot did — the history of what was auto-upgraded is kept indefinitely.
 
