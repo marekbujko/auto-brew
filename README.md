@@ -141,6 +141,7 @@ Once approved entries actually install during the next scheduler run, they are r
 BrewStore → **Discover** shows App-Store-style sections (Top Ranked, plus categories like Browsers, Developer Tools, Productivity, …) sorted by 365-day install popularity from the public Homebrew analytics.
 
 - Click any tile to see the cask's description, version, homepage, and the per-package Update Policy button.
+- The detail view also shows the **download size** for the DMG by issuing a single HTTP HEAD against the cask URL when the view opens — a real number for most casks, "Download size unknown" when the server hides `Content-Length` or refuses HEAD. Sizes are cached in memory for the rest of the session so reopening the same detail view stays instant.
 - Click **Install** to run `brew install --cask <token>` directly. The button label flips to **Open** once the app is on disk.
 - Hover any row to see the full description (and the brew token for `@variant` casks).
 
@@ -977,7 +978,8 @@ auto-brew/
 │   │   ├── RemoteIconLoader.swift       # Cask icon fetch + on-disk cache
 │   │   ├── BrewUpgradeOutcomeParser.swift # Per-cask attribution from brew upgrade --cask output
 │   │   ├── PreUpgradeSnapshot.swift     # Shared snapshot-then-record helper for auto + manual upgrades
-│   │   └── WidgetStateWriter.swift      # Serialises WidgetState.json into the App Group container
+│   │   ├── WidgetStateWriter.swift      # Serialises WidgetState.json into the App Group container
+│   │   └── CaskSizeService.swift        # HEAD-based DMG size probe for BrowseDetailView
 │   ├── Intents/                         # AppIntents for Shortcuts/Siri/Spotlight
 │   │   ├── InstallCaskIntent.swift, SnapshotAppIntent.swift, RollBackLastUpgradeIntent.swift
 │   │   ├── AutoBrewShortcuts.swift      # AppShortcutsProvider — registers the three intents
