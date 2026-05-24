@@ -87,6 +87,23 @@ jobs:
           security find-identity -v
           echo "Developer ID certificate imported."
 
+      - name: Install Developer ID provisioning profiles
+        env:
+          PROFILE_MAIN_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_MAIN }}
+          PROFILE_WIDGET_BASE64: ${{ secrets.MACOS_DEVID_PROFILE_WIDGET }}
+        run: |
+          set -e
+          # Widget extensions are sandboxed and need a real provisioning
+          # profile. Both bundles have a MAC_APP_DIRECT profile generated
+          # via the ASC API and stored as base64 secrets — install them
+          # into the user-level profile store so xcodebuild picks them
+          # up during the archive step.
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
+          echo -n "$PROFILE_MAIN_BASE64"   | base64 --decode -o "$PROFILES_DIR/AutoBrew_Main.mobileprovision"
+          echo -n "$PROFILE_WIDGET_BASE64" | base64 --decode -o "$PROFILES_DIR/AutoBrew_Widget.mobileprovision"
+          ls -la "$PROFILES_DIR"
+
       - name: Prepare App Store Connect API Key
         env:
           API_KEY_BASE64: ${{ secrets.MACOS_APPSTORE_API_KEY_BASE64 }}
@@ -108,27 +125,21 @@ jobs:
       - name: Archive
         env:
           TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
-          API_KEY_ID: ${{ secrets.MACOS_APPSTORE_API_KEY_ID }}
-          API_ISSUER_ID: ${{ secrets.MACOS_APPSTORE_API_ISSUER_ID }}
         run: |
-          # Automatic Code Signing + -allowProvisioningUpdates lets
-          # xcodebuild fetch the Developer-ID provisioning profile for
-          # AutoBrewWidget (sandboxed, profile-required) through the
-          # ASC API credentials already prepared on the runner. Manual
-          # signing without a profile fails the archive because the
-          # widget's embedded-dependency drags the main app into the
-          # same profile requirement.
+          # Manual signing with explicit Developer-ID profiles per
+          # target. Automatic signing on a Developer-ID distribution
+          # archive picks "Mac Development" certs (wrong path); the
+          # MAC_APP_DIRECT profiles installed in the prior step let
+          # Manual pick the right identity for both the main app and
+          # the sandboxed widget extension.
           xcodebuild archive \
             -project "$APP_NAME.xcodeproj" \
             -scheme "$SCHEME" \
             -configuration Release \
             -destination 'platform=macOS' \
             -archivePath "build/$APP_NAME.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$API_KEY_PATH" \
-            -authenticationKeyID "$API_KEY_ID" \
-            -authenticationKeyIssuerID "$API_ISSUER_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="$TEAM_ID"
 
       - name: Export app
