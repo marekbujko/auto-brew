@@ -17,6 +17,7 @@ user-facing, and free of internal jargon.
 - Pre-upgrade snapshots are now disk-pressure-aware: when the home-directory volume has less than the configured threshold (default 10 GiB) free, the snapshot is skipped for that cask and a notification surfaces the reason. The upgrade itself still runs — only the History row's rollback button is unavailable for that single run.
 - Widget large family now carries a **Run Now** link that triggers an immediate `brew update → upgrade → cleanup` cycle through the host app, alongside the existing Roll Back link. Uses the new `autobrew://run-now` URL scheme.
 - **Selective restore per component.** The Roll Back action in the Update History view now opens a sheet with a checkbox list of every component the snapshot recorded (Preferences, Containers, Application Support, etc.) with its size. Restore exactly the folders you want; the rest of the live state stays untouched. Defaults to "everything selected" so the previous all-or-nothing behaviour is one Roll Back click away when that's what you want.
+- **CHANGELOG-aware Pending Approvals.** Each pending-approval row for a cask whose `homepage` is on github.com now ships with an expandable section showing the upstream GitHub release notes for the incoming version. The fetch is rate-limit-friendly (per-cask disk cache, 7-day TTL, fallback to `/releases/latest` when no version-tagged release exists). Decisions stop being blind.
 
 ## [2.4.0] — 2026-05-24
 
