@@ -54,6 +54,9 @@ final class UpgradeHistoryStore {
         } catch {
             upgradeHistoryLogger.error("Failed to write upgrade history: \(error.localizedDescription, privacy: .public)")
         }
+        // The widget mirrors the top of this list; every mutation here is
+        // user-visible there.
+        WidgetStateWriter.refresh()
     }
 
     private static func load(from url: URL) -> [UpgradeHistoryEntry] {

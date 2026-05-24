@@ -18,6 +18,7 @@ user-facing, and free of internal jargon.
 - Manual cask upgrades from BrewStore now take the same pre-upgrade snapshot and create a History row, just like the automatic auto-update path.
 - Update History view shows per-cask outcomes (succeeded / failed / unclear) instead of a single aggregate status, attributed via a dedicated parser of `brew upgrade --cask` output.
 - Shortcuts.app, Siri and Spotlight actions: **Install Cask**, **Snapshot App**, and **Roll Back Last Cask Upgrade** — all via the system AppIntents framework, no Bridge or helper app needed.
+- **AutoBrew Status widget** for the desktop and Notification Center — three sizes show pending approvals, recent auto-upgrade outcomes with per-cask icons, and a destructive Roll Back link on the large size that triggers the same restore path as the failed-update notification. Reads from an App Group container so the sandboxed widget extension stays decoupled from the main app.
 - Release notes for every version are now driven by `CHANGELOG.md`. The same body shows up on the GitHub release page and inside Sparkle's update dialog.
 - Sparkle delta updates: each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
 
