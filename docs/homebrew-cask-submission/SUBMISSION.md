@@ -15,26 +15,30 @@ to open the PR.
 
 ## Prerequisites
 
-1. **DMG must be code-signed**, not just notarised. `brew audit
-   --new --strict --online` runs `spctl -a -t open --context
-   context:primary-signature -v` against the downloaded `.dmg` — an
-   unsigned container fails the audit even when the embedded `.app`
-   is correctly notarised. The release workflow was patched on
-   2026-05-24 to add a `codesign --sign "Developer ID Application: …"
-   --options runtime --timestamp` step before `notarytool submit`. The
-   first release built **after** that patch is the earliest candidate
-   for the submission.
-2. **Repository "notability"**. Homebrew/cask refuses brand-new GitHub
-   repositories below the notability threshold (currently <30 forks,
-   <30 watchers and <75 stars). The audit prints the rule literally
-   under `GitHub repository not notable enough`. The expected outcome
-   is that the maintainers either ask you to wait, or you add a brief
-   note in the PR body referencing the project's track record (releases,
-   community impact, sister apps) — see the PR template below.
-3. **Recent stable release on the `main` branch** with the DMG-signing
-   fix applied. Bump version to whatever comes next (likely 2.3.1 if the
-   change is workflow-only) and trigger `04. Release Build` so the new
-   DMG carries both the `.app` and `.dmg` signatures.
+1. **DMG must be code-signed**, not just notarised. ✓ **Done as of
+   v2.4.0.** The release workflow was patched on 2026-05-24 to add a
+   `codesign --sign "Developer ID Application: …" --options runtime
+   --timestamp` step before `notarytool submit`, and v2.4.0 is the
+   first release that ships with the fix:
+
+   ```
+   $ spctl -a -t open --context context:primary-signature -v AutoBrew-2.4.0.dmg
+   AutoBrew-2.4.0.dmg: accepted
+   source=Notarized Developer ID
+   ```
+
+   `brew audit --new --strict --online` no longer reports the
+   "Signature verification failed" error against the v2.4.0 DMG.
+2. **Repository "notability"**. ⏳ **Pending.** Homebrew/cask refuses
+   brand-new GitHub repositories below the notability threshold
+   (currently <30 forks, <30 watchers and <75 stars). The audit
+   prints the rule literally under `GitHub repository not notable
+   enough`. The expected outcome is that the maintainers either ask
+   you to wait, or you add a brief note in the PR body referencing
+   the project's track record (releases, community impact, sister
+   apps) — see the PR template below. Until that threshold is
+   crossed (or the maintainers accept the substance-over-stars
+   argument), the personal tap stays the install path.
 
 ## Verification before opening the PR
 
