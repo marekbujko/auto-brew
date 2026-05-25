@@ -227,6 +227,58 @@ final class SnapshotService {
         logger.info("Restored snapshot \(snapshot.bundleID, privacy: .public) — \(filtered.count) of \(manifest.components.count) components")
     }
 
+    /// Pure manifest-based diff between two snapshots. Both manifests
+    /// are loaded fresh from disk so the result reflects the actual
+    /// on-disk state, not a stale in-memory snapshot. Matching key is
+    /// `relativeArchivePath` — stable across snapshots of the same
+    /// bundle taken on the same machine, since
+    /// `SnapshotPathResolver` produces deterministic paths for a
+    /// given bundle id. Throws on a missing or unreadable manifest;
+    /// the caller surfaces that to the user instead of silently
+    /// returning an empty diff.
+    func diff(_ older: AppSnapshot, _ newer: AppSnapshot) throws -> SnapshotDiff {
+        let lhs = try loadManifestComponents(for: older)
+        let rhs = try loadManifestComponents(for: newer)
+
+        let lhsByPath = Dictionary(uniqueKeysWithValues: lhs.map { ($0.relativeArchivePath, $0) })
+        let rhsByPath = Dictionary(uniqueKeysWithValues: rhs.map { ($0.relativeArchivePath, $0) })
+
+        var added: [SnapshotComponent] = []
+        var removed: [SnapshotComponent] = []
+        var changed: [SnapshotDiff.Pair] = []
+        var unchanged: [SnapshotDiff.Pair] = []
+
+        for (path, rhsComponent) in rhsByPath {
+            if let lhsComponent = lhsByPath[path] {
+                if lhsComponent.sha256 == rhsComponent.sha256 {
+                    unchanged.append(.init(oldComponent: lhsComponent, newComponent: rhsComponent))
+                } else {
+                    changed.append(.init(oldComponent: lhsComponent, newComponent: rhsComponent))
+                }
+            } else {
+                added.append(rhsComponent)
+            }
+        }
+        for (path, lhsComponent) in lhsByPath where rhsByPath[path] == nil {
+            removed.append(lhsComponent)
+        }
+
+        // Sort each bucket by originalPath so the UI renders a stable
+        // alphabetical list rather than dict iteration order.
+        return SnapshotDiff(
+            added:     added.sorted     { $0.originalPath < $1.originalPath },
+            removed:   removed.sorted   { $0.originalPath < $1.originalPath },
+            changed:   changed.sorted   { $0.newComponent.originalPath < $1.newComponent.originalPath },
+            unchanged: unchanged.sorted { $0.newComponent.originalPath < $1.newComponent.originalPath }
+        )
+    }
+
+    private func loadManifestComponents(for snapshot: AppSnapshot) throws -> [SnapshotComponent] {
+        let data = try Data(contentsOf: snapshot.manifestURL)
+        let manifest = try JSONDecoder.snapshotDecoder().decode(SnapshotManifest.self, from: data)
+        return manifest.components
+    }
+
     // MARK: - Export / Import
 
     func exportSnapshot(_ snapshot: AppSnapshot, to destination: URL) async throws {
