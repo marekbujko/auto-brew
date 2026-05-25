@@ -41,6 +41,7 @@ struct BrewStoreSidebar: View {
                     sidebarRow(BrewStoreSection.updates, label: String(localized: "Updates"), systemImage: "arrow.triangle.2.circlepath")
                     sidebarRow(BrewStoreSection.history, label: String(localized: "History"), systemImage: "clock.arrow.circlepath")
                     sidebarRow(BrewStoreSection.collections, label: String(localized: "Collections"), systemImage: "rectangle.stack")
+                    sidebarRow(BrewStoreSection.orphans, label: String(localized: "Orphans"), systemImage: "leaf")
                     // Approvals row only shows when something is actually
                     // pending — keeps the sidebar uncluttered for users who
                     // don't have major updates pending.
