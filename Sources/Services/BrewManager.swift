@@ -175,6 +175,70 @@ final class BrewManager {
         return caskOutcomes
     }
 
+    private(set) var orphanedPackages: [OrphanedPackage] = []
+
+    /// Asks brew which formulae would be removed by `brew autoremove`
+    /// without actually removing anything. Used by the BrewStore
+    /// Orphans surface so the user sees what's reclaimable before
+    /// committing. Failures are swallowed — empty list means
+    /// "couldn't tell" rather than "definitely nothing", which
+    /// matches the rest of the BrewManager's defensive style.
+    func fetchOrphans() async {
+        guard !isRunning,
+              let brew = brewExecutable,
+              let path = brewPath else { return }
+        let result = try? await BrewProcess.run(
+            executable: brew,
+            arguments: ["autoremove", "--dry-run"],
+            brewPath: path
+        )
+        guard let result, result.succeeded else {
+            orphanedPackages = []
+            return
+        }
+        // brew autoremove --dry-run prints lines like
+        //   ==> Would remove (3 formulae):
+        //   foo
+        //   bar
+        //   baz
+        // We keep only lines that match the cask-token grammar so
+        // headers and progress chatter never sneak in.
+        let tokenPattern = #"^[a-zA-Z0-9][a-zA-Z0-9._@+-]*$"#
+        let names = result.stdout
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty && $0.range(of: tokenPattern, options: .regularExpression) != nil }
+        orphanedPackages = names.map(OrphanedPackage.init(name:))
+    }
+
+    /// Runs `brew autoremove` for real. Returns the list that was
+    /// expected to go away — callers can compare with the post-state
+    /// to surface anything that survived (e.g. user re-installed a
+    /// parent between dry-run and apply).
+    @discardableResult
+    func runAutoremove() async throws -> [OrphanedPackage] {
+        guard !isRunning else { return [] }
+        guard let brew = brewExecutable, let path = brewPath else {
+            throw BrewError.notFound
+        }
+        isRunning = true
+        defer {
+            isRunning = false
+            if lastError == nil { currentStage = .done }
+        }
+        let expected = orphanedPackages
+        currentStage = .cleanup
+        logger.info("brew autoremove")
+        let result = try await BrewProcess.run(executable: brew, arguments: ["autoremove"], brewPath: path)
+        lastOutput += result.stdout
+        if !result.succeeded {
+            lastError = result.stderr
+            throw BrewError.cleanupFailed(result.stderr)
+        }
+        orphanedPackages = []
+        return expected
+    }
+
     /// Runs `brew cleanup --prune=7` to free disk space.
     func runCleanup() async throws {
         guard !isRunning else { return }

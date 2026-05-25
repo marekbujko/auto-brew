@@ -31,6 +31,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Restoring a Snapshot](#restoring-a-snapshot)
   - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
+  - [Orphans](#orphans)
   - [Collections](#collections)
   - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
   - [`autobrew` CLI](#autobrew-cli)
@@ -239,6 +240,10 @@ On the new Mac open the **Restore Wizard** (Snapshots → Import…), point it a
 1. Validates the manifest (non-empty bundle IDs, ≥ 1 component, hashes well-formed, no zip-slip in the archive).
 2. Installs missing casks via `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` finds the new token automatically.
 3. Restores each app via the same transactional flow as a local restore.
+
+### Orphans
+
+BrewStore → **Orphans** runs `brew autoremove --dry-run` on appear (and on demand via the Refresh button) to surface formulae that were pulled in as dependencies but whose parents are gone. **Remove All** runs the real `brew autoremove`, then re-runs the probe so any orphans that only became orphaned by that first pass (chain dependencies) get cleaned up in the same session. The list is intentionally formulae-only — `brew autoremove` never touches casks or anything you installed explicitly.
 
 ### Collections
 
