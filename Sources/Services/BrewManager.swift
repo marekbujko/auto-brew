@@ -176,6 +176,34 @@ final class BrewManager {
     }
 
     private(set) var orphanedPackages: [OrphanedPackage] = []
+    private(set) var doctorReport: DoctorReport?
+
+    /// Runs `brew doctor`, parses the output through
+    /// `DoctorReport.parse`, and exposes the result on
+    /// `doctorReport`. `brew doctor` exits non-zero when it found
+    /// warnings — that is its normal mode, not a failure of our
+    /// invocation — so we parse regardless of exit status. Genuine
+    /// failures (brew missing, process couldn't launch) surface as
+    /// nil so the UI can render an honest "couldn't ask brew".
+    func runDoctor() async {
+        guard !isRunning,
+              let brew = brewExecutable,
+              let path = brewPath else { return }
+        guard let result = try? await BrewProcess.run(
+            executable: brew,
+            arguments: ["doctor"],
+            brewPath: path
+        ) else {
+            doctorReport = nil
+            return
+        }
+        // brew writes warnings to stderr in newer versions; combine
+        // both streams so the parser sees the full text either way.
+        let combined = [result.stdout, result.stderr]
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n\n")
+        doctorReport = DoctorReport.parse(combined)
+    }
 
     /// Asks brew which formulae would be removed by `brew autoremove`
     /// without actually removing anything. Used by the BrewStore
