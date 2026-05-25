@@ -31,6 +31,7 @@ Release notes for every version live in [CHANGELOG.md](CHANGELOG.md) — the sam
   - [Restoring a Snapshot](#restoring-a-snapshot)
   - [Automatic Pre-Upgrade Snapshots](#automatic-pre-upgrade-snapshots)
   - [Update History & One-Click Rollback](#update-history--one-click-rollback)
+  - [Doctor](#doctor)
   - [Orphans](#orphans)
   - [Collections](#collections)
   - [Shortcuts, Siri and Spotlight](#shortcuts-siri-and-spotlight)
@@ -240,6 +241,10 @@ On the new Mac open the **Restore Wizard** (Snapshots → Import…), point it a
 1. Validates the manifest (non-empty bundle IDs, ≥ 1 component, hashes well-formed, no zip-slip in the archive).
 2. Installs missing casks via `brew install --cask <token>`; if the cask was renamed since the snapshot, `brew search` finds the new token automatically.
 3. Restores each app via the same transactional flow as a local restore.
+
+### Doctor
+
+BrewStore → **Doctor** runs `brew doctor` and parses the output into discrete findings, grouped by severity (errors first, then warnings). Each finding renders as a `DisclosureGroup` — the title up top, the full body (file paths, suggested fixes) one click away. The doctor runs once when the section opens, and on demand via the **Run brew doctor** button. Unclassified noise from brew (the friendly "Your system is ready to brew." line, stray informational chatter) is filtered out so the list only shows actual findings.
 
 ### Orphans
 
