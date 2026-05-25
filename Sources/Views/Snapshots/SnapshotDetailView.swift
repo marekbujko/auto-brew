@@ -11,6 +11,8 @@ struct SnapshotDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var terminateApp = true
     @State private var exportError: String?
+    @State private var comparePartner: AppSnapshot?
+    @State private var showComparePicker = false
 
     var body: some View {
         ScrollView {
@@ -36,6 +38,10 @@ struct SnapshotDetailView: View {
                     } label: { Label(String(localized: "Restore"), systemImage: "arrow.uturn.backward.circle.fill") }
                         .adaptiveProminentButtonStyle()
                     Button {
+                        showComparePicker = true
+                    } label: { Label(String(localized: "Compare…"), systemImage: "rectangle.on.rectangle") }
+                        .disabled(otherSnapshotsForBundle.isEmpty)
+                    Button {
                         Task { await exportToFile() }
                     } label: { Label(String(localized: "Export…"), systemImage: "square.and.arrow.up") }
                     Button(role: .destructive) {
@@ -44,6 +50,20 @@ struct SnapshotDetailView: View {
                 }
             }
             .padding()
+        }
+        .sheet(isPresented: $showComparePicker) {
+            SnapshotComparePicker(
+                left: snapshot,
+                candidates: otherSnapshotsForBundle,
+                onSelect: { partner in
+                    showComparePicker = false
+                    comparePartner = partner
+                },
+                onCancel: { showComparePicker = false }
+            )
+        }
+        .sheet(item: $comparePartner) { partner in
+            SnapshotCompareView(left: snapshot, right: partner)
         }
         .confirmationDialog(
             String(localized: "Restore snapshot for \(snapshot.displayName)?"),
@@ -72,6 +92,14 @@ struct SnapshotDetailView: View {
         } message: { msg in
             Text(msg)
         }
+    }
+
+    /// Other snapshots of the same bundle id, newest-first, excluding
+    /// the snapshot the user is currently viewing.
+    private var otherSnapshotsForBundle: [AppSnapshot] {
+        SnapshotsStore.shared.snapshots
+            .filter { $0.bundleID == snapshot.bundleID && $0.id != snapshot.id }
+            .sorted { $0.createdAt > $1.createdAt }
     }
 
     @MainActor
