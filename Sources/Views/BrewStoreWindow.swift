@@ -9,6 +9,7 @@ enum BrewStoreSection: Hashable {
     case history
     case collections
     case orphans
+    case doctor
     case pendingApprovals
 }
 
@@ -88,6 +89,8 @@ struct BrewStoreWindow: View {
                 CollectionsView()
             case .orphans:
                 OrphansView()
+            case .doctor:
+                DoctorView()
             case .pendingApprovals:
                 PendingApprovalsView()
             }
@@ -107,6 +110,7 @@ struct BrewStoreWindow: View {
         case .history: return String(localized: "Update History")
         case .collections: return String(localized: "Collections")
         case .orphans: return String(localized: "Orphans")
+        case .doctor: return String(localized: "Doctor")
         case .pendingApprovals: return String(localized: "Pending Approvals")
         }
     }
