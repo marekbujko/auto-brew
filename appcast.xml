@@ -6,46 +6,40 @@
         <description>AutoBrew update feed</description>
         <language>en</language>
         <item>
-            <title>Version 2.4.0</title>
-            <pubDate>Sun, 24 May 2026 20:01:32 +0000</pubDate>
-            <sparkle:version>14</sparkle:version>
-            <sparkle:shortVersionString>2.4.0</sparkle:shortVersionString>
+            <title>Version 2.5.0</title>
+            <pubDate>Tue, 26 May 2026 07:11:51 +0000</pubDate>
+            <sparkle:version>15</sparkle:version>
+            <sparkle:shortVersionString>2.5.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
 
 ### Added
-- **Pre-upgrade auto-snapshots** — every automatic cask upgrade now captures a snapshot of the app's user data first, so a broken update can be rolled back in one click from the new Update History view.
-- **Update History** sidebar entry in BrewStore lists every auto-upgrade newest-first, with per-cask outcome icons (succeeded / failed / unclear) attributed by a dedicated parser of `brew upgrade --cask` output. Each row that still has its snapshot offers a one-click rollback.
-- **One-click rollback from the failed-update notification** — picks the most recent failed cask that still has its pre-upgrade snapshot on disk and offers Roll Back as a destructive notification action.
-- **Manual cask upgrades from BrewStore** now take the same pre-upgrade snapshot and create a History row, just like the automatic auto-update path. Per-token in-flight guard rejects double-clicks.
-- **Shortcuts.app, Siri and Spotlight** actions — **Install Cask**, **Snapshot App** and **Roll Back Last Cask Upgrade**, all via the system AppIntents framework. No helper app needed.
-- **AutoBrew Status widget** for the desktop and Notification Center — three sizes show pending approvals, recent auto-upgrade outcomes with per-cask icons, and a Roll Back link on the large size that triggers the same restore path as the failed-update notification. Reads from an App Group container so the sandboxed widget extension stays decoupled from the main app.
-- **Download size shown before installing a cask** — BrewStore's detail view issues a single HTTP HEAD against the DMG URL on appear and renders the size (or "unknown" when the server hides Content-Length).
-- **Sparkle delta updates** — each new release ships a `BinaryDelta`-generated patch from the previous build, so the in-app upgrade downloads a fraction of the full ZIP when the user is on the immediately-prior version.
-- **Release notes driven by `CHANGELOG.md`** — the same body shows up on the GitHub release page and inside Sparkle's update dialog. No more "see commits for details".
-- **ETag-cached cask catalog** — BrewStore's daily background refresh now sends `If-None-Match` and returns 304 Not Modified when nothing changed, saving roughly 50 MB of redundant download per refresh.
-- **Automatic Homebrew-tap bump** from the release workflow — every release on `main` updates `marcelrgberger/homebrew-tap` with the new version, sha256 and macOS minimum, so the cask never drifts behind the binary.
-- **Upstream `homebrew/cask` submission material** prepared under `docs/homebrew-cask-submission/`. The cask file is linted clean against the upstream rules; the PR is queued for once the project clears the notability threshold.
-
-### Changed
-- `UpgradeHistory.json` schema stores a three-state `outcome` field. Files written by an earlier build with `succeeded: Bool` are still readable — your history is not lost on upgrade.
-
-### Fixed
-- Release workflow now `codesign`s the `.dmg` container itself with the Developer ID Application identity. Previously only the embedded `.app` was signed + notarised; the `.dmg` carried no usable signature, so Gatekeeper warned on direct double-click of the downloaded DMG and homebrew/cask's audit refused the cask. From this release on, the DMG passes `spctl -a -t open --context context:primary-signature -v` cleanly.
+- Pre-upgrade snapshots are now disk-pressure-aware: when the home-directory volume has less than the configured threshold (default 10 GiB) free, the snapshot is skipped for that cask and a notification surfaces the reason. The upgrade itself still runs — only the History row's rollback button is unavailable for that single run.
+- Widget large family now carries a **Run Now** link that triggers an immediate `brew update → upgrade → cleanup` cycle through the host app, alongside the existing Roll Back link. Uses the new `autobrew://run-now` URL scheme.
+- **Selective restore per component.** The Roll Back action in the Update History view now opens a sheet with a checkbox list of every component the snapshot recorded (Preferences, Containers, Application Support, etc.) with its size. Restore exactly the folders you want; the rest of the live state stays untouched. Defaults to "everything selected" so the previous all-or-nothing behaviour is one Roll Back click away when that's what you want.
+- **CHANGELOG-aware Pending Approvals.** Each pending-approval row for a cask whose `homepage` is on github.com now ships with an expandable section showing the upstream GitHub release notes for the incoming version. The fetch is rate-limit-friendly (per-cask disk cache, 7-day TTL, fallback to `/releases/latest` when no version-tagged release exists). Decisions stop being blind.
+- **Pre-snapshot hooks per cask.** The per-package override sheet now carries an optional shell command (`/bin/bash -c <command>`, 30 s timeout) that runs right before AutoBrew takes the pre-upgrade snapshot of that cask. Use it to flush in-memory state — `osascript -e 'tell application "X" to save'`, quitting a daemon, syncing a sandbox — so the snapshot captures a quiescent on-disk state. The UI carries a clear warning that the command runs with your user permissions; failure logs but never blocks the upgrade.
+- **External snapshot storage.** Settings → Snapshots → **External storage** opens a folder picker; AutoBrew then writes new snapshots into `<picked>/AutoBrew/Snapshots/` instead of the default Application Support path. Handy for parking big snapshots on an external drive or NAS mount. Stored as a security-scoped bookmark so the choice survives unplug/replug.
+- **Cask collections.** A new BrewStore sidebar section lets you define named sets of cask tokens ("Dev Setup", "Gaming Setup", "New Laptop") and install or uninstall the whole set with one click. Failures inside a bulk run don't abort the rest — failed tokens get collected and surfaced at the end. Export/import as `.autobrewcollection` JSON for cross-Mac sharing.
+- **`autobrew` CLI helper.** A thin terminal command shipped inside `AutoBrew.app/Contents/Helpers/autobrew` and symlinked into the user's PATH by the cask. Subcommands `open`, `install <token>`, `rollback`, `run-now`, `version`, `help` — each one routes through the existing `autobrew://` URL scheme so the running menu-bar app applies the same security checks the URL handler enforces. Out of scope for this first iteration: direct service reuse (would need its own event loop + file locking against the GUI stores).
+- **Snapshot diff viewer.** SnapshotDetailView grew a **Compare…** button that opens a picker of other snapshots for the same bundle id, then a side-by-side diff sheet showing added/removed/changed components with size deltas (negative when something shrank). The diff runs straight off the manifest SHA-256 hashes — no extra disk reads against the live filesystem — so it is fast even on multi-GB snapshots.
+- **Orphaned formulae cleanup.** A new BrewStore sidebar section **Orphans** runs `brew autoremove --dry-run` to surface dependencies whose parents are gone, then offers a one-click **Remove All** that actually drops them. After the removal it re-runs the probe in case the first pass lifted further orphans (chain dependencies). Your explicit installs are never touched.
+- **Brew Doctor section.** New BrewStore sidebar entry **Doctor** runs `brew doctor`, parses its `Warning:` / `Error:` blocks into discrete findings, and renders them grouped by severity with expandable bodies. Surfaces broken installs and missing dependencies *before* they trip the next upgrade.
+- **Automatic retry for failed upgrades.** When `brew upgrade --cask <token>` fails inside an auto-update run, the row in Update History now carries an exponential backoff: AutoBrew retries the same cask after **1 h**, then **4 h**, then **12 h** — up to three attempts before the row becomes sticky-failed and only a manual run picks it up again. A 30-minute polling task scans the history for due retries, captures a fresh pre-upgrade snapshot, and runs only the affected casks. The History view shows the next-retry ETA inline and switches to a red "Retries exhausted" badge once the budget is used up. Transient failures (mirror hiccups, brief network blips) now self-heal without you noticing them.
 ]]></description>
             <enclosure
-                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.4.0/AutoBrew.zip"
-                length="4486365"
+                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.0/AutoBrew.zip"
+                length="4927126"
                 type="application/octet-stream"
-                sparkle:edSignature="+4ZcpZ+X+wz7/MwUVdSkd8JAaFhyZ4z+4OWqBKyGFmkFFXzBjDc/Q4nIluLmswQKi2CCUm/3FXyikww2exYpAA=="
+                sparkle:edSignature="ECgfXoaP/mz/NlshVIbginaMguE3TtBscczBQNtriMEZAEiNAZrgCsYJ/28UnbYj3P5+kFsHRQMDAwLzDSyXDA=="
             />
             <sparkle:deltas>
                 <enclosure
-                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.4.0/AutoBrew-13-14.delta"
-                    length="593618"
+                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.0/AutoBrew-14-15.delta"
+                    length="827198"
                     type="application/octet-stream"
-                    sparkle:edSignature="Y1YYBDCj1QPzxHUa1NZrQk748/4VhdtVyweEF0I3S33LyiMbXlWZiy+/MxAxqNmabgm36g8bqbLRkj1opwDlDw=="
-                    sparkle:deltaFrom="13"
+                    sparkle:edSignature="jV3habLS4qfjcc5xSn+G5vHXvX5yQF1JDNhc1ZZzGJ0kInYYIf+GoACjnmp5uzlDYkAZilLZzXiAfD9Yb/c3AA=="
+                    sparkle:deltaFrom="14"
                 />
             </sparkle:deltas>
         </item>
