@@ -6,40 +6,30 @@
         <description>AutoBrew update feed</description>
         <language>en</language>
         <item>
-            <title>Version 2.5.0</title>
-            <pubDate>Tue, 26 May 2026 07:11:51 +0000</pubDate>
-            <sparkle:version>15</sparkle:version>
-            <sparkle:shortVersionString>2.5.0</sparkle:shortVersionString>
+            <title>Version 2.5.1</title>
+            <pubDate>Tue, 26 May 2026 17:36:43 +0000</pubDate>
+            <sparkle:version>16</sparkle:version>
+            <sparkle:shortVersionString>2.5.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
 
-### Added
-- Pre-upgrade snapshots are now disk-pressure-aware: when the home-directory volume has less than the configured threshold (default 10 GiB) free, the snapshot is skipped for that cask and a notification surfaces the reason. The upgrade itself still runs — only the History row's rollback button is unavailable for that single run.
-- Widget large family now carries a **Run Now** link that triggers an immediate `brew update → upgrade → cleanup` cycle through the host app, alongside the existing Roll Back link. Uses the new `autobrew://run-now` URL scheme.
-- **Selective restore per component.** The Roll Back action in the Update History view now opens a sheet with a checkbox list of every component the snapshot recorded (Preferences, Containers, Application Support, etc.) with its size. Restore exactly the folders you want; the rest of the live state stays untouched. Defaults to "everything selected" so the previous all-or-nothing behaviour is one Roll Back click away when that's what you want.
-- **CHANGELOG-aware Pending Approvals.** Each pending-approval row for a cask whose `homepage` is on github.com now ships with an expandable section showing the upstream GitHub release notes for the incoming version. The fetch is rate-limit-friendly (per-cask disk cache, 7-day TTL, fallback to `/releases/latest` when no version-tagged release exists). Decisions stop being blind.
-- **Pre-snapshot hooks per cask.** The per-package override sheet now carries an optional shell command (`/bin/bash -c <command>`, 30 s timeout) that runs right before AutoBrew takes the pre-upgrade snapshot of that cask. Use it to flush in-memory state — `osascript -e 'tell application "X" to save'`, quitting a daemon, syncing a sandbox — so the snapshot captures a quiescent on-disk state. The UI carries a clear warning that the command runs with your user permissions; failure logs but never blocks the upgrade.
-- **External snapshot storage.** Settings → Snapshots → **External storage** opens a folder picker; AutoBrew then writes new snapshots into `<picked>/AutoBrew/Snapshots/` instead of the default Application Support path. Handy for parking big snapshots on an external drive or NAS mount. Stored as a security-scoped bookmark so the choice survives unplug/replug.
-- **Cask collections.** A new BrewStore sidebar section lets you define named sets of cask tokens ("Dev Setup", "Gaming Setup", "New Laptop") and install or uninstall the whole set with one click. Failures inside a bulk run don't abort the rest — failed tokens get collected and surfaced at the end. Export/import as `.autobrewcollection` JSON for cross-Mac sharing.
-- **`autobrew` CLI helper.** A thin terminal command shipped inside `AutoBrew.app/Contents/Helpers/autobrew` and symlinked into the user's PATH by the cask. Subcommands `open`, `install <token>`, `rollback`, `run-now`, `version`, `help` — each one routes through the existing `autobrew://` URL scheme so the running menu-bar app applies the same security checks the URL handler enforces. Out of scope for this first iteration: direct service reuse (would need its own event loop + file locking against the GUI stores).
-- **Snapshot diff viewer.** SnapshotDetailView grew a **Compare…** button that opens a picker of other snapshots for the same bundle id, then a side-by-side diff sheet showing added/removed/changed components with size deltas (negative when something shrank). The diff runs straight off the manifest SHA-256 hashes — no extra disk reads against the live filesystem — so it is fast even on multi-GB snapshots.
-- **Orphaned formulae cleanup.** A new BrewStore sidebar section **Orphans** runs `brew autoremove --dry-run` to surface dependencies whose parents are gone, then offers a one-click **Remove All** that actually drops them. After the removal it re-runs the probe in case the first pass lifted further orphans (chain dependencies). Your explicit installs are never touched.
-- **Brew Doctor section.** New BrewStore sidebar entry **Doctor** runs `brew doctor`, parses its `Warning:` / `Error:` blocks into discrete findings, and renders them grouped by severity with expandable bodies. Surfaces broken installs and missing dependencies *before* they trip the next upgrade.
-- **Automatic retry for failed upgrades.** When `brew upgrade --cask <token>` fails inside an auto-update run, the row in Update History now carries an exponential backoff: AutoBrew retries the same cask after **1 h**, then **4 h**, then **12 h** — up to three attempts before the row becomes sticky-failed and only a manual run picks it up again. A 30-minute polling task scans the history for due retries, captures a fresh pre-upgrade snapshot, and runs only the affected casks. The History view shows the next-retry ETA inline and switches to a red "Retries exhausted" badge once the budget is used up. Transient failures (mirror hiccups, brief network blips) now self-heal without you noticing them.
+### Fixed
+- **Collections view layout.** The Collections sidebar entry rendered with a second, nested sidebar inside the BrewStore detail pane — on narrow window widths the inner list was squashed to a few pixels and the "No collection selected" placeholder got clipped. Replaced the inner `NavigationSplitView` with a flat `HStack` split so Collections now looks consistent with the other BrewStore sections (Orphans, Doctor, Update History).
+- **Homebrew tap cask** declares `uninstall delete: "#{HOMEBREW_PREFIX}/bin/autobrew"` so upgrades and reinstalls clean up the `autobrew` CLI symlink even when the source `.app` has already been moved to the Caskroom backup. Before this fix, brew aborted mid-upgrade with `It seems the symlink source '/Applications/AutoBrew.app/Contents/Helpers/autobrew' is not there`. The change is in the [tap repo](https://github.com/marcelrgberger/homebrew-tap) and reached users on the next `brew update`.
 ]]></description>
             <enclosure
-                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.0/AutoBrew.zip"
-                length="4927126"
+                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.1/AutoBrew.zip"
+                length="4927815"
                 type="application/octet-stream"
-                sparkle:edSignature="ECgfXoaP/mz/NlshVIbginaMguE3TtBscczBQNtriMEZAEiNAZrgCsYJ/28UnbYj3P5+kFsHRQMDAwLzDSyXDA=="
+                sparkle:edSignature="LQpOQ1i5lXgd5ZCDAfeL51hKvzWItGuk2TSInRC0+U4fRdTnk91b0lLdvcSDZr8wOSCDqAo6A2aFoUZuKxpNAg=="
             />
             <sparkle:deltas>
                 <enclosure
-                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.0/AutoBrew-14-15.delta"
-                    length="827198"
+                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.1/AutoBrew-15-16.delta"
+                    length="183046"
                     type="application/octet-stream"
-                    sparkle:edSignature="jV3habLS4qfjcc5xSn+G5vHXvX5yQF1JDNhc1ZZzGJ0kInYYIf+GoACjnmp5uzlDYkAZilLZzXiAfD9Yb/c3AA=="
-                    sparkle:deltaFrom="14"
+                    sparkle:edSignature="k7K0sI81UQIj84cCjq6teMg13hzkUtZV7oZbLKdw4w5rls//DrYQfTUAbkv0p2PbtkrG6vlFB880m5upss2wCQ=="
+                    sparkle:deltaFrom="15"
                 />
             </sparkle:deltas>
         </item>
