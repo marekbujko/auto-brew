@@ -6,30 +6,29 @@
         <description>AutoBrew update feed</description>
         <language>en</language>
         <item>
-            <title>Version 2.5.1</title>
-            <pubDate>Tue, 26 May 2026 17:36:43 +0000</pubDate>
-            <sparkle:version>16</sparkle:version>
-            <sparkle:shortVersionString>2.5.1</sparkle:shortVersionString>
+            <title>Version 2.5.2</title>
+            <pubDate>Wed, 27 May 2026 06:03:37 +0000</pubDate>
+            <sparkle:version>17</sparkle:version>
+            <sparkle:shortVersionString>2.5.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
 
-### Fixed
-- **Collections view layout.** The Collections sidebar entry rendered with a second, nested sidebar inside the BrewStore detail pane — on narrow window widths the inner list was squashed to a few pixels and the "No collection selected" placeholder got clipped. Replaced the inner `NavigationSplitView` with a flat `HStack` split so Collections now looks consistent with the other BrewStore sections (Orphans, Doctor, Update History).
-- **Homebrew tap cask** declares `uninstall delete: "#{HOMEBREW_PREFIX}/bin/autobrew"` so upgrades and reinstalls clean up the `autobrew` CLI symlink even when the source `.app` has already been moved to the Caskroom backup. Before this fix, brew aborted mid-upgrade with `It seems the symlink source '/Applications/AutoBrew.app/Contents/Helpers/autobrew' is not there`. The change is in the [tap repo](https://github.com/marcelrgberger/homebrew-tap) and reached users on the next `brew update`.
+### Removed
+- **Dead code cleanup.** Three internal symbols had accumulated without callers and were removed: `AppLogger` utility (every consumer instantiates `Logger(subsystem:category:)` directly), `DoctorReport.Severity.other` enum case (never assigned, never matched), and `RestoreWizardStore.sourceURL` + `RestoreWizardStore.restoreList` stored properties (write-only — assigned during bundle load, never read). No behaviour change — pure code-hygiene patch.
 ]]></description>
             <enclosure
-                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.1/AutoBrew.zip"
-                length="4927815"
+                url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.2/AutoBrew.zip"
+                length="4922708"
                 type="application/octet-stream"
-                sparkle:edSignature="LQpOQ1i5lXgd5ZCDAfeL51hKvzWItGuk2TSInRC0+U4fRdTnk91b0lLdvcSDZr8wOSCDqAo6A2aFoUZuKxpNAg=="
+                sparkle:edSignature="RcxGqrXCAj96VKsb81MY1wW5M1pS/eM/D1Udv0EMpKbNf4B6CkUEcYRi4nsXhFnKRpH5z12oqPNKor8swh2yAw=="
             />
             <sparkle:deltas>
                 <enclosure
-                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.1/AutoBrew-15-16.delta"
-                    length="183046"
+                    url="https://github.com/marcelrgberger/auto-brew/releases/download/v2.5.2/AutoBrew-16-17.delta"
+                    length="345974"
                     type="application/octet-stream"
-                    sparkle:edSignature="k7K0sI81UQIj84cCjq6teMg13hzkUtZV7oZbLKdw4w5rls//DrYQfTUAbkv0p2PbtkrG6vlFB880m5upss2wCQ=="
-                    sparkle:deltaFrom="15"
+                    sparkle:edSignature="eiQPepyY6YNF4ZfGeZc3NIqOxmh4h/5lAs9dp9OCbFUFvzkCtkNJCD+3Y4zNvXlBHZvr9lxtjjvATETvXi8gDg=="
+                    sparkle:deltaFrom="16"
                 />
             </sparkle:deltas>
         </item>
